@@ -2,7 +2,11 @@
 
 <p align="center"><img src="assets/icon/futab.svg" alt="FuTab icon: a guitar plectrum split in two, with a music note in each half" width="96"></p>
 
+> **Work in progress.** FuTab is being set up as a project of its own: there are no releases or packages yet, and things will change. To try it now, [build it from source](#building-from-source).
+
 **FuTab** is a Free, Open-Source fully modular guitar tablature and score viewer, editor and player for Windows, macOS and Linux.
+
+FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), created by Mateus Rocha de Paula ([@mateusrdp](https://github.com/mateusrdp)) and the OxiGuitar contributors. Nearly all of what FuTab does is their work, and FuTab uses OxiGuitar's plugins as they are. Thank you to them.
 
 It is written entirely in Rust. 
 
