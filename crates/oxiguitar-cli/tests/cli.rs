@@ -165,12 +165,14 @@ fn system_plugin_folders() -> Vec<PathBuf> {
         "linux" => {
             let derived = bin
                 .and_then(Path::parent)
-                .map(|prefix| prefix.join("lib").join("oxiguitar").join("plugins"));
+                .map(|prefix| prefix.join("lib").join("futab").join("plugins"));
             let fallbacks = [
+                PathBuf::from("/usr/lib/futab/plugins"),
+                PathBuf::from("/usr/local/lib/futab/plugins"),
                 PathBuf::from("/usr/lib/oxiguitar/plugins"),
                 PathBuf::from("/usr/local/lib/oxiguitar/plugins"),
             ];
-            let mut out: Vec<PathBuf> = Vec::with_capacity(3);
+            let mut out: Vec<PathBuf> = Vec::with_capacity(5);
             if let Some(p) = derived
                 && !fallbacks.contains(&p)
             {
@@ -183,14 +185,18 @@ fn system_plugin_folders() -> Vec<PathBuf> {
             .and_then(Path::parent)
             .map(|contents| contents.join("PlugIns"))
             .into_iter()
-            .chain([PathBuf::from(
-                "/Library/Application Support/OxiGuitar/plugins",
-            )])
+            .chain([
+                PathBuf::from("/Library/Application Support/FuTab/plugins"),
+                PathBuf::from("/Library/Application Support/OxiGuitar/plugins"),
+            ])
             .collect(),
         "windows" => bin
             .map(|b| b.join("plugins"))
             .into_iter()
-            .chain([PathBuf::from("C:/Program Files/OxiGuitar/plugins")])
+            .chain([
+                PathBuf::from("C:/Program Files/FuTab/plugins"),
+                PathBuf::from("C:/Program Files/OxiGuitar/plugins"),
+            ])
             .collect(),
         _ => unreachable!(),
     }

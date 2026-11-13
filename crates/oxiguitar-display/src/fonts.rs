@@ -78,7 +78,7 @@ pub enum FontError {
 impl std::fmt::Display for FontError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FontError::Unreadable(name) => write!(f, "{name} is not a font OxiGuitar can read"),
+            FontError::Unreadable(name) => write!(f, "{name} is not a font FuTab can read"),
             FontError::TooMany => write!(f, "too many fonts"),
         }
     }

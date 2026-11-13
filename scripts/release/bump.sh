@@ -98,7 +98,7 @@ if len(first) > 300:
     first = first[:300].rsplit(" ", 1)[0] + " ..."
 if not first:
     sys.exit("CHANGELOG.md: the section has no text to describe the release with")
-meta = "assets/linux/io.github.mateusrdp.OxiGuitar.metainfo.xml"
+meta = "assets/linux/io.github.purpleicon.FuTab.metainfo.xml"
 entry = (f'    <release version="{new}" date="{date}" type="development">\n'
          f"      <description>\n        <p>{html.escape(first, quote=False)}</p>\n      </description>\n"
          f"      <url>https://github.com/mateusrdp/oxiguitar/releases/tag/v{new}</url>\n    </release>\n")

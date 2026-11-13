@@ -125,7 +125,7 @@ fn begin(
     let Some(folders) = folders else {
         notices.push(Notice::new(
             Level::Error,
-            format!("No home folder: set HOME (or {HOME_VARIABLE}) so OxiGuitar can keep its settings and find plugins."),
+            format!("No home folder: set HOME (or {HOME_VARIABLE}) so FuTab can keep its settings and find plugins."),
         ));
         let settings = SharedSettings::default();
         let plugins = discover(&[], settings.clone(), display, core);
@@ -222,7 +222,7 @@ fn begin(
         notices.push(Notice::new(
             Level::Warning,
             format!(
-                "Safe mode: no plugins are used, so nothing can be opened or played. {} plugin file{} found (Tools → Plugins lists them). Start OxiGuitar without --safe-mode to use them.",
+                "Safe mode: no plugins are used, so nothing can be opened or played. {} plugin file{} found (Tools → Plugins lists them). Start FuTab without --safe-mode to use them.",
                 plugins.found().len(),
                 if plugins.found().len() == 1 { " was" } else { "s were" }
             ),
@@ -402,7 +402,7 @@ mod tests {
         settings("");
         let s = start(resolve(), "x11", Arc::new(Unheard));
         assert_eq!(ids(&s), [core(NO_FORMAT_PLUGIN), core(NO_PLAYER_PLUGIN)]);
-        assert!(s.advice.iter().all(|a| a.plugin_name == "OxiGuitar"));
+        assert!(s.advice.iter().all(|a| a.plugin_name == "FuTab"));
 
         // Silenced one by one, under advice.oxiguitar.
         settings(r#", "advice": {"oxiguitar": {"no-format-plugin": "hidden"}}"#);

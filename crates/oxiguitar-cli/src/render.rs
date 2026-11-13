@@ -216,7 +216,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
         };
         let pages: Vec<_> = engraved.pages.iter().collect();
         let title = score.info.title.trim();
-        let title = if title.is_empty() { "OxiGuitar" } else { title };
+        let title = if title.is_empty() { "FuTab" } else { title };
         // A PDF is printed: pure black, whatever the pictures' theme.
         match to_pdf(&pages, &fonts, &Theme::PRINT, title) {
             Ok(bytes) => {

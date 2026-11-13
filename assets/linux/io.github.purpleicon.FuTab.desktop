@@ -1,12 +1,12 @@
 [Desktop Entry]
 Type=Application
-Name=OxiGuitar
+Name=FuTab
 GenericName=Guitar Tablature Editor
 Comment=View, edit and play guitar tablature and scores
 Exec=oxiguitar %f
-Icon=io.github.mateusrdp.OxiGuitar
+Icon=io.github.purpleicon.FuTab
 Terminal=false
 Categories=AudioVideo;Audio;Music;
 MimeType=application/x-gtp;
 Keywords=guitar;tab;tablature;score;notation;Guitar Pro;
-StartupWMClass=io.github.mateusrdp.OxiGuitar
+StartupWMClass=io.github.purpleicon.FuTab

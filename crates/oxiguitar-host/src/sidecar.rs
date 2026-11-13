@@ -138,7 +138,7 @@ impl Sidecar {
         };
         match top.get("oxiguitar").and_then(Value::as_u64) {
             Some(VERSION) => {}
-            Some(v) => return Err(format!("version {v}, written by a newer OxiGuitar")),
+            Some(v) => return Err(format!("version {v}, written by a newer FuTab")),
             None => return Err("no \"oxiguitar\" version".into()),
         }
         let tracks = match top.get("tracks") {
@@ -367,7 +367,7 @@ mod tests {
         assert!(
             Sidecar::parse(r#"{"oxiguitar": 2}"#)
                 .unwrap_err()
-                .contains("newer OxiGuitar")
+                .contains("newer FuTab")
         );
         // What isn't an object is left out, the rest kept.
         let odd = r#"{"oxiguitar": 1, "tracks": [{"name": "A", "plugins": {"x": 3, "y": {}}}]}"#;

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- SPDX-License-Identifier: CC0-1.0
      Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
-     OxiGuitar's AppStream metainfo: what software centres (GNOME Software,
+     FuTab's AppStream metainfo: what software centres (GNOME Software,
      KDE Discover) and the AppImage catalog show about it. Installed in
      /usr/share/metainfo by the .deb, the .rpm and the AppImage
      (scripts/package/linux.sh). Each release adds a <release> at the top of
      <releases>; the release workflow checks that the newest one is the
      version being released. -->
 <component type="desktop-application">
-  <id>io.github.mateusrdp.OxiGuitar</id>
+  <id>io.github.purpleicon.FuTab</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later AND GPL-3.0-only</project_license>
-  <name>OxiGuitar</name>
+  <name>FuTab</name>
   <summary>View, edit and play guitar tablature and scores</summary>
-  <developer id="io.github.mateusrdp">
-    <name>Mateus Rocha de Paula</name>
+  <developer id="io.github.purpleicon">
+    <name>Matthew, from OxiGuitar by Mateus Rocha de Paula</name>
   </developer>
   <description>
     <p>
-      OxiGuitar opens Guitar Pro files (.gp, .gpx, .gp5, .gp4 and .gp3) and
+      FuTab opens Guitar Pro files (.gp, .gpx, .gp5, .gp4 and .gp3) and
       shows them as standard notation and tablature, in four layouts, with
       any set of tracks together. It edits and saves them, exports them to
       PDF, and plays them, with a cursor on the beat being heard.
@@ -30,16 +30,15 @@
       <li>Every file format, sound and audio output is a plugin, and anyone can write one</li>
     </ul>
     <p>
-      No telemetry: OxiGuitar never uploads anything and downloads nothing.
+      No telemetry: FuTab never uploads anything and downloads nothing.
     </p>
   </description>
-  <launchable type="desktop-id">io.github.mateusrdp.OxiGuitar.desktop</launchable>
-  <url type="homepage">https://github.com/mateusrdp/oxiguitar</url>
-  <url type="bugtracker">https://github.com/mateusrdp/oxiguitar/issues</url>
+  <launchable type="desktop-id">io.github.purpleicon.FuTab.desktop</launchable>
+  <url type="homepage">https://github.com/PurpleIcon/futab</url>
+  <url type="bugtracker">https://github.com/PurpleIcon/futab/issues</url>
   <url type="help">https://mateusrdp.github.io/oxiguitar/</url>
-  <url type="vcs-browser">https://github.com/mateusrdp/oxiguitar</url>
-  <url type="contribute">https://github.com/mateusrdp/oxiguitar/blob/develop/CONTRIBUTING.md</url>
-  <url type="donation">https://www.paypal.com/donate/?business=4QYDZY4RP8V8L&amp;no_recurring=0&amp;currency_code=AUD</url>
+  <url type="vcs-browser">https://github.com/PurpleIcon/futab</url>
+  <url type="contribute">https://github.com/PurpleIcon/futab/blob/develop/CONTRIBUTING.md</url>
   <screenshots>
     <screenshot type="default">
       <caption>Playing an eight-track song, with the cursor on the beat being heard and each track's mixer</caption>

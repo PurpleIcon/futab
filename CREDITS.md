@@ -69,7 +69,7 @@ Checked for later milestones (licences confirmed 15 October 2026, see ROADMAP.md
 
 | Asset | Authors | License | Use |
 | --- | --- | --- | --- |
-| Placeholder icon (green pick, "OxG") | OxiGuitar contributors | GPL-3.0-or-later | App icon until real artwork exists |
+| FuTab icon (a plectrum split in two, with a note in each half; `assets/icon/futab.svg` and its PNGs) | FuTab contributors | GPL-3.0-or-later | App icon |
 | [Bravura](https://github.com/steinbergmedia/bravura) 1.482 and its SMuFL metadata | Steinberg Media Technologies GmbH | OFL-1.1 | Default music font |
 | [Noto Sans](https://github.com/notofonts/latin-greek-cyrillic) 2.015 | The Noto Project Authors | OFL-1.1 | Text and tab numbers |
 | Four cabinet impulse responses of the BestPlugins Mega Pack 2, as [Guitarix](https://github.com/brummer10/guitarix) ships them | David Fau Casquel | GPL-2.0-or-later | The NAM plugin's built-in cabinets (`plugins/nam/irs/`) |

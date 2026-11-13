@@ -1,139 +1,60 @@
-# OxiGuitar
+# FuTab
 
-<p align="center"><img src="assets/icon/oxiguitar-placeholder.svg" alt="OxiGuitar placeholder icon: a green guitar pick with OxG on it" width="96"></p>
+<p align="center"><img src="assets/icon/futab.svg" alt="FuTab icon: a guitar plectrum split in two, with a music note in each half" width="96"></p>
 
-**OxiGuitar** is a Free, Open-Source fully modular guitar tablature and score viewer, editor and player for Windows, macOS and Linux.
+**FuTab** is a Free, Open-Source fully modular guitar tablature and score viewer, editor and player for Windows, macOS and Linux.
 
-It is written entirely in Rust. Why Rust you'd ask? Because what do you get when you *Oxi*dise METAL \\m/? RUST! And because it’s very fast, of course. We don’t just *want* - we *need* great performance. First because we respect your hardware and your time (especially in this gawd damned economy), and second because we need a lot of grunt to give you a good experience with all the cool features we want in.
+It is written entirely in Rust. 
 
-It opens the industry’s usual files (Guitar Pro 3 to 8, MusicXML, MIDI and TuxGuitar files), because no one wants to have to rewrite their entire tab collection they’ve been diligently maintaining since the 90’s just to be able to use Mat's fancy f\*cking app. It needs to be useful from the get-go. It shows them as standard notation and tablature and allows you to play, edit and save them. Every input/output format is a plugin, so you can write your own if we still don’t support what you need.
+It opens the industry’s usual files (Guitar Pro 3 to 8, MusicXML, MIDI and TuxGuitar files), because no one wants to have to rewrite their entire tab collection. It shows them as standard notation and tablature and allows you to play, edit and save them. Every input/output format is a plugin, so you can write your own if we still don’t support what you need.
 
-We support a wide variety of typesetting tools, and try to stay aligned with the music industry standard. Because what's the point of opening your fancy tabs and not being able to display all the work you put in it, right?
-
-Playback is also big. We all like to play along with our favorite songs, don’t always have a band, and can’t always find a good backing track. So this is KEY. And we want quality here, because no one wants to be playing along to a cheap CASIO keyboard from the 90's operated by the neighbor’s toddler who just learnt a few chords and where that dumb arse automatic drumkit is! This is NOT a glorified metronome! Like file formats, every output method is a plugin. The most basic is a MIDI synthesizer that plays whatever sound fonts your computer already has (Windows and macOS come with one; on Linux it’s a package away). But we REALLY recommend that you get yourself some better ones – it makes a massive difference. We do have a few suggestions of nice free ones, with instructions on how to download, install and use them with OxiGuitar. And v1.0 brings some BIG tones too, using the famed *Neural Amp Modeler (NAM)* for some juicy realistic guitar tones. Compose your song, get yourself a sweet profile online (or capture your own rig with their software!) and you’ll have a pretty decent backing track to rock with real quick!
+Playback is also big. The most basic is a MIDI synthesizer that plays whatever sound fonts your computer already has (Windows and macOS come with one; on Linux there is an plugin). But we REALLY recommend that you get yourself some better ones – it makes a massive difference. We do have a few suggestions of nice free ones, with instructions on how to download, install and use them with FuTab. 
 
 ## Privacy
 
-OxiGuitar values your privacy first. It never uploads anything. No telemetry, no analytics, no automatic crash reports, no accounts, no background requests — not a single bit of data. It downloads nothing either: better sounds and plugins are files you get yourself and put in a folder, and the manual says where. The only network use ever planned is an update check you start yourself. If it crashes, it writes a log to your disk and tells you where it is; sending it to us is up to you. A CI test even runs OxiGuitar under a system-call tracer and fails if it ever tries to open a network connection to keep us honest. We don’t collect your data EVER. Because friends do **not** look at their friends’ browser histories.
+FuTab values your privacy first. It never uploads anything. No telemetry, no analytics, no automatic crash reports, no accounts, no background requests — not a single bit of data. It downloads nothing either: better sounds and plugins are files you get yourself and put in a folder, and the manual says where. The only network use ever planned is an update check you start yourself. If it crashes, it writes a log to your disk and tells you where it is; sending it to us is up to you. A CI test even runs FuTab under a system-call tracer and fails if it ever tries to open a network connection to keep us honest. We don’t collect your data EVER. 
 
-**THAT SAID**, these promises cover the OxiGuitar core and the plugins we publish, and nothing else: we make no promises about plugins you get from anywhere else. Because again, OxiGuitar is fully modular, open-source and encourages the community to collaborate! **Anyone** can write plugins for it! **Be careful where you get your plugins from!** It’s **your** responsibility to check, and so you should! Ours is open-source, so you can peek inside anytime to see that there’s nothing funky in there and can even compile your own builds if you’re extra-paranoid and don’t trust GitHub with compiling even after reading the build scripts!
-
-## Status
-
-**v0.18.0, a pre-release for testers, 9 November 2026**: the plugins live in repositories of their own, with apt and dnf repositories that keep OxiGuitar and its plugins up to date. This release adds the MusicXML and MIDI file plugins (`.musicxml`, `.mxl`, `.mid`, `.kar`, `.rmi`), plugin interface 1.7, automatic fingering, Fit Bars to Time Signature, the rest of Guitar Pro 8's notation (Multivoice and Design Mode), live effect settings while a song plays, and an equalizer plugin with an order for each track's effects. v1.0 follows it.
-
-OxiGuitar opens, shows, edits and saves Guitar Pro files and exports them to PDF. It supports pretty much every tool from TuxGuitar at least (more to come!). And it plays them: from the caret or the selection, looping, with a count-in and a metronome (heard, seen, or both), at 25 to 200 % speed, with each track's volume, pan, mute and solo, and a cursor on the very beat you're hearing. It uses the best sound set it finds: yours in the `soundfonts` folder, else the one your system has ([Better sounds](https://mateusrdp.github.io/oxiguitar/better-sounds.html)). `oxiguitar-cli play` plays a score from the terminal too. Coming with v1.0, and built: guitars and basses through **amp models** (Neural Amp Modeler captures) and cabinets, picked per track in its Properties ([Amp models](https://mateusrdp.github.io/oxiguitar/amp-models.html)), and **File → Export WAV Audio…**, the whole song or some bars, as written or at your practice speed ([Exporting audio](https://mateusrdp.github.io/oxiguitar/audio-export.html)). See [ROADMAP.md](ROADMAP.md) for what is done and what comes next, and [CHANGELOG.md](CHANGELOG.md) for what changed.
-
-<p align="center"><img src="docs/readme/playing.png" alt="OxiGuitar paused while playing an eight-track song: the blue cursor on the beat being heard, the Player controls above, each track's mixer and its overview below" width="800"></p>
-
-<p align="center">
-<img src="docs/readme/editing.png" alt="Editing: a bend selected on the tablature, the palette of tools on the left, the Note tab showing the note on the right" width="395">
-<img src="docs/readme/light.png" alt="The light interface, with lyrics under a melody" width="395">
-</p>
-
-<p align="center">
-<img src="docs/readme/amp.png" alt="A bass track's Properties: its Amp (NAM) section plays it through a Darkglass Microtubes 900 capture, with the cabinet, input and output levels" width="395">
-<img src="docs/readme/export.png" alt="File, Export WAV Audio: the whole song or the selected bars, as written or at the practice speed, with or without the metronome" width="395">
-</p>
-
-**Hear it:** a band with recorded guitars, bass and drums, the bass and the drum kit alone, guitar techniques, bends and strums, played by OxiGuitar with free sound sets, on the manual's [Hear it](https://mateusrdp.github.io/oxiguitar/hear-it.html) page. Amp modelling (NAM) examples come with v1.0.
+These promises cover FuTab itself and nothing else: we make no promises about plugins you get from anywhere else.  Please refer to OxiGuitar for their Privacy statement on Oxiguitar Plugins you use. FuTab is fully modular, open-source and encourages the community to collaborate! **Anyone** can write plugins for it! **Be careful where you get your plugins from!** It’s **your** responsibility to check.
 
 ## Install
 
-OxiGuitar is the program plus **plugins**: it opens, plays and exports files only through them. A usable set is the program, the **Guitar Pro** and **MIDI** plugins, and an audio output (all recommended, and installed with the program by apt and dnf), then the extras we suggest: **WAV** (export your song as audio), **NAM** (amp models), **Equalizer**, and the free **recorded sound sets** (clean, overdriven and distorted guitars, nylon and steel strings, ukulele, bass and drums; about 1.2 GB, downloaded from their authors after the package manager or the installer says so). The steps below install all of them. Leave out what you don't want: every name is a package of its own.
+FuTab doesn't publish packages yet. Until it does, build it from source (see [Building from source](#building-from-source)).
 
-None of the downloads is code-signed yet, so Windows and macOS warn the first time you open OxiGuitar ([how to get past it](https://mateusrdp.github.io/oxiguitar/installing.html)). Nothing here runs unless you run it, and OxiGuitar itself never downloads anything.
+FuTab is the program plus **plugins**: it opens, plays and exports files only through them. It uses OxiGuitar's plugins, as they are, and finds them where OxiGuitar's packages install them. A usable set is the **Guitar Pro** and **MIDI** plugins and an audio output; **WAV** (export your song as audio), **NAM** (amp models) and **Equalizer** are extras.
 
-### Debian, Ubuntu and relatives (apt)
-
-**Once**, add our signed repository (it stays; you never repeat this):
+On Debian, Ubuntu and relatives, add OxiGuitar's signed repository once, then install the plugins only:
 
 ```sh
 sudo install -d -m 0755 /etc/apt/keyrings
 sudo curl -fsSL https://mateusrdp.github.io/oxiguitar-packages/oxiguitar.gpg -o /etc/apt/keyrings/oxiguitar.gpg
 sudo curl -fsSL https://mateusrdp.github.io/oxiguitar-packages/oxiguitar.sources -o /etc/apt/sources.list.d/oxiguitar.sources
 sudo apt update
+sudo apt install oxiguitar-guitarpro oxiguitar-midi oxiguitar-pipewire oxiguitar-wav oxiguitar-nam oxiguitar-eq
 ```
 
-**Install** OxiGuitar with the recommended plugins (Guitar Pro, MIDI, ALSA and PipeWire audio) and the extras:
-
-```sh
-sudo apt install oxiguitar oxiguitar-wav oxiguitar-nam oxiguitar-eq oxiguitar-bettersounds-soundfonts
-```
-
-The last package asks whether to download the recorded sound sets (the default answer is yes; an unattended install downloads them). Say no, or install without it, and `sudo oxiguitar-install-sounds --system` fetches them any time later.
-
-**Update** with your system's own updates, which now include OxiGuitar and every plugin you installed:
-
-```sh
-sudo apt update && sudo apt upgrade
-```
-
-### Fedora and relatives (dnf)
-
-**Once**, add the repository (the same one, signed the same way):
+On Fedora and relatives:
 
 ```sh
 sudo curl -fsSL https://mateusrdp.github.io/oxiguitar-packages/oxiguitar.repo -o /etc/yum.repos.d/oxiguitar.repo
+sudo dnf install oxiguitar-guitarpro oxiguitar-midi oxiguitar-pipewire oxiguitar-wav oxiguitar-nam oxiguitar-eq
 ```
 
-**Install** (dnf adds the recommended plugins itself):
-
-```sh
-sudo dnf install oxiguitar oxiguitar-wav oxiguitar-nam oxiguitar-eq oxiguitar-bettersounds-soundfonts
-```
-
-The last package downloads the recorded sound sets as it installs, which takes a while; to skip that and fetch them later with `sudo oxiguitar-install-sounds --system`, install it with `sudo env OXIGUITAR_SKIP_SOUNDS=1 dnf install oxiguitar-bettersounds-soundfonts`.
-
-**Update** with `sudo dnf upgrade`.
-
-### Any Linux (AppImage)
-
-The AppImage is the program alone, with no repository to add and no automatic updates:
-
-1. Download `OxiGuitar-VERSION-x86_64.AppImage` (or `aarch64`) from the [latest release](https://github.com/mateusrdp/oxiguitar/releases/latest), then `chmod +x` it and run it.
-2. Download the Linux zip of each plugin from its latest release, unzip it and put the `.oxp` file in `~/.local/share/oxiguitar/plugins/`: [Guitar Pro](https://github.com/mateusrdp/oxiguitar-guitarpro/releases/latest), [MIDI](https://github.com/mateusrdp/oxiguitar-midi/releases/latest) and [ALSA](https://github.com/mateusrdp/oxiguitar-alsa/releases/latest) (the output the AppImage uses), then [WAV](https://github.com/mateusrdp/oxiguitar-wav/releases/latest), [NAM](https://github.com/mateusrdp/oxiguitar-nam/releases/latest) and [Equalizer](https://github.com/mateusrdp/oxiguitar-eq/releases/latest).
-3. For the sound sets, download `install.sh` from the [sound-set installer's latest release](https://github.com/mateusrdp/oxiguitar-bettersounds-soundfonts/releases/latest) and run `bash install.sh` in a terminal. It shows what it would download and asks first.
-
-To update, download the newer files and replace the old ones.
-
-### Windows
-
-There is no repository to add yet (winget is planned), so everything is a download, and each plugin has a small setup program that installs for you alone, with no administrator password:
-
-1. Unzip `OxiGuitar-VERSION-windows-x86_64.zip` (or `arm64`) from the [latest release](https://github.com/mateusrdp/oxiguitar/releases/latest) anywhere, and run `oxiguitar.exe`.
-2. From each plugin's latest release, run its `-setup.exe`: [Guitar Pro](https://github.com/mateusrdp/oxiguitar-guitarpro/releases/latest), [MIDI](https://github.com/mateusrdp/oxiguitar-midi/releases/latest) and [WASAPI](https://github.com/mateusrdp/oxiguitar-wasapi/releases/latest) (the audio output), then [WAV](https://github.com/mateusrdp/oxiguitar-wav/releases/latest), [NAM](https://github.com/mateusrdp/oxiguitar-nam/releases/latest) and [Equalizer](https://github.com/mateusrdp/oxiguitar-eq/releases/latest). Windows then lists them under Installed apps.
-3. For the sound sets, download `install.ps1` from the [sound-set installer's latest release](https://github.com/mateusrdp/oxiguitar-bettersounds-soundfonts/releases/latest) and run `powershell -ExecutionPolicy Bypass -File .\install.ps1`. It shows what it would download and asks first.
-
-To update, download the newer zip and setup programs and install them over the old ones.
-
-### macOS
-
-Open `OxiGuitar-VERSION-macos-universal.dmg` from the [latest release](https://github.com/mateusrdp/oxiguitar/releases/latest) and drag OxiGuitar to Applications, then run the `.pkg` installer from each plugin's latest release (no password needed): [Guitar Pro](https://github.com/mateusrdp/oxiguitar-guitarpro/releases/latest), [MIDI](https://github.com/mateusrdp/oxiguitar-midi/releases/latest) and [Core Audio](https://github.com/mateusrdp/oxiguitar-coreaudio/releases/latest), then [WAV](https://github.com/mateusrdp/oxiguitar-wav/releases/latest), [NAM](https://github.com/mateusrdp/oxiguitar-nam/releases/latest) and [Equalizer](https://github.com/mateusrdp/oxiguitar-eq/releases/latest). To update, install the newer files over the old.
-
-**The sound sets:** download `install.sh` from the [sound-set installer's latest release](https://github.com/mateusrdp/oxiguitar-bettersounds-soundfonts/releases/latest) and run `bash install.sh` in Terminal. It shows what it would download and asks first.
+Install only the plugin packages, never the `oxiguitar` package itself, or you get OxiGuitar alongside FuTab. The plugins and their repository are OxiGuitar's, signed with its maintainer's key; report problems you meet through FuTab [here](https://github.com/PurpleIcon/futab/issues) first. Elsewhere, download each plugin from its own repository's latest release (for example [Guitar Pro](https://github.com/mateusrdp/oxiguitar-guitarpro/releases/latest)) and put its `.oxp` file in your own plugin folder (`~/.local/share/futab/plugins/` on Linux).
 
 ### After installing
 
-Open a song. OxiGuitar plays each kind of track with the matching recorded set by itself (clean, overdriven and distorted guitars, nylon and steel strings, bass, drums); **Tools → Plugins…** lists the plugins it found and **Settings…** on MIDI changes the sets. The [manual](https://mateusrdp.github.io/oxiguitar/) says more, and [Better sounds](https://mateusrdp.github.io/oxiguitar/better-sounds.html) lists the sets.
+Open a song. FuTab plays each kind of track with the matching recorded set by itself (clean, overdriven and distorted guitars, nylon and steel strings, bass, drums); **Tools → Plugins…** lists the plugins it found and **Settings…** on MIDI changes the sets. OxiGuitar's [manual](https://mateusrdp.github.io/oxiguitar/) says more (FuTab works the same way; it has no manual of its own yet), and its [Better sounds](https://mateusrdp.github.io/oxiguitar/better-sounds.html) page lists the sets.
 
 ## How to get involved
 
-I’m a pretty good computer scientist and software engineer myself but this is all vibe-coded at the moment, just to get a headstart. Get the grunt work out of the way, and get something working quick. Cause, you know, I have a life, a full time job, and not a lot of time or money to spare (f\*ck, I even like to play the guitar when I can!). But I promise I have been VERY strict with Claude – if the machines turn on us, it *might* be because I have been so mean to them, just saying. Once we get something good out, we REALLY wanna have this all code reviewed by humans. De-slopify this sh\*t! Meanwhile we REALLY wanna have this all at least thoroughly tested by humans. Because Claude and I are doing all we can with what we have.
+FuTab is a young project, and every bit of help counts, whether you play, code, or both.
 
-That’s where **you** come in. Yes, you.
+- **Come and say hello** in [Discussions](https://github.com/PurpleIcon/futab/discussions): share what you think, ask questions, suggest ideas, or tell us what you play with it.
+- **Report bugs** in [Issues](https://github.com/PurpleIcon/futab/issues) when something doesn't work the way you expect.
+- **Try it on your system.** If you use Windows, macOS, an ARM machine or a Linux other than Fedora, your testing is especially welcome (see [Testers wanted](#testers-wanted)).
+- **Contribute code or documentation.** Pull requests are welcome: [CONTRIBUTING.md](CONTRIBUTING.md) explains how.
 
-How can you help, you ask?
-
-1. **USE IT!** Let us know what you think in the discussion pages! Report bugs when you find them!
-2. **TELL YOUR FRIENDS!** The more people using it and getting involved the better!
-3. **GET YOUR HANDS DIRTY!** This is open-source! So, are you a good dev too? SWEET, how about you help us squash a few bugs? Had a wild idea? Go and write a plugin for it or something! Implement a new feature to make the core better! I don’t know! Follow your dreams or whatever! You have the source code, don't you?
-4. **BUY ME A DRINK** to say thanks and/or **CHIP IN TO BUY MORE USAGE TOKENS**. Cause yeah, this takes time and resources. And Dario Amodei’s butt lift isn’t paying for itself.
-
-[![Donate with PayPal](assets/paypal-donate-button.png)](https://www.paypal.com/donate/?business=4QYDZY4RP8V8L&no_recurring=0&item_name=Thanks+heaps!+You+rock!&currency_code=AUD&source=qr)
-<img src="assets/DonationQRCode.png" alt="OxiGuitar Donation QR Code (PayPal)">
-
-# Nerd Section
+# Technical Section
 
 ## Supported systems
 
@@ -143,18 +64,9 @@ How can you help, you ask?
 | Linux | the AppImage: distributions with glibc 2.35 or newer (Debian 12 and later, Ubuntu 22.04+, Fedora 36+); the .deb and .rpm: glibc 2.39 or newer (Debian trixie and sid, Ubuntu 24.04+, Fedora 40+) | x86\_64, ARM64 |
 | macOS | the current release | Apple Silicon and Intel (one universal app) |
 
-Each [release](https://github.com/mateusrdp/oxiguitar/releases) has one download for your system: a portable .exe for Windows (in a zip); one AppImage for any Linux, which holds both the Wayland and the X11 build, starts the right one and plays through ALSA (which PipeWire desktops pass on to PipeWire); a .deb and an .rpm for Debian, Ubuntu and Fedora; one .dmg for macOS. **None carries the plugins** that open Guitar Pro files and play them: those live in repositories of their own ([oxiguitar-guitarpro](https://github.com/mateusrdp/oxiguitar-guitarpro), [oxiguitar-midi](https://github.com/mateusrdp/oxiguitar-midi), [oxiguitar-nam](https://github.com/mateusrdp/oxiguitar-nam), [oxiguitar-wav](https://github.com/mateusrdp/oxiguitar-wav) and the audio outputs), with releases, packages and updates of their own. The Linux package repositories below install OxiGuitar and its plugins together and keep them up to date.
+FuTab doesn't publish releases yet: build it from source (see [Install](#install)). When it does, it will offer the same downloads as OxiGuitar: a portable .exe for Windows (in a zip), an AppImage for any Linux, a .deb and an .rpm, and a .dmg for macOS. None will carry the plugins, which are OxiGuitar's and have releases, packages and updates of their own ([oxiguitar-guitarpro](https://github.com/mateusrdp/oxiguitar-guitarpro), [oxiguitar-midi](https://github.com/mateusrdp/oxiguitar-midi), [oxiguitar-nam](https://github.com/mateusrdp/oxiguitar-nam), [oxiguitar-wav](https://github.com/mateusrdp/oxiguitar-wav) and the audio outputs).
 
-Every release carries a SHA256SUMS file. The .deb, .rpm and .dmg register the Guitar Pro file types (.gp, .gpx, .gp5, .gp4, .gp3), so double-clicking a file opens OxiGuitar; the portable .exe and the AppImage register nothing, and the [user manual](https://mateusrdp.github.io/oxiguitar/installing.html) shows how to do it by hand. The [manual](https://mateusrdp.github.io/oxiguitar/) explains the whole program in a few short pages.
-
-- **Installing:** the [Install](#install) section above has the steps for each system, from adding our repositories (a one-off step) to updating.
-- **Linux on X11:** the AppImage works on X11 as it is. The .deb and .rpm above are the Wayland build, for today's desktops; a desktop without Wayland needs the X11 build's package instead, `oxiguitar-x11_….deb` or `oxiguitar-x11-….rpm`. The X11 build is deprecated and will be dropped. Each build carries only its own display system's code, and installing one package replaces the other.
-
-None of the packages is code-signed yet, so the first launch shows a warning:
-
-- **Windows:** SmartScreen says "Windows protected your PC". Click **More info**, then **Run anyway**.
-- **macOS:** right-click (or Control-click) the app, choose **Open**, then **Open** again. On recent macOS versions you may instead need **System Settings → Privacy \& Security → Open Anyway**.
-- **Linux AppImage:** make it executable (`chmod +x OxiGuitar-*.AppImage`), then run it.
+On Linux, the Wayland build is the default; a desktop with only an X server needs the X11 build (see [Building from source](#building-from-source)). The X11 build is deprecated and will be dropped.
 
 ## Building from source
 
@@ -165,15 +77,15 @@ sudo apt install git build-essential pkg-config rustup \
   libfontconfig1-dev libxkbcommon-dev libwayland-dev \
   libasound2-dev libpipewire-0.3-dev libclang-dev
 rustup default stable
-git clone https://github.com/mateusrdp/oxiguitar.git
-cd oxiguitar
+git clone https://github.com/PurpleIcon/futab.git
+cd futab
 cargo build --release
 cargo test
 ```
 
-Elsewhere, install rustup from your system's packages or from [rustup.rs](https://rustup.rs). The `lib…-dev` packages are the system libraries OxiGuitar needs: fontconfig, xkbcommon and Wayland for fonts, keyboard and windows, and ALSA and PipeWire (with libclang, which builds PipeWire's bindings) for the audio-device plugins.
+Elsewhere, install rustup from your system's packages or from [rustup.rs](https://rustup.rs). The `lib…-dev` packages are the system libraries FuTab needs: fontconfig, xkbcommon and Wayland for fonts, keyboard and windows, and ALSA and PipeWire (with libclang, which builds PipeWire's bindings) for the audio-device plugins.
 
-The program opens files only through format plugins (one per format, `.oxp` files), which are built from the plugin repositories ([oxiguitar-guitarpro](https://github.com/mateusrdp/oxiguitar-guitarpro) and the others; each has a `build-oxp.sh`). A build from source looks for them in `target/lib/oxiguitar/plugins/` beside the program on Linux, in `plugins\` beside the .exe on Windows, and in your own plugin folder everywhere; `cargo test` takes the latest releases of the plugins it needs by itself (`OXIGUITAR_PLUGINS_DIR` points it at a folder of your own builds instead).
+The program opens files only through format plugins (one per format, `.oxp` files), which are built from the plugin repositories ([oxiguitar-guitarpro](https://github.com/mateusrdp/oxiguitar-guitarpro) and the others; each has a `build-oxp.sh`). A build from source looks for them in `target/lib/futab/plugins/` beside the program on Linux (then in OxiGuitar's system plugin folders), in `plugins\` beside the .exe on Windows, and in your own plugin folder everywhere; `cargo test` takes the latest releases of the plugins it needs by itself (`OXIGUITAR_PLUGINS_DIR` points it at a folder of your own builds instead).
 
 Run the desktop app, optionally with a file to open:
 
@@ -183,7 +95,7 @@ cargo run --release -p oxiguitar-app -- path/to/your/song.gp
 
 That is the Wayland build, the default. On a desktop with only an X server, build the X11 one instead: `cargo run --release -p oxiguitar-app --no-default-features --features x11 -- song.gp`. Each build carries only its own display system's code, and says which build you need if it can't find its session.
 
-File → New starts a score; the [manual's Editing page](https://mateusrdp.github.io/oxiguitar/editing.html) and [Keyboard and mouse](https://mateusrdp.github.io/oxiguitar/keys.html) list the keys. On Linux, the Open and Export dialogs come from the desktop portal (`xdg-desktop-portal` with your desktop's backend, installed by default with GNOME and KDE). The binary is `target/release/oxiguitar`; it finds the plugins in `target/lib/oxiguitar/plugins/`, and in your own plugin folder ([Settings and plugins](https://mateusrdp.github.io/oxiguitar/plugins.html)). On Wayland, desktops take an app's icon from its desktop entry rather than from the window; to give a build from source (or an AppImage) its icon, a menu entry and the Guitar Pro file types, run `scripts/install-desktop-entry.sh [path to the program]` (it writes only to `~/.local/share`; `--uninstall` removes it).
+File → New starts a score; OxiGuitar's manual pages [Editing](https://mateusrdp.github.io/oxiguitar/editing.html) and [Keyboard and mouse](https://mateusrdp.github.io/oxiguitar/keys.html) list the keys, which are the same in FuTab. On Linux, the Open and Export dialogs come from the desktop portal (`xdg-desktop-portal` with your desktop's backend, installed by default with GNOME and KDE). The binary is `target/release/oxiguitar`; it finds the plugins in `target/lib/futab/plugins/`, in OxiGuitar's system plugin folders, and in your own plugin folder (`~/.local/share/futab/plugins/` on Linux; OxiGuitar's manual page [Settings and plugins](https://mateusrdp.github.io/oxiguitar/plugins.html) explains the folders, which FuTab names `futab` instead). On Wayland, desktops take an app's icon from its desktop entry rather than from the window; to give a build from source (or an AppImage) its icon, a menu entry and the Guitar Pro file types, run `scripts/install-desktop-entry.sh [path to the program]` (it writes only to `~/.local/share`; `--uninstall` removes it).
 
 Try the command-line tool, which reads files through the same plugins (Guitar Pro 3 to 8: .gp3, .gp4, .gp5, .gpx, .gp) and engraves them into PNG pages and a PDF:
 
@@ -199,26 +111,25 @@ cargo run --release -p oxiguitar-cli -- play path/to/your/song.gp --wav song.wav
 
 ## Writing plugins
 
-Every file format, tool and tab in OxiGuitar is a plugin: one `.oxp` file, a native library with a small manifest, built from Rust with our SDK. The [plugin developer guide](https://mateusrdp.github.io/oxiguitar/plugin-guide/) walks through it from its template (`docs/plugins/template/`), and plugins may use any GPL-compatible license, since the interface and the SDK are MIT OR Apache-2.0.
+Every file format, tool and tab in FuTab is a plugin: one `.oxp` file, a native library with a small manifest, built from Rust with the SDK in this repository. FuTab keeps OxiGuitar's plugin interface, so a plugin works in both. OxiGuitar's [plugin developer guide](https://mateusrdp.github.io/oxiguitar/plugin-guide/) walks through it from its template (`docs/plugins/template/`), and plugins may use any GPL-compatible license, since the interface and the SDK are MIT OR Apache-2.0.
 
 ## Testers wanted
 
-The maintainer tests by hand on x86\_64 Debian sid only. Everything else — **Windows, macOS, other Linux distributions, and any ARM64 machine** — is built and tested automatically, but nobody has clicked through it yet. If you can try test builds on one of those systems, please say hello in [Discussions](https://github.com/mateusrdp/oxiguitar/discussions) or open an issue with what you find.
+The maintainer tests by hand on x86\_64 Fedora only. Everything else — **Windows, macOS, other Linux distributions, and any ARM64 machine** — is built and tested automatically, but nobody has clicked through FuTab there yet. If you can try test builds on one of those systems, please say hello in [Discussions](https://github.com/PurpleIcon/futab/discussions) or [open an issue](https://github.com/PurpleIcon/futab/issues) with what you find.
 
-Test builds of every change on `develop` (the program for each system, its plugins, and the songs we write as .gp and .gp5 for checking in Guitar Pro) are under the [Actions](https://github.com/mateusrdp/oxiguitar/actions/workflows/builds.yml) tab, kept for 14 days (you need to be signed in to GitHub to download them). Packages of the latest state are made by hand under [Release packages](https://github.com/mateusrdp/oxiguitar/actions/workflows/release.yml), kept just as long.
+Test builds of every change on `develop` (the program for each system, its plugins, and the songs we write as .gp and .gp5 for checking in Guitar Pro) are under the [Actions](https://github.com/PurpleIcon/futab/actions/workflows/builds.yml) tab, kept for 14 days (you need to be signed in to GitHub to download them). FuTab doesn't publish packages yet.
 
 ## Contributing
 
 Pull requests are welcome from day one. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it covers code standards, the sign-off rule and how to add a file format or an effect. [ARCHITECTURE.md](ARCHITECTURE.md) explains how the code fits together, and [docs/adr/](docs/adr/) records why things are the way they are.
 
-## Donations
-
-See [How to get involved](#how-to-get-involved), point 4. The same PayPal link and QR code are in the app, under **Help → About**.
-
 ## License
 
-OxiGuitar is free software under the [GNU General Public License, version 3](LICENSE). Our own code is GPL-3.0-or-later; the program as distributed is GPL-3.0, because code ported from MuseScore keeps its GPL-3.0-only license. The plugin interface and the SDK for plugin authors (`oxiguitar-plugin-api`, `oxiguitar-plugin`) are MIT OR Apache-2.0, so plugins may use any GPL-compatible license.
+FuTab is free software under the [GNU General Public License, version 3](LICENSE). It is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), under the same license. Our own code is GPL-3.0-or-later; the program as distributed is GPL-3.0, because code ported from MuseScore keeps its GPL-3.0-only license. The plugin interface and the SDK for plugin authors (`oxiguitar-plugin-api`, `oxiguitar-plugin`) are MIT OR Apache-2.0, so plugins may use any GPL-compatible license.
 
-Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors. [CREDITS.md](CREDITS.md) lists every project we build on and thanks everyone who has contributed.
+Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors.\
+Copyright (C) 2026 The FuTab contributors.
 
-Guitar Pro is a trademark of Arobas Music. MuseScore is a trademark of Muse Group. OxiGuitar is not affiliated with either.
+[CREDITS.md](CREDITS.md) lists every project we build on and thanks everyone who has contributed.
+
+Guitar Pro is a trademark of Arobas Music. MuseScore is a trademark of Muse Group. FuTab is not affiliated with either, nor with the OxiGuitar project, whose name it uses only to say where FuTab comes from.

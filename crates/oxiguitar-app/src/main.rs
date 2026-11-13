@@ -109,7 +109,7 @@ use ui::{
 };
 
 /// The app id: the desktop entry's name and the Wayland app id.
-const APP_ID: &str = "io.github.mateusrdp.OxiGuitar";
+const APP_ID: &str = "io.github.purpleicon.FuTab";
 /// Interface zoom steps, as in web browsers.
 const UI_ZOOMS: &[f32] = &[0.5, 0.67, 0.75, 0.8, 0.9, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0];
 /// Size of the track rows' toggle icons (notation, mute, solo), in
@@ -461,10 +461,10 @@ fn wrong_build_hint(display: &str) -> Option<&'static str> {
     }
     match display {
         "wayland" => Some(
-            "This is OxiGuitar's Wayland build, and it found no Wayland session (is WAYLAND_DISPLAY set?). On an X11 desktop, install the X11 build instead (the package oxiguitar-x11), or use the AppImage, which holds both builds.",
+            "This is FuTab's Wayland build, and it found no Wayland session (is WAYLAND_DISPLAY set?). On an X11 desktop, install the X11 build instead (the package oxiguitar-x11), or use the AppImage, which holds both builds.",
         ),
         "x11" => Some(
-            "This is OxiGuitar's X11 build, and it found no X server (is DISPLAY set?). On a Wayland desktop, install the Wayland build instead (the package oxiguitar), or use the AppImage, which holds both builds.",
+            "This is FuTab's X11 build, and it found no X server (is DISPLAY set?). On a Wayland desktop, install the Wayland build instead (the package oxiguitar), or use the AppImage, which holds both builds.",
         ),
         _ => None,
     }
@@ -701,9 +701,10 @@ fn main() -> Result<(), slint::PlatformError> {
             "Guitar tablature and score viewer, editor and player. Version {}.",
             env!("CARGO_PKG_VERSION")
         ),
+        "FuTab is a fork of OxiGuitar, by Mateus Rocha de Paula and the OxiGuitar contributors: https://github.com/mateusrdp/oxiguitar".to_owned(),
         "Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors. Licensed under the GNU GPL, version 3 or later.".to_owned(),
         "Music font: Bravura (Steinberg, SIL OFL 1.1). Text font: Noto Sans (SIL OFL 1.1). GUI: Slint (GPL-3.0).".to_owned(),
-        "OxiGuitar never connects to the internet on its own and sends nothing anywhere.".to_owned(),
+        "FuTab never connects to the internet on its own and sends nothing anywhere.".to_owned(),
     ];
     about.extend(about_folders(&startup.inventory.folders, args.safe_mode));
     ui.set_about_lines(lines(&about.iter().map(String::as_str).collect::<Vec<_>>()));
@@ -1280,12 +1281,6 @@ fn main() -> Result<(), slint::PlatformError> {
     let a = app.clone();
     ui.on_open_link(move |url| {
         if let Err(e) = links::open(&url) {
-            message(&a, Level::Error, e);
-        }
-    });
-    let a = app.clone();
-    ui.on_open_donation(move || {
-        if let Err(e) = links::open(links::DONATE) {
             message(&a, Level::Error, e);
         }
     });
@@ -2187,7 +2182,7 @@ fn open_plugin_manager(app: &Shared) {
             SharedString::new()
         } else {
             SharedString::from(format!(
-                "{} couldn't be read when OxiGuitar started, so plugins can't be enabled or disabled now: correct it (or remove it) and start OxiGuitar again.",
+                "{} couldn't be read when FuTab started, so plugins can't be enabled or disabled now: correct it (or remove it) and start FuTab again.",
                 oxiguitar_host::SETTINGS_FILE
             ))
         });
@@ -2247,7 +2242,7 @@ fn manager_toggled(app: &Shared, index: i32, on: bool) {
                 app,
                 Level::Info,
                 format!(
-                    "{name} stays in use until you restart OxiGuitar: a loaded plugin can't be unloaded while it runs."
+                    "{name} stays in use until you restart FuTab: a loaded plugin can't be unloaded while it runs."
                 ),
             );
         }
@@ -2505,9 +2500,9 @@ fn sync_edit_state(app: &Shared, edit: &document::EditState) {
         let mut s = app.borrow_mut();
         s.modified = edit.modified;
         match &s.doc_name {
-            Some(name) if edit.modified => format!("• {name} — OxiGuitar"),
-            Some(name) => format!("{name} — OxiGuitar"),
-            None => "OxiGuitar".to_owned(),
+            Some(name) if edit.modified => format!("• {name} — FuTab"),
+            Some(name) => format!("{name} — FuTab"),
+            None => "FuTab".to_owned(),
         }
     };
     ui.set_window_title(window_title.into());
@@ -4931,7 +4926,7 @@ fn no_dialogs() -> Option<String> {
     }
     Some(
         "No file dialog: this session has no D-Bus for the desktop portal. \
-         Start OxiGuitar with a file instead: oxiguitar FILE"
+         Start FuTab with a file instead: oxiguitar FILE"
             .to_owned(),
     )
 }
@@ -5244,7 +5239,7 @@ mod tests {
             };
             assert_eq!(display_system(), own);
             assert!(wrong_build_hint(own).unwrap().contains(&format!(
-                "OxiGuitar's {} build",
+                "FuTab's {} build",
                 if own == "x11" { "X11" } else { "Wayland" }
             )));
         } else {

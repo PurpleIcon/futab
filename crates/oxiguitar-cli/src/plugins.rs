@@ -83,7 +83,7 @@ pub(crate) fn open(path: &str, data: &[u8]) -> Result<Opened, String> {
     let (name, extensions) = (format.spec.name.clone(), format.spec.extensions.clone());
     let read = opened.read;
     let mut score = oxiguitar_model::wire::from_wire2(read.score)
-        .map_err(|e| format!("the {plugin} plugin gave a score this OxiGuitar can't hold ({e})"))?;
+        .map_err(|e| format!("the {plugin} plugin gave a score this FuTab can't hold ({e})"))?;
     // Pitches on strings get a string and fret, as the app does (#157).
     oxiguitar_edit::finger_pitched(&mut score);
     oxiguitar_edit::plain_spellings(&mut score);

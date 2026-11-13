@@ -37,14 +37,14 @@ sed "s/@VERSION@/$plain/g" "$root/assets/macos/Info.plist" > "$app/Contents/Info
 plutil -lint "$app/Contents/Info.plist"
 printf 'APPL????' > "$app/Contents/PkgInfo"
 
-# The app and document icon, from the placeholder PNGs.
+# The app and document icon, from the icon PNGs (drawn from assets/icon/futab.svg).
 set_dir="$work/OxiGuitar.iconset"
 mkdir -p "$set_dir"
 png="$root/assets/icon/png"
 for s in 16 32 128 256 512; do
-    cp "$png/oxiguitar-$s.png" "$set_dir/icon_${s}x${s}.png"
+    cp "$png/futab-$s.png" "$set_dir/icon_${s}x${s}.png"
     if [[ $s -lt 512 ]]; then
-        cp "$png/oxiguitar-$((s * 2)).png" "$set_dir/icon_${s}x${s}@2x.png"
+        cp "$png/futab-$((s * 2)).png" "$set_dir/icon_${s}x${s}@2x.png"
     fi
 done
 iconutil -c icns -o "$app/Contents/Resources/OxiGuitar.icns" "$set_dir"

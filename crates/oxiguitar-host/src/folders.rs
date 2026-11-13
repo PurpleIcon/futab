@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-//! Where OxiGuitar keeps its settings and looks for plugins, on each system
+//! Where FuTab keeps its settings and looks for plugins, on each system
 //! (docs/design/plugins.md, "Folders and settings").
 
 use std::ffi::OsString;
@@ -40,7 +40,7 @@ impl System {
     }
 }
 
-/// OxiGuitar's folders on this machine.
+/// FuTab's folders on this machine.
 ///
 /// On Linux they follow the freedesktop XDG Base Directory convention
 /// (decided 18 Oct 2026): settings under the config home, plugins and
@@ -59,7 +59,7 @@ pub struct Folders {
     /// Where the plugins' caches live (interface 1.3): what a plugin can
     /// make again, which the system or the user may delete at any time.
     pub cache: PathBuf,
-    /// System plugin folders, which packages install into. OxiGuitar only
+    /// System plugin folders, which packages install into. FuTab only
     /// reads them; it never creates or writes them.
     pub system_plugins: Vec<PathBuf>,
 }
@@ -98,25 +98,25 @@ impl Folders {
             Some(dir) => (dir.clone(), dir.clone(), dir.join("cache")),
             None => match system {
                 System::Linux => (
-                    xdg("XDG_CONFIG_HOME", ".config")?.join("oxiguitar"),
-                    xdg("XDG_DATA_HOME", ".local/share")?.join("oxiguitar"),
-                    xdg("XDG_CACHE_HOME", ".cache")?.join("oxiguitar"),
+                    xdg("XDG_CONFIG_HOME", ".config")?.join("futab"),
+                    xdg("XDG_DATA_HOME", ".local/share")?.join("futab"),
+                    xdg("XDG_CACHE_HOME", ".cache")?.join("futab"),
                 ),
                 System::MacOs => {
                     let home = set("HOME")?;
                     let dir = home
                         .join("Library")
                         .join("Application Support")
-                        .join("OxiGuitar");
-                    let cache = home.join("Library").join("Caches").join("OxiGuitar");
+                        .join("FuTab");
+                    let cache = home.join("Library").join("Caches").join("FuTab");
                     (dir.clone(), dir, cache)
                 }
                 System::Windows => {
-                    let dir = set("APPDATA")?.join("OxiGuitar");
+                    let dir = set("APPDATA")?.join("FuTab");
                     // Caches stay on this machine (Local), not in the
                     // roaming profile.
                     let cache = set("LOCALAPPDATA")
-                        .map(|local| local.join("OxiGuitar"))
+                        .map(|local| local.join("FuTab"))
                         .unwrap_or_else(|| dir.clone())
                         .join("cache");
                     (dir.clone(), dir, cache)
@@ -125,21 +125,24 @@ impl Folders {
         };
         let bin = exe.and_then(Path::parent);
         let system_plugins = match system {
-            // /usr/bin/oxiguitar → /usr/lib/oxiguitar/plugins; the same
-            // rule finds /usr/local, the AppImage's own tree and a build
-            // installed anywhere else. When the derived path is missing
-            // (a dev build that hasn't been installed), fall back to the
-            // standard Linux plugin directories.
+            // /usr/bin/futab → /usr/lib/futab/plugins; the same rule finds
+            // /usr/local, the AppImage's own tree and a build installed
+            // anywhere else. When the derived path is missing (a dev build
+            // that hasn't been installed), fall back to the standard Linux
+            // plugin directories: FuTab's own, then OxiGuitar's, so the
+            // plugins installed from OxiGuitar's packages are found too.
             System::Linux => {
                 let derived = bin
                     .and_then(Path::parent)
-                    .map(|prefix| prefix.join("lib").join("oxiguitar").join("plugins"));
+                    .map(|prefix| prefix.join("lib").join("futab").join("plugins"));
                 let fallbacks = [
+                    PathBuf::from("/usr/lib/futab/plugins"),
+                    PathBuf::from("/usr/local/lib/futab/plugins"),
                     PathBuf::from("/usr/lib/oxiguitar/plugins"),
                     PathBuf::from("/usr/local/lib/oxiguitar/plugins"),
                 ];
                 // Deduplicate: the derived path may equal a fallback.
-                let mut out: Vec<PathBuf> = Vec::with_capacity(3);
+                let mut out: Vec<PathBuf> = Vec::with_capacity(5);
                 if let Some(p) = derived
                     && !fallbacks.contains(&p)
                 {
@@ -148,25 +151,26 @@ impl Folders {
                 out.extend(fallbacks);
                 out
             }
-            // OxiGuitar.app/Contents/MacOS/oxiguitar → Contents/PlugIns.
-            // When the derived path is missing (no exe path), fall back to
-            // the system-wide plugin folder.
+            // FuTab.app/Contents/MacOS/futab → Contents/PlugIns. Then the
+            // system-wide plugin folders: FuTab's, then OxiGuitar's.
             System::MacOs => bin
                 .and_then(Path::parent)
                 .map(|contents| contents.join("PlugIns"))
                 .into_iter()
-                .chain([PathBuf::from(
-                    "/Library/Application Support/OxiGuitar/plugins",
-                )])
+                .chain([
+                    PathBuf::from("/Library/Application Support/FuTab/plugins"),
+                    PathBuf::from("/Library/Application Support/OxiGuitar/plugins"),
+                ])
                 .collect(),
-            // The portable zip: plugins\ beside oxiguitar.exe. When the
-            // derived path is missing (a dev build that hasn't been
-            // installed), fall back to the standard Windows plugin
-            // directory.
+            // The portable zip: plugins\ beside futab.exe. Then the standard
+            // Windows plugin folders: FuTab's, then OxiGuitar's.
             System::Windows => bin
                 .map(|b| b.join("plugins"))
                 .into_iter()
-                .chain([PathBuf::from("C:/Program Files/OxiGuitar/plugins")])
+                .chain([
+                    PathBuf::from("C:/Program Files/FuTab/plugins"),
+                    PathBuf::from("C:/Program Files/OxiGuitar/plugins"),
+                ])
                 .collect(),
         };
         Some(Folders {
@@ -272,45 +276,48 @@ pub(crate) mod tests {
         let f = Folders::resolve(
             System::Linux,
             env(&[("HOME", "/home/mat")]),
-            Some(Path::new("/usr/bin/oxiguitar")),
+            Some(Path::new("/usr/bin/futab")),
         )
         .unwrap();
-        assert_eq!(f.config, PathBuf::from("/home/mat/.config/oxiguitar"));
+        assert_eq!(f.config, PathBuf::from("/home/mat/.config/futab"));
         assert_eq!(
             f.settings(),
-            PathBuf::from("/home/mat/.config/oxiguitar/settings.json")
+            PathBuf::from("/home/mat/.config/futab/settings.json")
         );
-        assert_eq!(f.data, PathBuf::from("/home/mat/.local/share/oxiguitar"));
+        assert_eq!(f.data, PathBuf::from("/home/mat/.local/share/futab"));
         assert_eq!(
             f.user_plugins,
-            PathBuf::from("/home/mat/.local/share/oxiguitar/plugins")
+            PathBuf::from("/home/mat/.local/share/futab/plugins")
         );
         assert_eq!(
             f.system_plugins,
             vec![
+                PathBuf::from("/usr/lib/futab/plugins"),
+                PathBuf::from("/usr/local/lib/futab/plugins"),
                 PathBuf::from("/usr/lib/oxiguitar/plugins"),
                 PathBuf::from("/usr/local/lib/oxiguitar/plugins"),
             ]
         );
         assert_eq!(f.default_plugin_folders()[0], f.system_plugins[0]);
-        // The second fallback comes before the user folder.
+        // Every fallback, FuTab's and then OxiGuitar's, comes before the
+        // user folder.
         assert_eq!(
-            f.default_plugin_folders()[1],
+            f.default_plugin_folders()[3],
             PathBuf::from("/usr/local/lib/oxiguitar/plugins")
         );
-        assert_eq!(f.default_plugin_folders()[2], f.user_plugins);
-        assert_eq!(f.cache, PathBuf::from("/home/mat/.cache/oxiguitar"));
+        assert_eq!(f.default_plugin_folders()[4], f.user_plugins);
+        assert_eq!(f.cache, PathBuf::from("/home/mat/.cache/futab"));
         assert_eq!(
             f.plugin_data("me.nam"),
-            PathBuf::from("/home/mat/.local/share/oxiguitar/data/me.nam")
+            PathBuf::from("/home/mat/.local/share/futab/data/me.nam")
         );
         assert_eq!(
             f.plugin_cache("me.nam"),
-            PathBuf::from("/home/mat/.cache/oxiguitar/me.nam")
+            PathBuf::from("/home/mat/.cache/futab/me.nam")
         );
         assert_eq!(
             f.shared(SharedFolder::Soundfonts),
-            PathBuf::from("/home/mat/.local/share/oxiguitar/soundfonts")
+            PathBuf::from("/home/mat/.local/share/futab/soundfonts")
         );
     }
 
@@ -326,9 +333,9 @@ pub(crate) mod tests {
             None,
         )
         .unwrap();
-        assert_eq!(f.config, PathBuf::from("/cfg/oxiguitar"));
+        assert_eq!(f.config, PathBuf::from("/cfg/futab"));
         // A relative value is invalid by the specification: ignored.
-        assert_eq!(f.data, PathBuf::from("/home/mat/.local/share/oxiguitar"));
+        assert_eq!(f.data, PathBuf::from("/home/mat/.local/share/futab"));
     }
 
     #[test]
@@ -336,41 +343,37 @@ pub(crate) mod tests {
         let mac = Folders::resolve(
             System::MacOs,
             env(&[("HOME", "/Users/mat")]),
-            Some(Path::new(
-                "/Applications/OxiGuitar.app/Contents/MacOS/oxiguitar",
-            )),
+            Some(Path::new("/Applications/FuTab.app/Contents/MacOS/futab")),
         )
         .unwrap();
-        let support = PathBuf::from("/Users/mat/Library/Application Support/OxiGuitar");
+        let support = PathBuf::from("/Users/mat/Library/Application Support/FuTab");
         assert_eq!((&mac.config, &mac.data), (&support, &support));
-        assert_eq!(
-            mac.cache,
-            PathBuf::from("/Users/mat/Library/Caches/OxiGuitar")
-        );
+        assert_eq!(mac.cache, PathBuf::from("/Users/mat/Library/Caches/FuTab"));
         assert_eq!(
             mac.system_plugins[0],
-            PathBuf::from("/Applications/OxiGuitar.app/Contents/PlugIns")
+            PathBuf::from("/Applications/FuTab.app/Contents/PlugIns")
         );
         let win = Folders::resolve(
             System::Windows,
             env(&[("APPDATA", "C:/Users/mat/AppData/Roaming")]),
-            Some(Path::new("D:/OxiGuitar/oxiguitar.exe")),
+            Some(Path::new("D:/FuTab/futab.exe")),
         )
         .unwrap();
         assert_eq!(
             win.config,
-            PathBuf::from("C:/Users/mat/AppData/Roaming/OxiGuitar")
+            PathBuf::from("C:/Users/mat/AppData/Roaming/FuTab")
         );
         assert_eq!(
             win.system_plugins,
             vec![
-                PathBuf::from("D:/OxiGuitar/plugins"),
+                PathBuf::from("D:/FuTab/plugins"),
+                PathBuf::from("C:/Program Files/FuTab/plugins"),
                 PathBuf::from("C:/Program Files/OxiGuitar/plugins"),
             ]
         );
         assert_eq!(
             win.cache,
-            PathBuf::from("C:/Users/mat/AppData/Roaming/OxiGuitar/cache")
+            PathBuf::from("C:/Users/mat/AppData/Roaming/FuTab/cache")
         );
         let local = Folders::resolve(
             System::Windows,
@@ -383,7 +386,7 @@ pub(crate) mod tests {
         .unwrap();
         assert_eq!(
             local.cache,
-            PathBuf::from("C:/Users/mat/AppData/Local/OxiGuitar/cache")
+            PathBuf::from("C:/Users/mat/AppData/Local/FuTab/cache")
         );
     }
 
@@ -399,26 +402,28 @@ pub(crate) mod tests {
         assert_eq!(
             f.system_plugins,
             vec![
-                PathBuf::from("/home/mat/src/oxiguitar/target/lib/oxiguitar/plugins"),
+                PathBuf::from("/home/mat/src/oxiguitar/target/lib/futab/plugins"),
+                PathBuf::from("/usr/lib/futab/plugins"),
+                PathBuf::from("/usr/local/lib/futab/plugins"),
                 PathBuf::from("/usr/lib/oxiguitar/plugins"),
                 PathBuf::from("/usr/local/lib/oxiguitar/plugins"),
             ]
         );
         // System folders still come before user folders.
         let folders = f.default_plugin_folders();
-        assert_eq!(folders.len(), 4);
+        assert_eq!(folders.len(), 6);
         assert_eq!(
             folders[0],
-            PathBuf::from("/home/mat/src/oxiguitar/target/lib/oxiguitar/plugins")
+            PathBuf::from("/home/mat/src/oxiguitar/target/lib/futab/plugins")
         );
-        assert_eq!(folders[1], PathBuf::from("/usr/lib/oxiguitar/plugins"));
+        assert_eq!(folders[1], PathBuf::from("/usr/lib/futab/plugins"));
         assert_eq!(
-            folders[2],
+            folders[4],
             PathBuf::from("/usr/local/lib/oxiguitar/plugins")
         );
         assert_eq!(
-            folders[3],
-            PathBuf::from("/home/mat/.local/share/oxiguitar/plugins")
+            folders[5],
+            PathBuf::from("/home/mat/.local/share/futab/plugins")
         );
     }
 
@@ -427,18 +432,18 @@ pub(crate) mod tests {
         let f = Folders::resolve(
             System::Linux,
             env(&[("HOME", "/home/mat"), (HOME_VARIABLE, "/tmp/og-test-var")]),
-            Some(Path::new("/usr/bin/oxiguitar")),
+            Some(Path::new("/usr/bin/futab")),
         )
         .unwrap();
         let folders = f.default_plugin_folders();
         // System folders come first, then user folder.
-        assert_eq!(folders.len(), 3);
-        assert_eq!(folders[0], PathBuf::from("/usr/lib/oxiguitar/plugins"));
+        assert_eq!(folders.len(), 5);
+        assert_eq!(folders[0], PathBuf::from("/usr/lib/futab/plugins"));
         assert_eq!(
-            folders[1],
+            folders[3],
             PathBuf::from("/usr/local/lib/oxiguitar/plugins")
         );
-        assert_eq!(folders[2], PathBuf::from("/tmp/og-test-var/plugins"));
+        assert_eq!(folders[4], PathBuf::from("/tmp/og-test-var/plugins"));
         // The user folder overrides the system folder for the same plugin ID
         // because, on a tie, the choice prefers the later folder
         // (Plugins::find), and the system folder comes first.
@@ -476,6 +481,8 @@ pub(crate) mod tests {
         assert_eq!(
             f.system_plugins,
             vec![
+                PathBuf::from("/usr/lib/futab/plugins"),
+                PathBuf::from("/usr/local/lib/futab/plugins"),
                 PathBuf::from("/usr/lib/oxiguitar/plugins"),
                 PathBuf::from("/usr/local/lib/oxiguitar/plugins"),
             ]

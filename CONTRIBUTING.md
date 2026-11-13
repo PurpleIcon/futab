@@ -1,6 +1,11 @@
-# Contributing to OxiGuitar
+# Contributing to FuTab
 
-Thank you for helping. Pull requests are welcome from anyone; the maintainer, Mateus Rocha de Paula ([@mateusrdp](https://github.com/mateusrdp)), reviews them.
+Thank you for helping. Pull requests are welcome from anyone; the maintainer, Matthew ([@cgullcharlie](https://github.com/cgullcharlie)), reviews them.
+
+FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), by Mateus Rocha de Paula and the OxiGuitar contributors, and follows its rules, written below. Where FuTab differs, this guide says so; [ARCHITECTURE.md](ARCHITECTURE.md) lists the differences in the code.
+
+- **Report FuTab's bugs here**, in [PurpleIcon/futab](https://github.com/PurpleIcon/futab/issues), even when they may come from OxiGuitar's code: we check, and pass on what belongs upstream.
+- **The plugins are OxiGuitar's** (`mateusrdp/oxiguitar-NAME`). FuTab uses them as they are. A change to a plugin goes to that plugin's repository, under its own rules.
 
 Before a large change, open an issue or a discussion so we can agree the approach. [ROADMAP.md](ROADMAP.md) shows what is planned, [ARCHITECTURE.md](ARCHITECTURE.md) how the code fits together, and [docs/adr/](docs/adr/) why.
 
@@ -8,6 +13,8 @@ Before a large change, open an issue or a discussion so we can agree the approac
 
 - `develop` is where work lands. Branch from it (`feat/gp5-reader`, `fix/tie-crash`) and open your pull request against it.
 - `main` holds reviewed milestones. Only the maintainer merges into it and tags releases.
+- The branch rules enforce this: nobody pushes to `develop` or `main` directly, every change arrives as a pull request, the maintainer (the code owner, `.github/CODEOWNERS`) approves it, and only the maintainer merges.
+- OxiGuitar's `develop` (the `upstream` remote) is merged into FuTab's `develop` from time to time. Keep FuTab's own changes to OxiGuitar's code small and in few places, so those merges stay easy.
 - Feature branches are squash-merged into `develop`; `develop` is merged into `main` with a merge commit.
 - CI must be green. The `ci-success` check sums up every other job.
 - One pull request carries the code, its tests, its documentation and any credit updates together.
@@ -22,14 +29,14 @@ git commit -s -m "Read GP5 bends"
 
 This adds a line such as `Signed-off-by: Your Name <you@example.com>`, which must match the commit's author email. To fix a branch afterwards: `git rebase --signoff develop`, then force-push your branch.
 
-Commits made by the Claude GitHub app, which writes much of the code with the maintainer, carry a `Co-Authored-By: Claude` trailer instead. The DCO is a statement by a person, so the check skips them, and also skips GitHub's squash merges of those pull requests into `develop`, which GitHub attributes to the account that merged them. The maintainer's review and merge of the pull request into `main` is the human sign-off for that work.
+Commits written with Claude carry a `Co-Authored-By: Claude` trailer. When you commit them under your own name, sign them off as well: you are stating the DCO for them. The check skips only commits authored by the Claude app itself (`noreply@anthropic.com`) and GitHub's squash merges of those pull requests; for those, the maintainer's review and merge is the human sign-off.
 
 You keep the copyright on what you contribute. Your name goes in [CREDITS.md](CREDITS.md) with your first merged contribution.
 
 ## Code standards
 
 - **Rust only.** Every line we write is Rust and every dependency is a Rust crate. The only exceptions are the operating system's own libraries for windows, graphics and audio. C and C++ projects are references to read and port from, never libraries to link.
-- **Crates Debian has.** OxiGuitar aims for Debian's main archive, which builds only from crates Debian packages ([docs/debian.md](docs/debian.md)). Given a choice, take a crate and a version Debian unstable has; the Debian workflow's weekly audit shows which.
+- **Crates Debian has.** FuTab, like OxiGuitar, aims for Debian's main archive, which builds only from crates Debian packages ([docs/debian.md](docs/debian.md)). Given a choice, take a crate and a version Debian unstable has; the Debian workflow's weekly audit shows which.
 - **Formatting and lint:** `cargo fmt --all` and `cargo clippy --workspace --all-targets -- -D warnings` must be clean. With `--all-features`, add `--exclude oxiguitar-nam-plugin` on Linux x86_64: its feature `x86-64-v3` (the build for those processors, with NeuralAmpModeler-rs) only builds with `RUSTFLAGS="-C target-cpu=x86-64-v3"`, as CI's "NAM for x86-64-v3" job lints it.
 - **Libraries exactly as published** (Mateus, 25 Oct 2026). Every dependency is the released version, used as it is: no fork, no `[patch]`, no vendored or edited copy. Never plan on a change upstream or wait on a pull request elsewhere. What a library lacks is added only in our own code on top of it: wrapping it, preparing what it is given, or processing what it returns. When a gap can't be closed that way, say plainly what it costs and propose our own code or another library.
 - **No panics on user input.** Readers return errors that name the file and the byte position or element where things went wrong (FMT-1). Reader crates deny `unwrap`, `expect`, `panic!` and unchecked indexing outside tests.
@@ -51,7 +58,7 @@ Features that don't work on one system because of a library we build on, with th
 
 ## Design principles
 
-These come from Mateus's decisions and apply to every pull request.
+These come from the decisions of OxiGuitar's maintainer, Mateus Rocha de Paula; FuTab keeps them, and they apply to every pull request.
 
 - **No polling, ever** (Mateus, 17 and 18 Oct 2026). Nothing may wake up on a timer to check whether something happened: not a file, a queue, a socket or another library's state. Code reacts to events the operating system or a library delivers, or it waits on a channel, a condition or a file descriptor that wakes it. A one-shot timer for something that really is about time (a message that fades after ten seconds, a double-click window) is not polling. If the only way to learn about an event is to poll, the feature is left out and the gap documented, as ADRs 0006 and 0007 show.
 - **Wayland first** (Mateus, 19 Oct 2026; ADR 0009). When the Wayland and X11 builds pull different ways, the Wayland build gets the clean, native solution; fallbacks and workarounds belong in the X11 build, which will be dropped. The Wayland build holds no X11 code, and CI checks it (`scripts/check-display-crates.sh`). Test on Wayland first (headless Weston), then X11.
@@ -62,12 +69,14 @@ These come from Mateus's decisions and apply to every pull request.
 
 ## File headers
 
-Every source file we write starts with:
+Every source file written for FuTab starts with:
 
 ```rust
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
+// Copyright (C) 2026 The FuTab contributors
 ```
+
+A file that comes from OxiGuitar keeps its header as it is, `// Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors`, and its license. When FuTab changes it, add `// Copyright (C) 2026 The FuTab contributors` below that line; never remove or replace OxiGuitar's.
 
 The plugin interface and the SDK (`crates/oxiguitar-plugin-api`, `crates/oxiguitar-plugin`) are the exception: they are MIT OR Apache-2.0, so that plugins built on them may use any GPL-compatible licence, and their files start with `// SPDX-License-Identifier: MIT OR Apache-2.0`. Code from the GPL crates must never be copied into them.
 
@@ -104,6 +113,8 @@ After changing the writer or the reference songs, run `scripts/guitar-pro-check.
 ## Adding a file format
 
 Every format is its own plugin, and every plugin has a repository of its own (#165); the core recognises no format itself (docs/design/plugins.md). `github.com/mateusrdp/oxiguitar-guitarpro` shows the shape, and `docs/plugins/template/` is a starting point.
+
+FuTab keeps OxiGuitar's plugin interface, so a plugin works in both. A new plugin can be offered to OxiGuitar, or live under [PurpleIcon](https://github.com/PurpleIcon) as `futab-NAME`; ask in an issue first. FuTab doesn't publish plugins or packages yet, so the release steps below (step 7) apply once it does.
 
 1. Write down what you learn about the format in `docs/formats/<format>.md`.
 2. Write the reader in the plugin's repository. It recognises the format from its contents (FMT-6), never from the extension, fills the score model, and records anything it cannot represent in the import log (FMT-2).

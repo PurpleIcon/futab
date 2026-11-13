@@ -1,4 +1,22 @@
-# Architecture
+# FuTab Architecture
+
+FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar) and keeps its architecture, described under "OxiGuitar Architecture" below. This section lists only where FuTab differs; anything not listed here works as OxiGuitar's does.
+
+## Plugin folders
+
+FuTab looks for plugins in its own folders first, then in OxiGuitar's (`crates/oxiguitar-host/src/folders.rs`):
+
+| System | FuTab's plugin folders (for FuTab's own plugins) | Then OxiGuitar's |
+|---|---|---|
+| Linux | `lib/futab/plugins` beside the program (`/usr/bin/futab` → `/usr/lib/futab/plugins`), `/usr/lib/futab/plugins`, `/usr/local/lib/futab/plugins` | `/usr/lib/oxiguitar/plugins`, `/usr/local/lib/oxiguitar/plugins` |
+| macOS | `FuTab.app/Contents/PlugIns`, `/Library/Application Support/FuTab/plugins` | `/Library/Application Support/OxiGuitar/plugins` |
+| Windows | `plugins\` beside the program, `C:\Program Files\FuTab\plugins` | `C:\Program Files\OxiGuitar\plugins` |
+
+The user's own plugin folder comes last, in FuTab's data folder (`~/.local/share/futab/plugins` on Linux), as in OxiGuitar.
+
+OxiGuitar's plugins are compatible with FuTab, which keeps OxiGuitar's plugin interface. They are installed as they are, from OxiGuitar's packages, into OxiGuitar's folders, and FuTab finds them there: nothing is copied or moved. FuTab's settings, data and cache folders are its own (`futab`, `FuTab`), so FuTab and an installed OxiGuitar never share settings.
+
+# OxiGuitar Architecture
 
 OxiGuitar is a small core and a set of plugins (decided 18 Oct 2026; [ADR 0008](docs/adr/0008-plugin-architecture.md), [docs/design/plugins.md](docs/design/plugins.md)). The core holds the score, shows it (with PDF export) and edits it (with Infer Key Signatures), and drives the player's transport; file formats, sound, other exports and tools, and anything platform-specific are plugins, loaded only when used. The core recognises no file format itself: what it can open is what the installed plugins recognise (ADR 0008, "Amendments"). Inside the core, one score model sits at the centre of a Cargo workspace; layout, editing, the plugin host and the GUI are separate crates around it, so the GUI can change without touching the music code, and the command-line tool can render and test files in CI without a window.
 

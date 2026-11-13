@@ -187,7 +187,7 @@ fn open_stream(
 ) -> Result<(cpal::Stream, Opened), Error> {
     let out = host
         .audio_out()
-        .ok_or_else(|| Error::new(ErrorKind::Unsupported, "this OxiGuitar can't play sound"))?;
+        .ok_or_else(|| Error::new(ErrorKind::Unsupported, "this FuTab can't play sound"))?;
     let cpal_host =
         cpal::host_from_id(id).map_err(|e| failed(&format!("{name} isn't available"), e))?;
     let device = if open.device.is_empty() {
@@ -285,7 +285,7 @@ fn open_stream(
         other => {
             return Err(Error::new(
                 ErrorKind::Unsupported,
-                format!("the output takes {other} samples, which OxiGuitar doesn't make"),
+                format!("the output takes {other} samples, which FuTab doesn't make"),
             ));
         }
     }

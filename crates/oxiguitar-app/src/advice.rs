@@ -44,7 +44,7 @@ pub(crate) fn lines(text: &str) -> Vec<String> {
 /// Who is talking, for the dialog's small print.
 pub(crate) fn source(asked: &Asked) -> String {
     if asked.plugin == oxiguitar_host::advice::CORE {
-        "From OxiGuitar".to_owned()
+        "From FuTab".to_owned()
     } else {
         format!("From the plugin \u{201c}{}\u{201d}", asked.plugin_name)
     }
@@ -92,9 +92,6 @@ mod tests {
             source(&asked("oxiguitar.midi", "x")),
             "From the plugin \u{201c}MIDI (SoundFont, SFZ)\u{201d}"
         );
-        assert_eq!(
-            source(&Asked::core(asked("", "x").advice)),
-            "From OxiGuitar"
-        );
+        assert_eq!(source(&Asked::core(asked("", "x").advice)), "From FuTab");
     }
 }

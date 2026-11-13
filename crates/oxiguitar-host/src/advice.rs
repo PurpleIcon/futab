@@ -40,7 +40,7 @@ impl Asked {
     pub fn core(advice: Advice) -> Asked {
         Asked {
             plugin: CORE.to_owned(),
-            plugin_name: "OxiGuitar".to_owned(),
+            plugin_name: "FuTab".to_owned(),
             advice,
         }
     }
