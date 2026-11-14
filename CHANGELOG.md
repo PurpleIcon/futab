@@ -20,6 +20,7 @@ All notable changes to OxiGuitar. The format follows [Keep a Changelog](https://
 
 ### Removed
 
+- **OxiGuitar's repository tools** (FuTab): `scripts/new-repo.sh` and `scripts/split-history.sh`, which made and filled plugin repositories under `mateusrdp`, are gone. The workspace's `repository` and `homepage`, and the AppStream screenshots, now point at `PurpleIcon/futab`.
 - **Clef, Time Signature and Key Signature tools from the left palette** (#277): these tools did nothing — their functionality already lives in the Bar tab of the right inspector sidebar. Removed from the palette, shortcut map, dialog mapping, drawing functions, and tests.
 
 ## [0.19.1] - 2026-11-11

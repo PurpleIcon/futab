@@ -18,7 +18,7 @@ Playback is also big. The most basic is a MIDI synthesizer that plays whatever s
 
 FuTab values your privacy first. It never uploads anything. No telemetry, no analytics, no automatic crash reports, no accounts, no background requests — not a single bit of data. It downloads nothing either: better sounds and plugins are files you get yourself and put in a folder, and the manual says where. The only network use ever planned is an update check you start yourself. If it crashes, it writes a log to your disk and tells you where it is; sending it to us is up to you. A CI test even runs FuTab under a system-call tracer and fails if it ever tries to open a network connection to keep us honest. We don’t collect your data EVER. 
 
-These promises cover FuTab itself and nothing else: we make no promises about plugins you get from anywhere else.  Please refer to OxiGuitar for their Privacy statement on Oxiguitar Plugins you use. FuTab is fully modular, open-source and encourages the community to collaborate! **Anyone** can write plugins for it! **Be careful where you get your plugins from!** It’s **your** responsibility to check.
+These promises cover FuTab itself and nothing else: we make no promises about plugins you get from anywhere else.  For OxiGuitar's plugins, see OxiGuitar's own privacy statement. FuTab is fully modular, open-source and encourages the community to collaborate! **Anyone** can write plugins for it! **Be careful where you get your plugins from!** It’s **your** responsibility to check.
 
 ## Install
 

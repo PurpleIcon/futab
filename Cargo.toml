@@ -15,8 +15,8 @@ edition = "2024"
 rust-version = "1.99"
 license = "GPL-3.0-or-later"
 authors = ["Mateus Rocha de Paula", "The OxiGuitar contributors"]
-repository = "https://github.com/mateusrdp/oxiguitar"
-homepage = "https://github.com/mateusrdp/oxiguitar"
+repository = "https://github.com/PurpleIcon/futab"
+homepage = "https://github.com/PurpleIcon/futab"
 publish = false
 
 [workspace.dependencies]

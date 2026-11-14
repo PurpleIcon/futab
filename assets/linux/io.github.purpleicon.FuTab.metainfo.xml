@@ -42,15 +42,15 @@
   <screenshots>
     <screenshot type="default">
       <caption>Playing an eight-track song, with the cursor on the beat being heard and each track's mixer</caption>
-      <image type="source" width="1280" height="800">https://raw.githubusercontent.com/mateusrdp/oxiguitar/main/docs/readme/playing.png</image>
+      <image type="source" width="1280" height="800">https://raw.githubusercontent.com/PurpleIcon/futab/main/docs/readme/playing.png</image>
     </screenshot>
     <screenshot>
       <caption>Editing a bend on the tablature, with the palette of tools and the Inspector</caption>
-      <image type="source" width="1280" height="800">https://raw.githubusercontent.com/mateusrdp/oxiguitar/main/docs/readme/editing.png</image>
+      <image type="source" width="1280" height="800">https://raw.githubusercontent.com/PurpleIcon/futab/main/docs/readme/editing.png</image>
     </screenshot>
     <screenshot>
       <caption>The light interface, with lyrics under a melody</caption>
-      <image type="source" width="1280" height="800">https://raw.githubusercontent.com/mateusrdp/oxiguitar/main/docs/readme/light.png</image>
+      <image type="source" width="1280" height="800">https://raw.githubusercontent.com/PurpleIcon/futab/main/docs/readme/light.png</image>
     </screenshot>
   </screenshots>
   <categories>
