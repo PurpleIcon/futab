@@ -422,7 +422,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           scripts/released-plugins.sh "$RUNNER_TEMP/released" guitarpro
-          plugins="$HOME/.var/app/$APP/data/oxiguitar/plugins"
+          plugins="$HOME/.var/app/$APP/data/futab/plugins"
           mkdir -p "$plugins"
           cp "$RUNNER_TEMP/released/files/"*.oxp "$plugins/"
       - name: Test the bundle

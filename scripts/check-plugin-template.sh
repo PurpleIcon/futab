@@ -99,7 +99,7 @@ if [[ "$oxp" == *macos-universal.oxp ]]; then
 fi
 
 # Where a user puts the file: a plugin folder (OXIGUITAR_HOME's plugins/
-# here; ~/.local/share/oxiguitar/plugins/ and the like for a user).
+# here; ~/.local/share/futab/plugins/ and the like for a user).
 home="$work/home"
 rm -rf "$home"
 mkdir -p "$home/plugins"

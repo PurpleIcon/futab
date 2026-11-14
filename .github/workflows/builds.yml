@@ -69,9 +69,9 @@ jobs:
           a canvas) and "side" (right area), and every kind of event. Never
           shipped; for trying plugin tabs by hand.
 
-          Put test.oxp in your plugin folder and start OxiGuitar:
-            Linux    ~/.local/share/oxiguitar/plugins/
-            Windows  %APPDATA%\OxiGuitar\plugins\
+          Put test.oxp in your plugin folder and start FuTab:
+            Linux    ~/.local/share/futab/plugins/
+            Windows  %APPDATA%\FuTab\plugins\
           Remove it, or untick it in Tools > Plugins, when done.
           TXT
       - uses: actions/upload-artifact@v4
