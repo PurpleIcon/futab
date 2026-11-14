@@ -42,7 +42,7 @@ jobs:
           test -s SHA256SUMS || { echo "::error::$TAG has no SHA256SUMS"; exit 1; }
           sha256sum -c SHA256SUMS
           v="${TAG#v}"
-          for f in "oxiguitar_${v}_amd64.deb" "oxiguitar-${v}-1.x86_64.rpm" "OxiGuitar-${v}-macos-universal.dmg"; do
+          for f in "futab_${v}_amd64.deb" "futab-${v}-1.x86_64.rpm" "FuTab-${v}-macos-universal.dmg"; do
             test -f "$f" || { echo "::error::$TAG lacks $f"; exit 1; }
           done
       - name: Tell the package repositories and the tap
@@ -54,8 +54,8 @@ jobs:
             exit 0
           fi
           payload="$(jq -nc --arg tag "$TAG" --arg repo "$GITHUB_REPOSITORY" \
-            '{event_type: "plugin-published", client_payload: {plugin: "oxiguitar", tag: $tag, repository: $repo}}')"
-          for target in mateusrdp/oxiguitar-packages; do
+            '{event_type: "plugin-published", client_payload: {plugin: "futab", tag: $tag, repository: $repo}}')"
+          for target in PurpleIcon/futab-packages; do
             GH_TOKEN="$PACKAGES_TOKEN" gh api "repos/$target/dispatches" --method POST --input - <<< "$payload"
             echo "Told $target."
           done

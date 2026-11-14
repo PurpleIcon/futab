@@ -3,13 +3,13 @@
   SPDX-License-Identifier: GPL-3.0-or-later
   Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-  The Guitar Pro file types OxiGuitar opens (UI-4), for the shared MIME
+  The Guitar Pro file types FuTab opens (UI-4), for the shared MIME
   database. Installed by the .deb and .rpm packages in
   /usr/share/mime/packages/; the systems' own triggers rebuild the database.
 
   The type name is TuxGuitar's, so both programs share one type and appear
   together under "Open With". .gtp (Guitar Pro 1-2) is left out until
-  OxiGuitar reads it.
+  FuTab reads it.
 -->
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-gtp">

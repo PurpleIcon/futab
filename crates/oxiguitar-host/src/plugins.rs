@@ -192,7 +192,7 @@ struct Inner {
     /// OxiGuitar's folders, for the plugins' own folders and the shared
     /// ones (interface 1.3); unset for programs that keep none.
     folders: OnceLock<Folders>,
-    /// The folders are only read (`oxiguitar-cli`): a plugin's own folders
+    /// The folders are only read (`futab-cli`): a plugin's own folders
     /// are named but not created.
     read_only: std::sync::atomic::AtomicBool,
 }
@@ -786,7 +786,7 @@ impl Plugins {
     }
 
     /// Gives the plugins OxiGuitar's folders to read only, as a program
-    /// that changes nothing in them does (`oxiguitar-cli`): plugins asking
+    /// that changes nothing in them does (`futab-cli`): plugins asking
     /// for their own data and cache folders are told where they are, but
     /// they aren't created, so what a plugin writes there fails unless the
     /// app made them.

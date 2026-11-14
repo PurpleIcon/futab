@@ -1,4 +1,4 @@
-# OxiGuitar and Debian's archive (ROADMAP, M2 slice 5; docs/debian.md).
+# FuTab and Debian's archive (ROADMAP, M2 slice 5; docs/debian.md).
 # Weekly, since Debian moves on its own, and on every change to Cargo.lock
 # or the packaging.
 #
@@ -67,11 +67,11 @@ jobs:
         run: |
           need="$(sed -n 's/^rust-version = "\(.*\)"/\1/p' Cargo.toml)"
           have="$(docker run --rm debian:sid bash -c 'apt-get update -qq > /dev/null && apt-cache policy rustc' | sed -n 's/^ *Candidate: \([0-9]*\.[0-9]*\).*/\1/p')"
-          echo "OxiGuitar needs rustc $need; Debian sid has $have."
+          echo "FuTab needs rustc $need; Debian sid has $have."
           if [ "$(printf '%s\n%s\n' "$need" "$have" | sort -V | head -n1)" = "$need" ]; then
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice title=Debian sid's rustc is older than ours::OxiGuitar needs rustc $need; Debian sid has $have. The offline sid build waits until sid catches up (CONTRIBUTING.md, \"Minimum Rust version\")."
+            echo "::notice title=Debian sid's rustc is older than ours::FuTab needs rustc $need; Debian sid has $have. The offline sid build waits until sid catches up (CONTRIBUTING.md, \"Minimum Rust version\")."
             echo "ok=false" >> "$GITHUB_OUTPUT"
           fi
       - if: steps.rustc.outputs.ok == 'true'
@@ -85,16 +85,16 @@ jobs:
         run: |
           docker run --name sid-build -v "$PWD/build:/build" -w /build debian:sid bash -euxc '
             apt-get update
-            DEBIAN_FRONTEND=noninteractive apt-get build-dep -y --no-install-recommends ./oxiguitar-*/
+            DEBIAN_FRONTEND=noninteractive apt-get build-dep -y --no-install-recommends ./futab-*/
           '
-          docker commit sid-build oxiguitar-sid-build
+          docker commit sid-build futab-sid-build
       # On failure, the log's last lines become an annotation.
       - if: steps.rustc.outputs.ok == 'true'
         name: Build with no network
         run: |
           status=0
-          docker run --rm --network none -v "$PWD/build:/build" oxiguitar-sid-build bash -euc '
-            cd /build/oxiguitar-*/
+          docker run --rm --network none -v "$PWD/build:/build" futab-sid-build bash -euc '
+            cd /build/futab-*/
             dpkg-buildpackage -us -uc -j"$(nproc)" > ../build.log 2>&1
           ' || status=$?
           tail -n 200 build/build.log
@@ -127,10 +127,10 @@ jobs:
             DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
               shared-mime-info desktop-file-utils weston libgl1-mesa-dri man-db
             # The core installs without plugins (it only recommends them).
-            DEBIAN_FRONTEND=noninteractive apt-get install -y ./build/oxiguitar_*.deb
-            oxiguitar-cli --version
-            man -w oxiguitar oxiguitar-cli
-            OXIGUITAR_EXIT_AFTER_MS=3000 scripts/package/in-wayland.sh oxiguitar
+            DEBIAN_FRONTEND=noninteractive apt-get install -y ./build/futab_*.deb
+            futab-cli --version
+            man -w futab futab-cli
+            OXIGUITAR_EXIT_AFTER_MS=3000 scripts/package/in-wayland.sh futab
           '
       - if: steps.rustc.outputs.ok == 'true'
         uses: actions/upload-artifact@v7

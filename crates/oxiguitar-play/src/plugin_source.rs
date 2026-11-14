@@ -4,7 +4,7 @@
 //! An instrument plugin's prepared instance as one of the engine's
 //! sources, with the effects of each of its tracks after it (interface
 //! 1.3), and the instruments for a score's tracks, chosen and prepared
-//! ([`plan`], [`prepare`]), as the window and `oxiguitar-cli play` share
+//! ([`plan`], [`prepare`]), as the window and `futab-cli play` share
 //! them.
 
 use oxiguitar_host::Plugins;

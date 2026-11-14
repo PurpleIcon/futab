@@ -47,7 +47,7 @@ pub(crate) fn plugins() -> &'static Plugins {
             Arc::new(Stderr),
         );
         for notice in &found.notices {
-            eprintln!("oxiguitar-cli: {}", notice.text);
+            eprintln!("futab-cli: {}", notice.text);
         }
         found.plugins
     })

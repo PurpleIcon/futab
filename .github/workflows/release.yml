@@ -1,6 +1,6 @@
 # Release packages: a portable .exe in a zip (Windows x86_64 and ARM64), a
-# .deb and an .rpm of each Linux build (Wayland: oxiguitar; X11, deprecated:
-# oxiguitar-x11), one AppImage holding both builds (x86_64 and ARM64 each),
+# .deb and an .rpm of each Linux build (Wayland: futab; X11, deprecated:
+# futab-x11), one AppImage holding both builds (x86_64 and ARM64 each),
 # a Flatpak bundle (x86_64 and ARM64 each; docs/design/flatpak.md) and a
 # universal .dmg (macOS), none of them code-signed. None carries a
 # plugin: the plugins have repositories and releases of their own (#165,
@@ -107,8 +107,8 @@ jobs:
       # The two Linux builds of the app (docs/design/plugins.md): the
       # Wayland one, the default, and the deprecated X11 one in a target
       # folder of its own.
-      - run: cargo build --release --locked -p oxiguitar-app -p oxiguitar-cli
-      - run: cargo build --release --locked -p oxiguitar-app --no-default-features --features x11 --target-dir target/x11
+      - run: cargo build --release --locked -p futab -p futab-cli
+      - run: cargo build --release --locked -p futab --no-default-features --features x11 --target-dir target/x11
       - uses: actions/download-artifact@v8
         with:
           name: third-party-licenses
@@ -134,7 +134,7 @@ jobs:
       # sample. Each build starts in its own
       # kind of session: the Wayland build in a headless Weston
       # (scripts/package/in-wayland.sh), the X11 build under Xvfb. Installing
-      # oxiguitar-x11 replaces oxiguitar.
+      # futab-x11 replaces futab.
       - name: Test the .deb packages on Debian sid
         run: |
           docker run --rm -e OXIGUITAR_HOME=/smoke-home -v "$SMOKE_HOME:/smoke-home" -v "$PWD:/w" -w /w debian:sid bash -euxc '
@@ -142,25 +142,25 @@ jobs:
             # The databases first, so the package triggers rebuild them.
             DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
               shared-mime-info desktop-file-utils appstream xvfb xauth weston libgl1-mesa-dri
-            DEBIAN_FRONTEND=noninteractive apt-get install -y ./dist/oxiguitar_*.deb
-            dpkg -s oxiguitar | grep -E "^(Version|Depends|Recommends|Suggests):"
-            dpkg -s oxiguitar | grep -E "^Recommends:.*oxiguitar-guitarpro.*oxiguitar-midi"
-            dpkg -s oxiguitar | grep -E "^Suggests:.*oxiguitar-nam.*oxiguitar-eq.*oxiguitar-musicxml.*oxiguitar-midi-file.*oxiguitar-tuxguitar"
-            ! dpkg -s oxiguitar | grep -E "^Depends:.*oxiguitar-(plugins|guitarpro|midi)"
-            test ! -e /usr/lib/oxiguitar/plugins
-            oxiguitar-cli info "$0" > /dev/null
+            DEBIAN_FRONTEND=noninteractive apt-get install -y ./dist/futab_*.deb
+            dpkg -s futab | grep -E "^(Version|Depends|Recommends|Suggests):"
+            dpkg -s futab | grep -E "^Recommends:.*oxiguitar-guitarpro.*oxiguitar-midi"
+            dpkg -s futab | grep -E "^Suggests:.*oxiguitar-nam.*oxiguitar-eq.*oxiguitar-musicxml.*oxiguitar-midi-file.*oxiguitar-tuxguitar"
+            ! dpkg -s futab | grep -E "^Depends:.*oxiguitar-(plugins|guitarpro|midi)"
+            test ! -e /usr/lib/futab/plugins
+            futab-cli info "$0" > /dev/null
             grep -q "application/x-gtp:\*\.gp$" /usr/share/mime/globs2
             grep -q "application/x-gtp=io.github.purpleicon.FuTab.desktop" /usr/share/applications/mimeinfo.cache
             desktop-file-validate /usr/share/applications/io.github.purpleicon.FuTab.desktop
             appstreamcli validate --no-net /usr/share/metainfo/io.github.purpleicon.FuTab.metainfo.xml
-            OXIGUITAR_EXIT_AFTER_MS=3000 scripts/package/in-wayland.sh oxiguitar "$0"
+            OXIGUITAR_EXIT_AFTER_MS=3000 scripts/package/in-wayland.sh futab "$0"
             # The X11 build takes its place.
-            DEBIAN_FRONTEND=noninteractive apt-get install -y ./dist/oxiguitar-x11_*.deb
-            ! dpkg -s oxiguitar 2> /dev/null | grep -q "^Status: install ok installed"
-            dpkg -s oxiguitar-x11 | grep -E "^(Version|Depends|Recommends|Provides|Conflicts|Replaces):"
-            OXIGUITAR_EXIT_AFTER_MS=3000 xvfb-run -a oxiguitar "$0"
-            apt-get remove -y oxiguitar-x11
-            test ! -e /usr/lib/oxiguitar
+            DEBIAN_FRONTEND=noninteractive apt-get install -y ./dist/futab-x11_*.deb
+            ! dpkg -s futab 2> /dev/null | grep -q "^Status: install ok installed"
+            dpkg -s futab-x11 | grep -E "^(Version|Depends|Recommends|Provides|Conflicts|Replaces):"
+            OXIGUITAR_EXIT_AFTER_MS=3000 xvfb-run -a futab "$0"
+            apt-get remove -y futab-x11
+            test ! -e /usr/lib/futab
           ' "$SAMPLE"
       # Debian's own package checker, from sid, on every .deb
       # (scripts/package/lintian.sh). Errors and warnings fail the release,
@@ -180,48 +180,48 @@ jobs:
         run: |
           docker run --rm -e OXIGUITAR_HOME=/smoke-home -v "$SMOKE_HOME:/smoke-home" -v "$PWD:/w" -w /w fedora:latest bash -euxc '
             dnf install -y shared-mime-info desktop-file-utils xorg-x11-server-Xvfb xorg-x11-xauth weston mesa-dri-drivers mesa-libEGL
-            dnf install -y --setopt=install_weak_deps=False $(ls ./dist/oxiguitar-[0-9]*.rpm)
-            rpm -q --requires oxiguitar
-            rpm -q --recommends oxiguitar | grep -q "^oxiguitar-guitarpro"
-            rpm -q --recommends oxiguitar | grep -q "^oxiguitar-midi"
-            rpm -q --suggests oxiguitar | grep -q "^oxiguitar-nam"
-            rpm -q --suggests oxiguitar | grep -q "^oxiguitar-eq"
-            rpm -q --suggests oxiguitar | grep -q "^oxiguitar-musicxml"
-            rpm -q --suggests oxiguitar | grep -q "^oxiguitar-midi-file"
-            rpm -q --suggests oxiguitar | grep -q "^oxiguitar-tuxguitar"
-            test ! -e /usr/lib/oxiguitar/plugins
-            oxiguitar-cli info "$0" > /dev/null
+            dnf install -y --setopt=install_weak_deps=False $(ls ./dist/futab-[0-9]*.rpm)
+            rpm -q --requires futab
+            rpm -q --recommends futab | grep -q "^oxiguitar-guitarpro"
+            rpm -q --recommends futab | grep -q "^oxiguitar-midi"
+            rpm -q --suggests futab | grep -q "^oxiguitar-nam"
+            rpm -q --suggests futab | grep -q "^oxiguitar-eq"
+            rpm -q --suggests futab | grep -q "^oxiguitar-musicxml"
+            rpm -q --suggests futab | grep -q "^oxiguitar-midi-file"
+            rpm -q --suggests futab | grep -q "^oxiguitar-tuxguitar"
+            test ! -e /usr/lib/futab/plugins
+            futab-cli info "$0" > /dev/null
             grep -q "application/x-gtp:\*\.gp$" /usr/share/mime/globs2
-            OXIGUITAR_EXIT_AFTER_MS=3000 scripts/package/in-wayland.sh oxiguitar "$0"
-            dnf remove -y oxiguitar
-            dnf install -y ./dist/oxiguitar-x11-*.rpm
-            rpm -q --provides oxiguitar-x11 | grep -q "^oxiguitar = "
-            OXIGUITAR_EXIT_AFTER_MS=3000 xvfb-run -a oxiguitar "$0"
-            dnf remove -y oxiguitar-x11
+            OXIGUITAR_EXIT_AFTER_MS=3000 scripts/package/in-wayland.sh futab "$0"
+            dnf remove -y futab
+            dnf install -y ./dist/futab-x11-*.rpm
+            rpm -q --provides futab-x11 | grep -q "^futab = "
+            OXIGUITAR_EXIT_AFTER_MS=3000 xvfb-run -a futab "$0"
+            dnf remove -y futab-x11
           ' "$SAMPLE"
       # With archive: false a step uploads exactly one file, so one step
       # per package; each pattern matches one (versions start with a digit).
       - uses: actions/upload-artifact@v7
         with:
-          path: dist/oxiguitar_*.deb
+          path: dist/futab_*.deb
           archive: false
           retention-days: 14
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         with:
-          path: dist/oxiguitar-x11_*.deb
+          path: dist/futab-x11_*.deb
           archive: false
           retention-days: 14
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         with:
-          path: dist/oxiguitar-[0-9]*.rpm
+          path: dist/futab-[0-9]*.rpm
           archive: false
           retention-days: 14
           if-no-files-found: error
       - uses: actions/upload-artifact@v7
         with:
-          path: dist/oxiguitar-x11-*.rpm
+          path: dist/futab-x11-*.rpm
           archive: false
           retention-days: 14
           if-no-files-found: error
@@ -284,8 +284,8 @@ jobs:
       - name: No glibc newer than 2.35
         run: |
           scripts/package/check-glibc.sh 2.35 \
-            target/release/oxiguitar target/release/oxiguitar-cli \
-            target/x11/release/oxiguitar
+            target/release/futab target/release/futab-cli \
+            target/x11/release/futab
       - uses: actions/download-artifact@v8
         with:
           name: third-party-licenses
@@ -304,27 +304,27 @@ jobs:
           # Guitar Pro plugin in the user's folder it opens the sample, as
           # the Wayland build in a Wayland session and as the X11 build on an
           # X11 one (AppRun picks).
-          appimage="$(ls dist/OxiGuitar-[0-9]*.AppImage)"
+          appimage="$(ls dist/FuTab-[0-9]*.AppImage)"
           home="$SMOKE_HOME"
           rm -rf "$RUNNER_TEMP/squashfs-root"
           (cd "$RUNNER_TEMP" && "$GITHUB_WORKSPACE/$appimage" --appimage-extract > /dev/null)
           root="$RUNNER_TEMP/squashfs-root"
           test -x "$root/AppRun"
-          test -x "$root/usr/bin/oxiguitar"
-          test -x "$root/usr/bin/oxiguitar-x11"
-          test ! -e "$root/usr/lib/oxiguitar/plugins"
+          test -x "$root/usr/bin/futab"
+          test -x "$root/usr/bin/futab-x11"
+          test ! -e "$root/usr/lib/futab/plugins"
           test -f "$root/usr/share/metainfo/io.github.purpleicon.FuTab.metainfo.xml"
           scripts/package/check-glibc.sh 2.35 "$root"
           # The libraries it brings, found through the programs' RPATH.
-          test -f "$root/usr/lib/oxiguitar/libs/libxkbcommon-x11.so.0"
-          for b in oxiguitar oxiguitar-x11; do
-            readelf -d "$root/usr/bin/$b" | grep -F '(RPATH)' | grep -qF '$ORIGIN/../lib/oxiguitar/libs'
+          test -f "$root/usr/lib/futab/libs/libxkbcommon-x11.so.0"
+          for b in futab futab-x11; do
+            readelf -d "$root/usr/bin/$b" | grep -F '(RPATH)' | grep -qF '$ORIGIN/../lib/futab/libs'
           done
-          OXIGUITAR_HOME="$home" "$root/usr/bin/oxiguitar-cli" info "$SAMPLE" > /dev/null
+          OXIGUITAR_HOME="$home" "$root/usr/bin/futab-cli" info "$SAMPLE" > /dev/null
           # Each build holds only its own display system's code
           # (scripts/check-display-crates.sh checks the crates; this, the files).
-          ! grep -q "libX11.so" "$root/usr/bin/oxiguitar"
-          ! grep -q "libwayland-client.so" "$root/usr/bin/oxiguitar-x11"
+          ! grep -q "libX11.so" "$root/usr/bin/futab"
+          ! grep -q "libwayland-client.so" "$root/usr/bin/futab-x11"
           # Without FUSE on the runner, the runtime unpacks and runs. AppRun
           # starts the Wayland build here (in-wayland.sh sets WAYLAND_DISPLAY)
           # and the X11 one under Xvfb, which sets only DISPLAY.
@@ -336,7 +336,7 @@ jobs:
           ! grep -q "Wayland build" "$RUNNER_TEMP/x11.log"
       - uses: actions/upload-artifact@v7
         with:
-          path: dist/OxiGuitar-[0-9]*.AppImage
+          path: dist/FuTab-[0-9]*.AppImage
           archive: false
           retention-days: 14
           if-no-files-found: error
@@ -354,11 +354,11 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v8
         with:
-          pattern: "OxiGuitar-*-x86_64.AppImage"
+          pattern: "FuTab-*-x86_64.AppImage"
           path: dist
           merge-multiple: true
           skip-decompress: true
-      - run: scripts/package/appimage-catalog-test.sh dist/OxiGuitar-*-x86_64.AppImage
+      - run: scripts/package/appimage-catalog-test.sh dist/FuTab-*-x86_64.AppImage
       - if: always()
         uses: actions/upload-artifact@v7
         with:
@@ -407,7 +407,7 @@ jobs:
           flatpak-builder --user --install-deps-from=flathub --disable-rofiles-fuse --force-clean \
             --state-dir="$RUNNER_TEMP/state" --repo="$RUNNER_TEMP/repo" \
             "$RUNNER_TEMP/build" "scripts/package/$APP.yml"
-          bundle="dist/OxiGuitar-$VERSION-${{ matrix.arch }}.flatpak"
+          bundle="dist/FuTab-$VERSION-${{ matrix.arch }}.flatpak"
           # The bundle names Flathub, where its runtime comes from.
           flatpak build-bundle "$RUNNER_TEMP/repo" "$bundle" "$APP" stable \
             --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo
@@ -438,7 +438,7 @@ jobs:
           ! grep -qE 'host|home' "$RUNNER_TEMP/permissions.txt"
           grep -q 'merge-dirs=plugins' ~/.local/share/flatpak/app/$APP/current/active/metadata
           # Every library both builds need is in the runtime.
-          run --command=sh "$APP" -c 'ldd /app/bin/oxiguitar /app/bin/oxiguitar-x11 /app/bin/oxiguitar-cli' > "$RUNNER_TEMP/ldd.txt"
+          run --command=sh "$APP" -c 'ldd /app/bin/futab /app/bin/futab-x11 /app/bin/futab-cli' > "$RUNNER_TEMP/ldd.txt"
           if grep 'not found' "$RUNNER_TEMP/ldd.txt"; then
             echo "::error::a library the app needs is missing from the runtime"
             exit 1
@@ -447,16 +447,16 @@ jobs:
           run --command=sh "$APP" -c 'test -d /app/lib/oxiguitar && ! ls /app/lib/oxiguitar/plugins/*.oxp 2> /dev/null'
           run --command=sh "$APP" -c 'test -f /app/share/icons/hicolor/512x512/apps/'"$APP"'.png && ! find /app/share/icons -name "*.svg" | grep -q .'
           grep '^Exec=' ~/.local/share/flatpak/exports/share/applications/$APP.desktop
-          grep -q '^Exec=.*--command=oxiguitar-start .*%f' ~/.local/share/flatpak/exports/share/applications/$APP.desktop
+          grep -q '^Exec=.*--command=futab-start .*%f' ~/.local/share/flatpak/exports/share/applications/$APP.desktop
           # The sample opens with the plugin in the Flatpak's own folder.
           # (The sandbox sees only the folder it is given, so the path is whole.)
-          run --filesystem="$PWD/fixtures:ro" --command=oxiguitar-cli "$APP" info "$PWD/$SAMPLE" > /dev/null
-          out="$(run --filesystem="$PWD/fixtures:ro" --command=oxiguitar-cli "$APP" detect "$PWD/$SAMPLE")"
+          run --filesystem="$PWD/fixtures:ro" --command=futab-cli "$APP" info "$PWD/$SAMPLE" > /dev/null
+          out="$(run --filesystem="$PWD/fixtures:ro" --command=futab-cli "$APP" detect "$PWD/$SAMPLE")"
           echo "$out"
           grep -q 'Guitar Pro' <<< "$out"
       - name: Both builds through the launcher
         run: |
-          # In a Wayland session (a headless Weston) oxiguitar-start starts the
+          # In a Wayland session (a headless Weston) futab-start starts the
           # Wayland build; with only an X server, the X11 build. Each opens
           # the sample and quits after three seconds.
           for display in wayland x11; do
@@ -470,7 +470,7 @@ jobs:
             # Which build the launcher started, seen while it runs.
             : > "$RUNNER_TEMP/$display-ps.txt"
             for _ in $(seq 100); do
-              ps -eo args | grep '^[/]app/bin/oxiguitar' > "$RUNNER_TEMP/$display-ps.txt" && break
+              ps -eo args | grep '^[/]app/bin/futab' > "$RUNNER_TEMP/$display-ps.txt" && break
               sleep 0.1
             done
             cat "$RUNNER_TEMP/$display-ps.txt"
@@ -479,14 +479,14 @@ jobs:
             cat "$log"
             [[ $status -eq 0 ]] || { echo "::error::the $display build failed ($status)"; exit 1; }
             if [[ "$display" == wayland ]]; then
-              grep -q '^/app/bin/oxiguitar ' "$RUNNER_TEMP/$display-ps.txt"
+              grep -q '^/app/bin/futab ' "$RUNNER_TEMP/$display-ps.txt"
             else
-              grep -q '^/app/bin/oxiguitar-x11 ' "$RUNNER_TEMP/$display-ps.txt"
+              grep -q '^/app/bin/futab-x11 ' "$RUNNER_TEMP/$display-ps.txt"
             fi
           done
       - uses: actions/upload-artifact@v7
         with:
-          path: dist/OxiGuitar-[0-9]*.flatpak
+          path: dist/FuTab-[0-9]*.flatpak
           archive: false
           retention-days: 14
           if-no-files-found: error
@@ -507,7 +507,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build --release --locked -p oxiguitar-app -p oxiguitar-cli
+      - run: cargo build --release --locked -p futab -p futab-cli
       - uses: actions/download-artifact@v8
         with:
           name: third-party-licenses
@@ -528,11 +528,11 @@ jobs:
         shell: pwsh
         run: |
           # The icon and version information are linked in by build.rs.
-          $info = (Get-Item target/release/oxiguitar.exe).VersionInfo
+          $info = (Get-Item target/release/futab.exe).VersionInfo
           $info | Format-List FileDescription, ProductName, FileVersion, LegalCopyright
-          if ($info.FileDescription -ne 'FuTab') { throw 'oxiguitar.exe has no version information' }
+          if ($info.FileDescription -ne 'FuTab') { throw 'futab.exe has no version information' }
           Add-Type -AssemblyName System.Drawing
-          $icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Resolve-Path target/release/oxiguitar.exe))
+          $icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Resolve-Path target/release/futab.exe))
           $bmp = $icon.ToBitmap()
           # FuTab's icon is a dark navy square (navy below the plectrum's tip,
           # at the bottom centre) with a cyan-to-blue plectrum filling at
@@ -548,19 +548,19 @@ jobs:
           $share = $blue / ($bmp.Width * $bmp.Height)
           "Icon $($bmp.Width)x$($bmp.Height), bottom-centre pixel $c, blue share $share"
           $navy = $c.A -eq 255 -and $c.R -lt 30 -and $c.G -lt 50 -and $c.B -ge 25 -and $c.B -le 90
-          if (-not $navy -or $share -lt 0.05) { throw 'oxiguitar.exe does not carry the FuTab icon' }
+          if (-not $navy -or $share -lt 0.05) { throw 'futab.exe does not carry the FuTab icon' }
           $env:OXIGUITAR_HOME = $env:SMOKE_HOME
-          ./target/release/oxiguitar-cli.exe info $env:SAMPLE | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw 'oxiguitar-cli failed' }
+          ./target/release/futab-cli.exe info $env:SAMPLE | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'futab-cli failed' }
       - name: Package
         shell: pwsh
         run: |
           # The portable programs, no plugin: those have installers of their
           # own (#165), because they must be moved to specific places.
-          $name = "OxiGuitar-$env:VERSION-windows-${{ matrix.arch }}"
+          $name = "FuTab-$env:VERSION-windows-${{ matrix.arch }}"
           $dir = "dist/$name"
           New-Item -ItemType Directory -Force $dir, "$dir/licenses" | Out-Null
-          Copy-Item target/release/oxiguitar.exe, target/release/oxiguitar-cli.exe $dir
+          Copy-Item target/release/futab.exe, target/release/futab-cli.exe $dir
           Copy-Item README.md, CHANGELOG.md, CREDITS.md $dir
           Copy-Item LICENSE "$dir/LICENSE.txt"
           Copy-Item dist/THIRD-PARTY-LICENSES.html "$dir/licenses/"
@@ -574,15 +574,15 @@ jobs:
           # Unzipped anywhere, with a released Guitar Pro plugin in the user
           # folder, it opens the sample.
           $t = "$env:RUNNER_TEMP/zip-test"
-          Expand-Archive "dist/OxiGuitar-$env:VERSION-windows-${{ matrix.arch }}.zip" $t
+          Expand-Archive "dist/FuTab-$env:VERSION-windows-${{ matrix.arch }}.zip" $t
           $core = Get-ChildItem $t -Directory | Select-Object -First 1
           if (Test-Path "$($core.FullName)/plugins") { throw 'the zip holds plugins' }
           $env:OXIGUITAR_HOME = $env:SMOKE_HOME
-          & "$($core.FullName)/oxiguitar-cli.exe" info $env:SAMPLE | Out-Null
+          & "$($core.FullName)/futab-cli.exe" info $env:SAMPLE | Out-Null
           if ($LASTEXITCODE -ne 0) { throw 'the zip opened nothing' }
       - uses: actions/upload-artifact@v7
         with:
-          path: dist/OxiGuitar-[0-9]*-windows-*.zip
+          path: dist/FuTab-[0-9]*-windows-*.zip
           archive: false
           retention-days: 14
           if-no-files-found: error
@@ -601,15 +601,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: |
           for target in aarch64-apple-darwin x86_64-apple-darwin; do
-            cargo build --release --locked -p oxiguitar-app --target "$target"
+            cargo build --release --locked -p futab --target "$target"
           done
           # The command-line tool, for opening the sample below.
-          cargo build --release --locked -p oxiguitar-cli --target aarch64-apple-darwin
+          cargo build --release --locked -p futab-cli --target aarch64-apple-darwin
           mkdir -p dist/macos
-          lipo -create -output dist/macos/oxiguitar \
-            target/aarch64-apple-darwin/release/oxiguitar \
-            target/x86_64-apple-darwin/release/oxiguitar
-          lipo -info dist/macos/oxiguitar
+          lipo -create -output dist/macos/futab \
+            target/aarch64-apple-darwin/release/futab \
+            target/x86_64-apple-darwin/release/futab
+          lipo -info dist/macos/futab
       # The latest release of the Guitar Pro plugins, in an OxiGuitar home of
       # its own, so the sample can be opened (the core holds no plugin).
       - name: A released Guitar Pro plugin for the smoke tests
@@ -629,16 +629,16 @@ jobs:
       - name: Test the .dmg
         run: |
           mount="$(mktemp -d)"
-          hdiutil attach -nobrowse -readonly -mountpoint "$mount" dist/OxiGuitar-*.dmg
-          app="$mount/OxiGuitar.app"
+          hdiutil attach -nobrowse -readonly -mountpoint "$mount" dist/FuTab-*.dmg
+          app="$mount/FuTab.app"
           plutil -p "$app/Contents/Info.plist" | grep -E "CFBundleIdentifier|CFBundleShortVersionString|gp5"
-          lipo -info "$app/Contents/MacOS/oxiguitar" | grep -q "x86_64 arm64"
-          test -f "$app/Contents/Resources/OxiGuitar.icns"
+          lipo -info "$app/Contents/MacOS/futab" | grep -q "x86_64 arm64"
+          test -f "$app/Contents/Resources/FuTab.icns"
           codesign --verify --verbose "$app"
           # The app holds no plugin. The command-line tool opens the sample
           # through a released Guitar Pro plugin in an OxiGuitar home.
           test ! -e "$app/Contents/PlugIns"
-          OXIGUITAR_HOME="$SMOKE_HOME" target/aarch64-apple-darwin/release/oxiguitar-cli info "$SAMPLE" > /dev/null
+          OXIGUITAR_HOME="$SMOKE_HOME" target/aarch64-apple-darwin/release/futab-cli info "$SAMPLE" > /dev/null
           hdiutil detach "$mount"
       - uses: actions/upload-artifact@v7
         with:
@@ -692,20 +692,20 @@ jobs:
               exit 1
             fi
           }
-          expect 2 'oxiguitar_*.deb' 'Wayland core .deb'
-          expect 2 'oxiguitar-x11_*.deb' 'X11 core .deb'
-          expect 2 'oxiguitar-[0-9]*.rpm' 'Wayland core .rpm'
-          expect 2 'oxiguitar-x11-*.rpm' 'X11 core .rpm'
-          expect 2 'OxiGuitar-[0-9]*.AppImage' 'AppImage'
-          expect 0 'OxiGuitar-x11-*.AppImage' 'X11 AppImage (the AppImage holds both builds)'
-          expect 2 'OxiGuitar-[0-9]*.flatpak' 'Flatpak bundle'
-          expect 2 'OxiGuitar-[0-9]*-windows-*.zip' 'Windows zip'
+          expect 2 'futab_*.deb' 'Wayland core .deb'
+          expect 2 'futab-x11_*.deb' 'X11 core .deb'
+          expect 2 'futab-[0-9]*.rpm' 'Wayland core .rpm'
+          expect 2 'futab-x11-*.rpm' 'X11 core .rpm'
+          expect 2 'FuTab-[0-9]*.AppImage' 'AppImage'
+          expect 0 'FuTab-x11-*.AppImage' 'X11 AppImage (the AppImage holds both builds)'
+          expect 2 'FuTab-[0-9]*.flatpak' 'Flatpak bundle'
+          expect 2 'FuTab-[0-9]*-windows-*.zip' 'Windows zip'
           expect 1 '*.dmg' '.dmg'
           expect 0 '*.oxp' 'plugin on its own'
           expect 15 '*' 'files in all'
-          for f in dist/OxiGuitar-[0-9]*-windows-*.zip; do
+          for f in dist/FuTab-[0-9]*-windows-*.zip; do
             unzip -tq "$f" > /dev/null || { echo "::error::$f is not a valid zip" >&2; exit 1; }
-            unzip -l "$f" | grep -q 'oxiguitar.exe' || { echo "::error::$f has no oxiguitar.exe" >&2; exit 1; }
+            unzip -l "$f" | grep -q 'futab.exe' || { echo "::error::$f has no futab.exe" >&2; exit 1; }
             ! unzip -l "$f" | grep -qE '\.oxp$' || { echo "::error::$f holds a plugin" >&2; exit 1; }
           done
       - name: Checksums
@@ -737,5 +737,5 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" dist/* \
             --draft --verify-tag \
-            --title "OxiGuitar $VERSION" \
+            --title "FuTab $VERSION" \
             --notes-file notes.md

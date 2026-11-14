@@ -107,10 +107,10 @@ fn version_info(info: &VersionInfo<'_>) -> Vec<u8> {
         push32(&mut fixed, v);
     }
     let strings = [
-        ("CompanyName", "The OxiGuitar contributors"),
+        ("CompanyName", "The FuTab contributors"),
         ("FileDescription", info.description),
         ("FileVersion", &info.version_text),
-        ("InternalName", "oxiguitar"),
+        ("InternalName", "futab"),
         ("LegalCopyright", info.copyright),
         ("OriginalFilename", info.original_filename),
         ("ProductName", info.product),

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-//! `oxiguitar-cli events FILE`: the score as it plays (M4's timeline): the
+//! `futab-cli events FILE`: the score as it plays (M4's timeline): the
 //! bars in playing order with their times, every note with its start, end,
 //! velocity and effects, and the metronome's clicks, as the golden files
 //! in `fixtures/events/` hold them.

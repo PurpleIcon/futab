@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-//! `oxiguitar-cli`: inspect, convert and test score files without a window.
+//! `futab-cli`: inspect, convert and test score files without a window.
 //! Files are read by the format plugins installed for the app.
 
 mod convert;
@@ -17,7 +17,7 @@ mod tools;
 use std::process::ExitCode;
 
 const USAGE: &str = "\
-Usage: oxiguitar-cli <command> [options]
+Usage: futab-cli <command> [options]
 
 Commands:
   info [--bars] <file>...    Print the structure of each file: format, header,
@@ -97,7 +97,7 @@ fn main() -> ExitCode {
         Some("export") => export::run(rest),
         Some("tools") => tools::list(),
         Some("version" | "--version" | "-V") => {
-            println!("oxiguitar-cli {}", env!("CARGO_PKG_VERSION"));
+            println!("futab-cli {}", env!("CARGO_PKG_VERSION"));
             ExitCode::SUCCESS
         }
         Some("help" | "--help" | "-h") | None => {
@@ -109,6 +109,6 @@ fn main() -> ExitCode {
 }
 
 pub(crate) fn usage_error(msg: &str) -> ExitCode {
-    eprintln!("oxiguitar-cli: {msg}\n\n{USAGE}");
+    eprintln!("futab-cli: {msg}\n\n{USAGE}");
     ExitCode::from(2)
 }

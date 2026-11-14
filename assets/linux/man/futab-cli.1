@@ -1,21 +1,21 @@
 .\" SPDX-License-Identifier: GPL-3.0-or-later
 .\" Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
-.TH OXIGUITAR-CLI 1 "October 2026" "OxiGuitar" "User Commands"
+.TH FUTAB-CLI 1 "November 2026" "FuTab" "User Commands"
 .SH NAME
-oxiguitar\-cli \- print, convert and engrave guitar tablature files
+futab\-cli \- print, convert and engrave guitar tablature files
 .SH SYNOPSIS
-.B oxiguitar\-cli info
+.B futab\-cli info
 .RB [ \-\-bars ]
 .IR file ...
 .br
-.B oxiguitar\-cli detect
+.B futab\-cli detect
 .IR file ...
 .br
-.B oxiguitar\-cli convert
+.B futab\-cli convert
 .I file
 .I new\-file
 .br
-.B oxiguitar\-cli render
+.B futab\-cli render
 .I file
 .RB [ \-\-png
 .IR prefix ]
@@ -23,14 +23,14 @@ oxiguitar\-cli \- print, convert and engrave guitar tablature files
 .IR file ]
 .RI [ options ]
 .br
-.BI "oxiguitar\-cli events " file
+.BI "futab\-cli events " file
 .br
-.BI "oxiguitar\-cli play " file
+.BI "futab\-cli play " file
 .RI [ options ]
 .br
-.B oxiguitar\-cli tools
+.B futab\-cli tools
 .br
-.B oxiguitar\-cli specimen
+.B futab\-cli specimen
 .RB [ \-\-png
 .IR file ]
 .RB [ \-\-pdf
@@ -39,21 +39,26 @@ oxiguitar\-cli \- print, convert and engrave guitar tablature files
 .IR n ]
 .RB [ \-\-dark ]
 .br
-.B oxiguitar\-cli version
+.B futab\-cli version
 .br
-.B oxiguitar\-cli help
+.B futab\-cli help
 .SH DESCRIPTION
-.B oxiguitar\-cli
+.B futab\-cli
 is the command\-line companion of
-.BR oxiguitar (1).
+.BR futab (1).
 It reads and writes files through the same format plugins, from the same plugin folders
 (see
-.BR oxiguitar (1)),
+.BR futab (1)),
 and never creates or changes anything there.
-The package
-.B oxiguitar\-plugins\-basic
-holds the plugins for Guitar Pro files, versions 3 to 8, the SoundFont
-player, and those that play sound through PipeWire and ALSA.
+The plugins are OxiGuitar's, from its packages: among them
+.B oxiguitar\-guitarpro
+for Guitar Pro files, versions 3 to 8,
+.B oxiguitar\-midi
+for the SoundFont player, and
+.B oxiguitar\-pipewire
+and
+.B oxiguitar\-alsa
+to play sound.
 .SH COMMANDS
 .TP
 .BR info " [" \-\-bars "] \fIfile\fR..."
@@ -101,7 +106,7 @@ takes a few seconds.
 .TP
 .B tools
 List the tools, as in the Tools menu of
-.BR oxiguitar (1).
+.BR futab (1).
 .TP
 .B specimen
 Draw the renderer's test page into a PNG and/or a PDF.
@@ -195,26 +200,26 @@ written), 1 if any could not be, 2 on bad usage.
 .SH ENVIRONMENT
 .BR XDG_CONFIG_HOME ", " XDG_DATA_HOME " and " OXIGUITAR_HOME
 choose the settings and the plugin folder, as for
-.BR oxiguitar (1).
+.BR futab (1).
 .SH EXAMPLES
 .TP
-.B oxiguitar\-cli info song.gp5
+.B futab\-cli info song.gp5
 Print the structure of song.gp5.
 .TP
-.B oxiguitar\-cli convert song.gp5 song.gp
+.B futab\-cli convert song.gp5 song.gp
 Write song.gp5 as a Guitar Pro 7 file, song.gp.
 .TP
-.B oxiguitar\-cli render song.gp \-\-pdf song.pdf \-\-tracks all
+.B futab\-cli render song.gp \-\-pdf song.pdf \-\-tracks all
 Engrave every track of song.gp into a PDF.
 .TP
-.B oxiguitar\-cli play song.gp \-\-loop 5\-8 \-\-speed 75 \-\-count\-in
+.B futab\-cli play song.gp \-\-loop 5\-8 \-\-speed 75 \-\-count\-in
 Practise bars 5 to 8 at three\-quarter speed, after a bar of count\-in.
 .TP
-.B oxiguitar\-cli play song.gp \-\-wav song.wav
+.B futab\-cli play song.gp \-\-wav song.wav
 Play song.gp into song.wav.
 .SH BUGS
 Report bugs at
-.UR https://github.com/mateusrdp/oxiguitar/issues
+.UR https://github.com/PurpleIcon/futab/issues
 .UE .
 .SH SEE ALSO
-.BR oxiguitar (1)
+.BR futab (1)

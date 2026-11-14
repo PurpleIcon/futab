@@ -1,12 +1,13 @@
-# The OxiGuitar Flatpak (#163, docs/design/flatpak.md), built by the release
+# The FuTab Flatpak (OxiGuitar's #163, docs/design/flatpak.md), built by the release
 # workflow (.github/workflows/release.yml, job "Flatpak") into a single-file
-# bundle per processor, OxiGuitar-VERSION-ARCH.flatpak. oxiguitar-packages'
-# Site workflow imports the bundles of published releases into our Flatpak
-# repository.
+# bundle per processor, FuTab-VERSION-ARCH.flatpak. (FuTab has no Flatpak
+# repository yet; OxiGuitar's oxiguitar-packages imports its own bundles
+# into its repository.)
 #
-# It holds no plugin: each plugin is a package of its own, an extension of
-# this one (io.github.mateusrdp.OxiGuitar.Plugin.NAME, made by
-# oxiguitar-packages' plugin-release.yml), and the sandbox is Flatpak's
+# It holds no plugin: each plugin is a package of its own, OxiGuitar's
+# Flatpak extension (io.github.mateusrdp.OxiGuitar.Plugin.NAME, made by
+# oxiguitar-packages' plugin-release.yml); FuTab keeps OxiGuitar's extension
+# point so they work here too, and the sandbox is Flatpak's
 # default: no access to the user's files (scores come through the desktop
 # portal) or to the system's.
 id: io.github.purpleicon.FuTab
@@ -15,12 +16,12 @@ runtime: org.freedesktop.Platform
 runtime-version: "26.08"
 sdk: org.freedesktop.Sdk
 # Starts the Wayland or the X11 build, as the AppImage's AppRun does.
-command: oxiguitar-start
+command: futab-start
 # English only: no translations to split off.
 separate-locales: false
 finish-args:
   # Both builds, as in the AppImage: Wayland where the session has it, X11
-  # only where it doesn't (fallback-x11), chosen by oxiguitar-start.
+  # only where it doesn't (fallback-x11), chosen by futab-start.
   - --socket=wayland
   - --socket=fallback-x11
   - --share=ipc
@@ -34,8 +35,8 @@ add-extensions:
   # Each plugin is an extension, io.github.mateusrdp.OxiGuitar.Plugin.NAME,
   # mounted at /app/lib/oxiguitar/NAME with its .oxp files in plugins/.
   # Flatpak links every installed extension's plugins/ folder into
-  # /app/lib/oxiguitar/plugins, the system plugin folder OxiGuitar derives
-  # from /app/bin/oxiguitar (oxiguitar-host's folders.rs), so the core needs
+  # /app/lib/oxiguitar/plugins, the OxiGuitar plugin folder FuTab derives
+  # from /app/bin/futab (oxiguitar-host's folders.rs), so the core needs
   # no Flatpak code. No plugin comes with the app on its own.
   io.github.mateusrdp.OxiGuitar.Plugin:
     directory: lib/oxiguitar
@@ -44,7 +45,7 @@ add-extensions:
     no-autodownload: true
     autodelete: true
 modules:
-  - name: oxiguitar
+  - name: futab
     buildsystem: simple
     build-options:
       # Our own repository, not Flathub: the build may reach the network
@@ -52,24 +53,24 @@ modules:
       build-args:
         - --share=network
       env:
-        CARGO_HOME: /run/build/oxiguitar/.cargo-home
-        RUSTUP_HOME: /run/build/oxiguitar/.rustup-home
+        CARGO_HOME: /run/build/futab/.cargo-home
+        RUSTUP_HOME: /run/build/futab/.rustup-home
         CARGO_TERM_COLOR: always
     build-commands:
       # Rust as Cargo.toml's rust-version asks.
       - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.99 --no-modify-path
-      - .cargo-home/bin/cargo build --release --locked -p oxiguitar-app -p oxiguitar-cli
-      - .cargo-home/bin/cargo build --release --locked -p oxiguitar-app --no-default-features --features x11 --target-dir target/x11
-      - install -Dm755 target/release/oxiguitar /app/bin/oxiguitar
-      - install -Dm755 target/x11/release/oxiguitar /app/bin/oxiguitar-x11
-      - install -Dm755 scripts/package/oxiguitar-start /app/bin/oxiguitar-start
-      - install -Dm755 target/release/oxiguitar-cli /app/bin/oxiguitar-cli
+      - .cargo-home/bin/cargo build --release --locked -p futab -p futab-cli
+      - .cargo-home/bin/cargo build --release --locked -p futab --no-default-features --features x11 --target-dir target/x11
+      - install -Dm755 target/release/futab /app/bin/futab
+      - install -Dm755 target/x11/release/futab /app/bin/futab-x11
+      - install -Dm755 scripts/package/futab-start /app/bin/futab-start
+      - install -Dm755 target/release/futab-cli /app/bin/futab-cli
       # The extension point's folder (Flatpak mounts the plugins under it).
       - install -d /app/lib/oxiguitar
       # The menu entry starts the launcher: Flatpak runs the command its Exec
       # line names, which would otherwise always be the Wayland build.
-      - sed 's/^Exec=oxiguitar /Exec=oxiguitar-start /' assets/linux/io.github.purpleicon.FuTab.desktop > io.github.purpleicon.FuTab.desktop
-      - grep -qx 'Exec=oxiguitar-start %f' io.github.purpleicon.FuTab.desktop
+      - sed 's/^Exec=futab /Exec=futab-start /' assets/linux/io.github.purpleicon.FuTab.desktop > io.github.purpleicon.FuTab.desktop
+      - grep -qx 'Exec=futab-start %f' io.github.purpleicon.FuTab.desktop
       - install -Dm644 io.github.purpleicon.FuTab.desktop /app/share/applications/io.github.purpleicon.FuTab.desktop
       - install -Dm644 assets/linux/io.github.purpleicon.FuTab.xml /app/share/mime/packages/io.github.purpleicon.FuTab.xml
       - install -Dm644 assets/linux/io.github.purpleicon.FuTab.metainfo.xml /app/share/metainfo/io.github.purpleicon.FuTab.metainfo.xml

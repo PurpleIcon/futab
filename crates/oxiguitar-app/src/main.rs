@@ -22,14 +22,14 @@
 //! `--safe-mode` starts with no plugins at all; Help → About lists the
 //! plugin folders.
 //!
-//! Usage: `oxiguitar [--safe-mode] [FILE]`. Nothing here touches the
+//! Usage: `futab [--safe-mode] [FILE]`. Nothing here touches the
 //! network.
 
 #![windows_subsystem = "windows"]
 
 // The windowing backend comes from one of these features (Cargo.toml).
 #[cfg(not(any(feature = "wayland", feature = "x11")))]
-compile_error!("build oxiguitar-app with the `wayland` feature (the default) or `x11`");
+compile_error!("build futab with the `wayland` feature (the default) or `x11`");
 
 mod advice;
 mod audio_export;
@@ -461,10 +461,10 @@ fn wrong_build_hint(display: &str) -> Option<&'static str> {
     }
     match display {
         "wayland" => Some(
-            "This is FuTab's Wayland build, and it found no Wayland session (is WAYLAND_DISPLAY set?). On an X11 desktop, install the X11 build instead (the package oxiguitar-x11), or use the AppImage, which holds both builds.",
+            "This is FuTab's Wayland build, and it found no Wayland session (is WAYLAND_DISPLAY set?). On an X11 desktop, install the X11 build instead (the package futab-x11), or use the AppImage, which holds both builds.",
         ),
         "x11" => Some(
-            "This is FuTab's X11 build, and it found no X server (is DISPLAY set?). On a Wayland desktop, install the Wayland build instead (the package oxiguitar), or use the AppImage, which holds both builds.",
+            "This is FuTab's X11 build, and it found no X server (is DISPLAY set?). On a Wayland desktop, install the Wayland build instead (the package futab), or use the AppImage, which holds both builds.",
         ),
         _ => None,
     }
@@ -2096,7 +2096,7 @@ fn install_plugin_tab_callbacks(ui: &AppWindow, app: &Shared) {
     ui.on_plugin_canvas_room(move |area, id, w, h| canvas_room(&a, area, &id, w, h));
 }
 
-/// The command line: `oxiguitar [--safe-mode] [FILE]`.
+/// The command line: `futab [--safe-mode] [FILE]`.
 #[derive(Debug, Default, PartialEq, Eq)]
 struct Args {
     /// Start with no plugins at all.
@@ -2884,7 +2884,7 @@ fn measure_palette() {
             });
         });
     if let Err(e) = spawned {
-        eprintln!("oxiguitar: the palette's icons can't be drawn: {e}");
+        eprintln!("futab: the palette's icons can't be drawn: {e}");
     }
 }
 
@@ -4926,7 +4926,7 @@ fn no_dialogs() -> Option<String> {
     }
     Some(
         "No file dialog: this session has no D-Bus for the desktop portal. \
-         Start FuTab with a file instead: oxiguitar FILE"
+         Start FuTab with a file instead: futab FILE"
             .to_owned(),
     )
 }

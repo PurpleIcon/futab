@@ -3,7 +3,7 @@
 # Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 #
 # Runs a command as a client of a private, headless Weston (software
-# rendering, nothing on screen): for testing the Wayland build of OxiGuitar
+# rendering, nothing on screen): for testing the Wayland build of FuTab
 # where no desktop runs, as xvfb-run does for the X11 build. Needs weston
 # (Debian/Ubuntu/Fedora: the package weston).
 #

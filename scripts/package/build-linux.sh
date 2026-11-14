@@ -15,8 +15,8 @@
 #
 #   docker run --rm -v "$PWD:/w" -w /w ubuntu:22.04 scripts/package/build-linux.sh
 #
-# Writes: target/release/oxiguitar (the Wayland build), oxiguitar-cli,
-#         target/x11/release/oxiguitar (the X11 build) and
+# Writes: target/release/futab (the Wayland build), futab-cli,
+#         target/x11/release/futab (the X11 build) and
 #         target/appimage-libs/: the
 #         libraries the programs load that an AppImage must bring, with
 #         their copyright files (see below),
@@ -45,13 +45,13 @@ ldd --version | sed -n 1p
 
 export CARGO_TERM_COLOR=always CARGO_INCREMENTAL=0
 # The programs find the libraries the AppImage brings beside them, in
-# usr/lib/oxiguitar/libs, through an RPATH: unlike a RUNPATH, it also
+# usr/lib/futab/libs, through an RPATH: unlike a RUNPATH, it also
 # serves those libraries' own dependencies (libxkbcommon-x11 needs
 # libxcb-xkb), and unlike LD_LIBRARY_PATH it reaches no other program
-# OxiGuitar starts (the browser, for a link).
-export RUSTFLAGS='-C link-arg=-Wl,--disable-new-dtags,-rpath,$ORIGIN/../lib/oxiguitar/libs'
-cargo build --release --locked -p oxiguitar-app -p oxiguitar-cli
-cargo build --release --locked -p oxiguitar-app --no-default-features --features x11 --target-dir target/x11
+# FuTab starts (the browser, for a link).
+export RUSTFLAGS='-C link-arg=-Wl,--disable-new-dtags,-rpath,$ORIGIN/../lib/futab/libs'
+cargo build --release --locked -p futab -p futab-cli
+cargo build --release --locked -p futab --no-default-features --features x11 --target-dir target/x11
 unset RUSTFLAGS
 
 # Libraries the programs load at run time that aren't on every system and

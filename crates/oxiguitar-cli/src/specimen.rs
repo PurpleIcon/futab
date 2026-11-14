@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-//! `oxiguitar-cli specimen`: the render spike's test page as PNG and PDF.
+//! `futab-cli specimen`: the render spike's test page as PNG and PDF.
 
 use std::process::ExitCode;
 use std::time::Instant;
@@ -35,7 +35,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
     let meta = match Metadata::bravura() {
         Ok(m) => m,
         Err(e) => {
-            eprintln!("oxiguitar-cli: Bravura metadata: {e}");
+            eprintln!("futab-cli: Bravura metadata: {e}");
             return ExitCode::FAILURE;
         }
     };
@@ -52,7 +52,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
         let view = View::page(&page, scale);
         let started = Instant::now();
         let Some(pixmap) = raster.render(&page, &fonts, &theme, &view) else {
-            eprintln!("oxiguitar-cli: empty image");
+            eprintln!("futab-cli: empty image");
             return ExitCode::FAILURE;
         };
         let cold = ms(started);
@@ -68,13 +68,13 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
         match pixmap.encode_png() {
             Ok(bytes) => {
                 if let Err(e) = std::fs::write(&path, bytes) {
-                    eprintln!("oxiguitar-cli: {path}: {e}");
+                    eprintln!("futab-cli: {path}: {e}");
                     return ExitCode::FAILURE;
                 }
                 println!("wrote {path}");
             }
             Err(e) => {
-                eprintln!("oxiguitar-cli: PNG encoding failed: {e}");
+                eprintln!("futab-cli: PNG encoding failed: {e}");
                 return ExitCode::FAILURE;
             }
         }
@@ -86,13 +86,13 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
             Ok(bytes) => {
                 println!("pdf: {} bytes in {:.1} ms", bytes.len(), ms(started));
                 if let Err(e) = std::fs::write(&path, bytes) {
-                    eprintln!("oxiguitar-cli: {path}: {e}");
+                    eprintln!("futab-cli: {path}: {e}");
                     return ExitCode::FAILURE;
                 }
                 println!("wrote {path}");
             }
             Err(e) => {
-                eprintln!("oxiguitar-cli: {e}");
+                eprintln!("futab-cli: {e}");
                 return ExitCode::FAILURE;
             }
         }

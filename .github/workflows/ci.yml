@@ -63,7 +63,7 @@ jobs:
       - name: Clippy, the X11 build
         run: |
           set -o pipefail
-          cargo clippy -p oxiguitar-app --no-default-features --features x11 --all-targets --locked \
+          cargo clippy -p futab --no-default-features --features x11 --all-targets --locked \
             --message-format=short -- -D warnings 2>&1 \
             | sed -E 's/^([^ :]+):([0-9]+):([0-9]+): (error|warning)(\[[^]]*\])?: (.*)$/::error file=\1,line=\2,col=\3::\6\n&/'
       - name: The two Linux builds keep apart
@@ -170,7 +170,7 @@ jobs:
   # the template (docs/plugins/). A copy of docs/plugins/template/ outside
   # the repository, built against this checkout's SDK: fmt, clippy, its
   # tests and the contract suite (cargo test and oxiguitar-plugin-test), then
-  # oxiguitar-cli opens the template's sample through the plugin file. On
+  # futab-cli opens the template's sample through the plugin file. On
   # each of the three systems, as the guide's "Building for every system".
   template:
     name: Plugin template (${{ matrix.name }})
@@ -242,7 +242,7 @@ jobs:
           CARGO_TERM_COLOR: never
         run: |
           set +e
-          cargo test --release --locked -p oxiguitar-app speed -- --nocapture 2>&1 | tee speed.log
+          cargo test --release --locked -p futab speed -- --nocapture 2>&1 | tee speed.log
           status=${PIPESTATUS[0]}
           cargo test --release --locked -p oxiguitar-plugin-test --features released --test contract speed_budget -- --nocapture 2>&1 | tee -a speed.log
           [ "${PIPESTATUS[0]}" -eq 0 ] || status=1
@@ -277,10 +277,10 @@ jobs:
       # Both Linux builds of the app: the X11 one in a target folder of its
       # own, then copied beside the Wayland one so both find the plugins in
       # target/lib/futab/plugins/ (released ones, below).
-      - run: cargo build -p oxiguitar-app --no-default-features --features x11 --locked --target-dir target/x11
-      - run: cargo test -p oxiguitar-app --no-default-features --features x11 --locked --target-dir target/x11 display_system
+      - run: cargo build -p futab --no-default-features --features x11 --locked --target-dir target/x11
+      - run: cargo test -p futab --no-default-features --features x11 --locked --target-dir target/x11 display_system
       - run: cargo build --workspace --locked
-      - run: cp target/x11/debug/oxiguitar target/debug/oxiguitar-x11
+      - run: cp target/x11/debug/futab target/debug/futab-x11
       # The released Guitar Pro plugins, where the programs look for them
       # (target/lib/futab/plugins/), so the session reads every fixture
       # through them. Fetched before the session, which then runs without
@@ -292,7 +292,7 @@ jobs:
           mkdir -p target/lib/futab/plugins
           cp "$RUNNER_TEMP/released/files/"*.oxp target/lib/futab/plugins/
       # The Wayland build in a headless Weston, the X11 build under Xvfb.
-      - run: scripts/no-network.sh target/debug/oxiguitar-cli --wayland target/debug/oxiguitar --x11 target/debug/oxiguitar-x11
+      - run: scripts/no-network.sh target/debug/futab-cli --wayland target/debug/futab --x11 target/debug/futab-x11
 
   dco:
     name: Sign-off (DCO)

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 #
-# oxiguitar (the Wayland build), built offline. The plugins have repositories
+# futab (the Wayland build), built offline. The plugins have repositories
 # and packages of their own (#165).
 # The crates come from vendor/, the orig-vendor component
 # (scripts/debian/source.sh), until Debian packages them all
@@ -19,7 +19,7 @@ export DEB_HOST_RUST_TYPE DEB_HOST_GNU_TYPE
 # dh-cargo's wrapper (/usr/share/cargo/bin/cargo) gives cargo Debian's
 # flags once prepare-debian has written debian/cargo_home/config.
 export CARGO_HOME = $(CURDIR)/debian/cargo_home
-export DEB_CARGO_CRATE = oxiguitar_$(DEB_VERSION_UPSTREAM)
+export DEB_CARGO_CRATE = futab_$(DEB_VERSION_UPSTREAM)
 # Upstream strips its release builds; dh_strip makes the -dbgsym
 # packages, so it gets them whole.
 export CARGO_PROFILE_RELEASE_STRIP = false
@@ -43,38 +43,38 @@ override_dh_auto_configure:
 	$(CARGO) prepare-debian vendor
 
 override_dh_auto_build:
-	$(CARGO) build --release -p oxiguitar-app -p oxiguitar-cli
+	$(CARGO) build --release -p futab -p futab-cli
 
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS) $(DEB_BUILD_PROFILES)))
 	# The programs start. Opening a file takes a plugin, which this source
 	# package does not build.
-	$(release)/oxiguitar-cli --version
+	$(release)/futab-cli --version
 endif
 
 override_dh_auto_install:
-	install -Dm755 $(release)/oxiguitar debian/oxiguitar/usr/bin/oxiguitar
-	install -Dm755 $(release)/oxiguitar-cli debian/oxiguitar/usr/bin/oxiguitar-cli
+	install -Dm755 $(release)/futab debian/futab/usr/bin/futab
+	install -Dm755 $(release)/futab-cli debian/futab/usr/bin/futab-cli
 	set -e; for s in 16 24 32 48 64 128 256 512; do \
 		install -Dm644 assets/icon/png/futab-$$s.png \
-			debian/oxiguitar/usr/share/icons/hicolor/$${s}x$${s}/apps/$(app_id).png; \
+			debian/futab/usr/share/icons/hicolor/$${s}x$${s}/apps/$(app_id).png; \
 	done
 	install -Dm644 assets/icon/futab.svg \
-		debian/oxiguitar/usr/share/icons/hicolor/scalable/apps/$(app_id).svg
-	install -Dm644 assets/linux/$(app_id).desktop debian/oxiguitar/usr/share/applications/$(app_id).desktop
-	install -Dm644 assets/linux/$(app_id).xml debian/oxiguitar/usr/share/mime/packages/$(app_id).xml
-	install -Dm644 assets/linux/$(app_id).metainfo.xml debian/oxiguitar/usr/share/metainfo/$(app_id).metainfo.xml
+		debian/futab/usr/share/icons/hicolor/scalable/apps/$(app_id).svg
+	install -Dm644 assets/linux/$(app_id).desktop debian/futab/usr/share/applications/$(app_id).desktop
+	install -Dm644 assets/linux/$(app_id).xml debian/futab/usr/share/mime/packages/$(app_id).xml
+	install -Dm644 assets/linux/$(app_id).metainfo.xml debian/futab/usr/share/metainfo/$(app_id).metainfo.xml
 	# The NOTICE files of the vendored crates, as the Apache licence asks.
-	install -d debian/oxiguitar/usr/share/doc/oxiguitar
+	install -d debian/futab/usr/share/doc/futab
 	set -e; for f in vendor/*/NOTICE; do \
 		printf '%s\n\n' "== $$(basename $$(dirname $$f)) =="; cat $$f; printf '\n'; \
-	done > debian/oxiguitar/usr/share/doc/oxiguitar/NOTICE
+	done > debian/futab/usr/share/doc/futab/NOTICE
 
 override_dh_installchangelogs:
 	dh_installchangelogs CHANGELOG.md
 
 override_dh_gencontrol:
-	dh_gencontrol -- -Voxiguitar:Built-Using="$$(dpkg-query -f '$${source:Package} (= $${source:Version})' -W fonts-noto-core)"
+	dh_gencontrol -- -Vfutab:Built-Using="$$(dpkg-query -f '$${source:Package} (= $${source:Version})' -W fonts-noto-core)"
 
 override_dh_auto_clean:
 	rm -rf debian/cargo_home target
