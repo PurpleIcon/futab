@@ -150,9 +150,9 @@ jobs:
             test ! -e /usr/lib/oxiguitar/plugins
             oxiguitar-cli info "$0" > /dev/null
             grep -q "application/x-gtp:\*\.gp$" /usr/share/mime/globs2
-            grep -q "application/x-gtp=io.github.mateusrdp.OxiGuitar.desktop" /usr/share/applications/mimeinfo.cache
-            desktop-file-validate /usr/share/applications/io.github.mateusrdp.OxiGuitar.desktop
-            appstreamcli validate --no-net /usr/share/metainfo/io.github.mateusrdp.OxiGuitar.metainfo.xml
+            grep -q "application/x-gtp=io.github.purpleicon.FuTab.desktop" /usr/share/applications/mimeinfo.cache
+            desktop-file-validate /usr/share/applications/io.github.purpleicon.FuTab.desktop
+            appstreamcli validate --no-net /usr/share/metainfo/io.github.purpleicon.FuTab.metainfo.xml
             OXIGUITAR_EXIT_AFTER_MS=3000 scripts/package/in-wayland.sh oxiguitar "$0"
             # The X11 build takes its place.
             DEBIAN_FRONTEND=noninteractive apt-get install -y ./dist/oxiguitar-x11_*.deb
@@ -313,7 +313,7 @@ jobs:
           test -x "$root/usr/bin/oxiguitar"
           test -x "$root/usr/bin/oxiguitar-x11"
           test ! -e "$root/usr/lib/oxiguitar/plugins"
-          test -f "$root/usr/share/metainfo/io.github.mateusrdp.OxiGuitar.metainfo.xml"
+          test -f "$root/usr/share/metainfo/io.github.purpleicon.FuTab.metainfo.xml"
           scripts/package/check-glibc.sh 2.35 "$root"
           # The libraries it brings, found through the programs' RPATH.
           test -f "$root/usr/lib/oxiguitar/libs/libxkbcommon-x11.so.0"
@@ -370,7 +370,7 @@ jobs:
   flatpak:
     name: Flatpak (${{ matrix.arch }})
     # The app as a Flatpak bundle (#163, docs/design/flatpak.md), built from
-    # source in the Freedesktop SDK (scripts/package/io.github.mateusrdp.OxiGuitar.yml)
+    # source in the Freedesktop SDK (scripts/package/io.github.purpleicon.FuTab.yml)
     # with the runtime from Flathub, then installed and run in its sandbox.
     # oxiguitar-packages' Site workflow imports the bundles of published
     # releases into our Flatpak repository; its plugins are extensions made
@@ -386,7 +386,7 @@ jobs:
           - { arch: aarch64, os: ubuntu-24.04-arm }
     env:
       VERSION: ${{ needs.meta.outputs.version }}
-      APP: io.github.mateusrdp.OxiGuitar
+      APP: io.github.purpleicon.FuTab
     steps:
       - uses: actions/checkout@v5
       - name: Flatpak tools
@@ -422,7 +422,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           scripts/released-plugins.sh "$RUNNER_TEMP/released" guitarpro
-          plugins="$HOME/.var/app/$APP/data/oxiguitar/plugins"
+          plugins="$HOME/.var/app/$APP/data/futab/plugins"
           mkdir -p "$plugins"
           cp "$RUNNER_TEMP/released/files/"*.oxp "$plugins/"
       - name: Test the bundle
@@ -530,14 +530,25 @@ jobs:
           # The icon and version information are linked in by build.rs.
           $info = (Get-Item target/release/oxiguitar.exe).VersionInfo
           $info | Format-List FileDescription, ProductName, FileVersion, LegalCopyright
-          if ($info.FileDescription -ne 'OxiGuitar') { throw 'oxiguitar.exe has no version information' }
+          if ($info.FileDescription -ne 'FuTab') { throw 'oxiguitar.exe has no version information' }
           Add-Type -AssemblyName System.Drawing
           $icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Resolve-Path target/release/oxiguitar.exe))
           $bmp = $icon.ToBitmap()
-          $c = $bmp.GetPixel([int]($bmp.Width / 2), [int]($bmp.Height / 2))
-          "Icon $($bmp.Width)x$($bmp.Height), centre pixel $c"
-          # The pick is green: the default program icon has no green centre.
-          if ($c.G -le $c.R -or $c.G -le $c.B) { throw 'oxiguitar.exe does not carry the OxiGuitar icon' }
+          # FuTab's icon is a dark navy square (navy below the plectrum's tip,
+          # at the bottom centre) with a cyan-to-blue plectrum filling at
+          # least 5% of it; the default program icon has neither.
+          $c = $bmp.GetPixel([int]($bmp.Width / 2), [int]($bmp.Height * 0.93))
+          $blue = 0
+          for ($y = 0; $y -lt $bmp.Height; $y++) {
+            for ($x = 0; $x -lt $bmp.Width; $x++) {
+              $p = $bmp.GetPixel($x, $y)
+              if ($p.A -gt 200 -and $p.B -gt 200 -and $p.R -lt 140) { $blue++ }
+            }
+          }
+          $share = $blue / ($bmp.Width * $bmp.Height)
+          "Icon $($bmp.Width)x$($bmp.Height), bottom-centre pixel $c, blue share $share"
+          $navy = $c.A -eq 255 -and $c.R -lt 30 -and $c.G -lt 50 -and $c.B -ge 25 -and $c.B -le 90
+          if (-not $navy -or $share -lt 0.05) { throw 'oxiguitar.exe does not carry the FuTab icon' }
           $env:OXIGUITAR_HOME = $env:SMOKE_HOME
           ./target/release/oxiguitar-cli.exe info $env:SAMPLE | Out-Null
           if ($LASTEXITCODE -ne 0) { throw 'oxiguitar-cli failed' }
@@ -716,9 +727,9 @@ jobs:
           fi
           cat changes.md >> notes.md
           # The software centres' list of releases names this one first.
-          newest="$(grep -m 1 -oP '<release version="\K[^"]+' assets/linux/io.github.mateusrdp.OxiGuitar.metainfo.xml)"
+          newest="$(grep -m 1 -oP '<release version="\K[^"]+' assets/linux/io.github.purpleicon.FuTab.metainfo.xml)"
           if [ "$newest" != "$VERSION" ]; then
-            echo "::error::the metainfo's newest release is $newest, not $VERSION: add a <release> for it (assets/linux/io.github.mateusrdp.OxiGuitar.metainfo.xml)" >&2
+            echo "::error::the metainfo's newest release is $newest, not $VERSION: add a <release> for it (assets/linux/io.github.purpleicon.FuTab.metainfo.xml)" >&2
             exit 1
           fi
       - name: Create the draft release

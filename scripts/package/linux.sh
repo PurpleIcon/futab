@@ -44,7 +44,7 @@ what="${1:?usage: linux.sh deb|rpm|appimage|all VERSION [wayland|x11]}"
 version="${2:?usage: linux.sh deb|rpm|appimage|all VERSION [wayland|x11]}"
 build="${3:-wayland}"
 root="$(cd "$(dirname "$0")/../.." && pwd)"
-id="io.github.mateusrdp.OxiGuitar"
+id="io.github.purpleicon.FuTab"
 bin="$root/target/release"
 case "$build" in
     wayland) app="$root/target/release/oxiguitar"; package=oxiguitar ;;
@@ -132,10 +132,10 @@ stage() {
     install -Dm644 "$root/assets/linux/$id.xml" "$to/usr/share/mime/packages/$id.xml"
     install -Dm644 "$root/assets/linux/$id.metainfo.xml" "$to/usr/share/metainfo/$id.metainfo.xml"
     for s in 16 24 32 48 64 128 256 512; do
-        install -Dm644 "$root/assets/icon/png/oxiguitar-$s.png" \
+        install -Dm644 "$root/assets/icon/png/futab-$s.png" \
             "$to/usr/share/icons/hicolor/${s}x${s}/apps/$id.png"
     done
-    install -Dm644 "$root/assets/icon/oxiguitar-placeholder.svg" \
+    install -Dm644 "$root/assets/icon/futab.svg" \
         "$to/usr/share/icons/hicolor/scalable/apps/$id.svg"
     install -d "$to/usr/share/man/man1"
     for page in oxiguitar oxiguitar-cli; do
@@ -334,8 +334,8 @@ build_appimage() {
     # The desktop entry and icon at the top, as the AppImage format wants,
     # and AppRun choosing the program. The mime file stays inside, unused.
     cp "$dir/usr/share/applications/$id.desktop" "$dir/$id.desktop"
-    cp "$root/assets/icon/png/oxiguitar-256.png" "$dir/$id.png"
-    cp "$root/assets/icon/png/oxiguitar-256.png" "$dir/.DirIcon"
+    cp "$root/assets/icon/png/futab-256.png" "$dir/$id.png"
+    cp "$root/assets/icon/png/futab-256.png" "$dir/.DirIcon"
     install -m755 "$root/scripts/package/AppRun" "$dir/AppRun"
     mksquashfs "$dir" "$work/image.squashfs" -root-owned -noappend -comp zstd -quiet
     local out="$dist/OxiGuitar-$version-$arch.AppImage"

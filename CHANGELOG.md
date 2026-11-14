@@ -8,6 +8,10 @@ All notable changes to OxiGuitar. The format follows [Keep a Changelog](https://
 
 - **Play Engraved Beat toggle** (#246): Edit → "Play Engraved Beat" (ticked by default) plays a 1-beat preview of the edited track when a note is added or changed — only the caret's track sounds (temporarily soloed), same instrument and effects as normal playback. Ticking it off disables the preview. Persisted in `settings.json` under the `view` key.
 
+### Changed
+
+- **FuTab**: this fork of OxiGuitar is now called FuTab in the app: window title, About box (which credits OxiGuitar), messages, desktop entry, AppStream metainfo and macOS bundle name. FuTab has its own icon (a plectrum split in two, with a note in each half) in place of the green placeholder pick. The PayPal donation button, QR code and README section are removed. The app ID is `io.github.purpleicon.FuTab`. Settings live in FuTab's own folders (`~/.config/futab`, `~/.local/share/futab`, `~/.cache/futab`; `FuTab` on macOS and Windows), so FuTab never touches an installed OxiGuitar's settings. Plugins are found in FuTab's folders first and then in OxiGuitar's (`/usr/lib/oxiguitar/plugins` and the others), so OxiGuitar's plugin packages work in FuTab. Bug reports go to `PurpleIcon/futab`. The program and package names (`oxiguitar`, `oxiguitar-x11`, `oxiguitar-cli`) change in a later release, with the packaging.
+
 ### Fixed
 
 - **Play button now starts playback when a new song is loaded** (#284): the `play-pause` action handler now returns the `Vec<Do>` result from `play()` so `act()` can execute the commands (e.g. opening the audio output), instead of discarding it.

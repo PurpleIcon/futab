@@ -97,7 +97,7 @@ fn section<'a, R: ReadRef<'a>>(data: R) -> Result<Vec<u8>, String> {
         BinaryFormat::Elf => ("a Linux or Android library", MANIFEST_SECTION),
         BinaryFormat::Pe => ("a Windows library", PE_MANIFEST_SECTION),
         BinaryFormat::MachO => ("a macOS or iOS library", MANIFEST_SECTION),
-        _ => return Err("it is not a library file OxiGuitar can load".into()),
+        _ => return Err("it is not a library file FuTab can load".into()),
     };
     if file.format() != this_format() {
         return Err(format!(

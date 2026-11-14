@@ -14,7 +14,7 @@
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-gtp">
     <comment>Guitar Pro file</comment>
-    <icon name="io.github.mateusrdp.OxiGuitar"/>
+    <icon name="io.github.purpleicon.FuTab"/>
     <!-- Guitar Pro 3-5: a length byte, then "FICHIER GUITAR PRO v3.00" and so on. -->
     <magic priority="50">
       <match type="string" offset="1" value="FICHIER GUITAR PRO v"/>

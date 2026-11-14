@@ -146,7 +146,7 @@ pub(crate) fn load(path: &Path, manifest: &[u8], host: Box<HostCalls>) -> Result
     let host_minor = oxiguitar_plugin_api::INTERFACE.1;
     if table.interface_minor > host_minor {
         return Err(format!(
-            "it needs interface 1.{}, and this OxiGuitar has 1.{host_minor}: update OxiGuitar",
+            "it needs interface 1.{}, and this FuTab has 1.{host_minor}: update FuTab",
             table.interface_minor
         ));
     }

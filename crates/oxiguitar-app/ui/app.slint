@@ -1304,11 +1304,11 @@ component Pill inherits Rectangle {
 export component AppWindow inherits Window {
     // "song.gp — OxiGuitar", with a dot while the score differs from the
     // file (main.rs).
-    in property <string> window-title: "OxiGuitar";
+    in property <string> window-title: "FuTab";
     title: root.window-title;
     // The window icon for X11, Windows and macOS. Wayland ignores it and
     // takes the icon of the desktop entry named by the app id (main.rs).
-    icon: @image-url("../../../assets/icon/png/oxiguitar-256.png");
+    icon: @image-url("../../../assets/icon/png/futab-256.png");
     preferred-width: 1280px;
     preferred-height: 800px;
     min-width: 400px;
@@ -1490,8 +1490,6 @@ export component AppWindow inherits Window {
     in property <length> shortcut-right-column-width;
     in property <length> shortcut-popup-width;
     in property <[string]> about-lines;
-    // Help → About's donation button (links.rs opens the page in the browser).
-    callback open-donation();
 
     callback open-file();
     callback new-file();
@@ -1839,7 +1837,7 @@ export component AppWindow inherits Window {
         Menu {
             title: "Help";
             MenuItem { title: "Keyboard and Mouse"; shortcut: @keys(F1); activated => { shortcuts-popup.show(); } }
-            MenuItem { title: "About OxiGuitar"; activated => { about-popup.show(); } }
+            MenuItem { title: "About FuTab"; activated => { about-popup.show(); } }
         }
     }
 
@@ -1859,52 +1857,10 @@ export component AppWindow inherits Window {
     about-popup := InfoPopup {
         x: (root.width - self.width) / 2;
         y: 60px;
-        heading: "OxiGuitar";
+        heading: "FuTab";
         lines: root.about-lines;
         // A click on the button must reach it; a click outside closes.
         close-policy: PopupClosePolicy.close-on-click-outside;
-        // Donations (Mateus, 25 Oct 2026; the README's "Buy me a drink").
-        Rectangle { height: 1px; background: Palette.border; }
-        Text {
-            text: "OxiGuitar is free. If it's useful to you, buy Mateus a drink, or chip in for the tokens that build it.";
-            font-size: 12px;
-            wrap: word-wrap;
-        }
-        HorizontalLayout {
-            spacing: 14px;
-            alignment: start;
-            // The QR code is black on transparent: on white, so it shows in the dark interface too.
-            Rectangle {
-                width: 104px;
-                height: 104px;
-                background: white;
-                border-radius: 4px;
-                Image { source: @image-url("../../../assets/DonationQRCode.png"); width: 96px; height: 96px; }
-            }
-            VerticalLayout {
-                alignment: center;
-                spacing: 6px;
-                Rectangle {
-                    width: 150px;
-                    height: 58px;
-                    Image {
-                        source: @image-url("../../../assets/paypal-donate-button.png");
-                        width: 150px;
-                        height: 58px;
-                    }
-                    touch := TouchArea {
-                        clicked => {
-                            root.open-donation();
-                            about-popup.close();
-                        }
-                    }
-                    Tooltip {
-                        text: @markdown("Donate with PayPal");
-                    }
-                }
-                Text { text: "or scan the code with your phone"; font-size: 11px; opacity: 0.7; }
-            }
-        }
     }
 
     forward-focus: keys;

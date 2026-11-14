@@ -9,7 +9,7 @@
 # oxiguitar-packages' plugin-release.yml), and the sandbox is Flatpak's
 # default: no access to the user's files (scores come through the desktop
 # portal) or to the system's.
-id: io.github.mateusrdp.OxiGuitar
+id: io.github.purpleicon.FuTab
 branch: stable
 runtime: org.freedesktop.Platform
 runtime-version: "26.08"
@@ -68,21 +68,21 @@ modules:
       - install -d /app/lib/oxiguitar
       # The menu entry starts the launcher: Flatpak runs the command its Exec
       # line names, which would otherwise always be the Wayland build.
-      - sed 's/^Exec=oxiguitar /Exec=oxiguitar-start /' assets/linux/io.github.mateusrdp.OxiGuitar.desktop > io.github.mateusrdp.OxiGuitar.desktop
-      - grep -qx 'Exec=oxiguitar-start %f' io.github.mateusrdp.OxiGuitar.desktop
-      - install -Dm644 io.github.mateusrdp.OxiGuitar.desktop /app/share/applications/io.github.mateusrdp.OxiGuitar.desktop
-      - install -Dm644 assets/linux/io.github.mateusrdp.OxiGuitar.xml /app/share/mime/packages/io.github.mateusrdp.OxiGuitar.xml
-      - install -Dm644 assets/linux/io.github.mateusrdp.OxiGuitar.metainfo.xml /app/share/metainfo/io.github.mateusrdp.OxiGuitar.metainfo.xml
+      - sed 's/^Exec=oxiguitar /Exec=oxiguitar-start /' assets/linux/io.github.purpleicon.FuTab.desktop > io.github.purpleicon.FuTab.desktop
+      - grep -qx 'Exec=oxiguitar-start %f' io.github.purpleicon.FuTab.desktop
+      - install -Dm644 io.github.purpleicon.FuTab.desktop /app/share/applications/io.github.purpleicon.FuTab.desktop
+      - install -Dm644 assets/linux/io.github.purpleicon.FuTab.xml /app/share/mime/packages/io.github.purpleicon.FuTab.xml
+      - install -Dm644 assets/linux/io.github.purpleicon.FuTab.metainfo.xml /app/share/metainfo/io.github.purpleicon.FuTab.metainfo.xml
       # The PNG icons only (16 to 512 px): appstreamcli compose refuses the
       # scalable SVG ("Unrecognized image file format"), which stays in the
       # other packages (Mateus, 9 Nov 2026).
-      - for s in 16 24 32 48 64 128 256 512; do install -Dm644 assets/icon/png/oxiguitar-$s.png /app/share/icons/hicolor/${s}x${s}/apps/io.github.mateusrdp.OxiGuitar.png; done
+      - for s in 16 24 32 48 64 128 256 512; do install -Dm644 assets/icon/png/futab-$s.png /app/share/icons/hicolor/${s}x${s}/apps/io.github.purpleicon.FuTab.png; done
       # The licences, as the other packages carry them.
-      - install -Dm644 LICENSE /app/share/licenses/io.github.mateusrdp.OxiGuitar/LICENSE
-      - install -Dm644 dist/THIRD-PARTY-LICENSES.html /app/share/licenses/io.github.mateusrdp.OxiGuitar/THIRD-PARTY-LICENSES.html
-      - install -Dm644 assets/fonts/bravura/OFL.txt /app/share/licenses/io.github.mateusrdp.OxiGuitar/fonts/Bravura-OFL.txt
-      - install -Dm644 assets/fonts/noto-sans/OFL.txt /app/share/licenses/io.github.mateusrdp.OxiGuitar/fonts/NotoSans-OFL.txt
-      - install -Dm644 CREDITS.md /app/share/doc/io.github.mateusrdp.OxiGuitar/CREDITS.md
+      - install -Dm644 LICENSE /app/share/licenses/io.github.purpleicon.FuTab/LICENSE
+      - install -Dm644 dist/THIRD-PARTY-LICENSES.html /app/share/licenses/io.github.purpleicon.FuTab/THIRD-PARTY-LICENSES.html
+      - install -Dm644 assets/fonts/bravura/OFL.txt /app/share/licenses/io.github.purpleicon.FuTab/fonts/Bravura-OFL.txt
+      - install -Dm644 assets/fonts/noto-sans/OFL.txt /app/share/licenses/io.github.purpleicon.FuTab/fonts/NotoSans-OFL.txt
+      - install -Dm644 CREDITS.md /app/share/doc/io.github.purpleicon.FuTab/CREDITS.md
     sources:
       - type: dir
         path: ../..

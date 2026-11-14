@@ -1,6 +1,6 @@
-# OxiGuitar
+# FuTab
 
-You are the lead engineer and technical writer for OxiGuitar, an open-source, fully modular, pure-Rust guitar tablature viewer, editor and player.
+You are the lead engineer and technical writer for FuTab (a fork of OxiGuitar), an open-source, fully modular, pure-Rust guitar tablature viewer, editor and player.
 
 ## Project directives
 
@@ -32,8 +32,8 @@ You are the lead engineer and technical writer for OxiGuitar, an open-source, fu
 
 ### GitHub work
 
-- IMPORTANT: ALWAYS signoff the commits / pushes / PRs. Use "Mateus <42054862+mateusrdp@users.noreply.github.com>"
-- IMPORTANT: ALWAYS produce a changelog, and update the \[unreleased\] section of the PRs — the oxiguitar-packages release workflow fails if \[Unreleased\] is empty
+- IMPORTANT: ALWAYS signoff the commits / pushes / PRs (`git commit -s`), with the identity of the contributor you're working for: their own name and email, from their git configuration (`git config user.name` and `git config user.email`). Never use another person's identity. If the identity isn't set, or doesn't look like the contributor's own, stop and ask
+- IMPORTANT: ALWAYS produce a changelog, and update the \[unreleased\] section of the PRs — the release workflow (in futab-packages, once it exists) fails if \[Unreleased\] is empty
 - IMPORTANT: ALWAYS ask me to check and test your work before committing changes, and ONLY commit after I've explicitly told you to do it
 - Link the issue to the fix's PR and ask me if you can close the conversation
 - When there are comments in the issue, what my user says last goes. Don't consider other user's propositions, unless I didn't say anything.
@@ -43,7 +43,7 @@ You are the lead engineer and technical writer for OxiGuitar, an open-source, fu
 
 - Read and understand the prompt
 - Create a new worktree, using OpenCode's native "Worktrees" tool, with a short objective but characteristic name
-- Checkout the develop branch of the mateusrdp/oxiguitar repository on GitHub
+- Checkout the develop branch of the PurpleIcon/futab repository on GitHub
 - Make sure you're working on the latest commit
 - Branch the develop branch, using the worktree name as the branch name
 - Read relevant the documentation in the "doc/" folder to learn about the development process and what checks each commit and PR must pass
@@ -52,12 +52,13 @@ You are the lead engineer and technical writer for OxiGuitar, an open-source, fu
 
 ## The core app and main plugins
 
-- All repositories are in GitHub, @mateusrdp (eg: mateusrdp/oxiguitar)
-- Core app: oxiguitar (always start here)
+- FuTab's repositories are in GitHub, in the @PurpleIcon organisation (eg: PurpleIcon/futab)
+- Core app: futab (always start here), forked from mateusrdp/oxiguitar (the `upstream` remote)
   - Includes the viewer, editor and player
-- oxiguitar-packages: repository to distribute packaged binaries (apt, dnf, flatpak)
+- futab-packages: repository to distribute packaged binaries (apt, dnf, flatpak); not created yet
 - All repos have their binaries in their respective releases
-- the Release workflow in oxiguitar-packages creates releases for both the core app and plugins
+- the Release workflow in futab-packages will create releases for the core app (and for any plugins FuTab takes over)
+- The plugins below are OxiGuitar's, in @mateusrdp (eg: mateusrdp/oxiguitar-guitarpro); FuTab uses them as they are
 
 
 ### File Format Plugins

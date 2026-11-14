@@ -276,21 +276,21 @@ jobs:
         timeout-minutes: 15
       # Both Linux builds of the app: the X11 one in a target folder of its
       # own, then copied beside the Wayland one so both find the plugins in
-      # target/lib/oxiguitar/plugins/ (released ones, below).
+      # target/lib/futab/plugins/ (released ones, below).
       - run: cargo build -p oxiguitar-app --no-default-features --features x11 --locked --target-dir target/x11
       - run: cargo test -p oxiguitar-app --no-default-features --features x11 --locked --target-dir target/x11 display_system
       - run: cargo build --workspace --locked
       - run: cp target/x11/debug/oxiguitar target/debug/oxiguitar-x11
       # The released Guitar Pro plugins, where the programs look for them
-      # (target/lib/oxiguitar/plugins/), so the session reads every fixture
+      # (target/lib/futab/plugins/), so the session reads every fixture
       # through them. Fetched before the session, which then runs without
       # network under strace.
       - env:
           GH_TOKEN: ${{ github.token }}
         run: |
           scripts/released-plugins.sh "$RUNNER_TEMP/released" guitarpro
-          mkdir -p target/lib/oxiguitar/plugins
-          cp "$RUNNER_TEMP/released/files/"*.oxp target/lib/oxiguitar/plugins/
+          mkdir -p target/lib/futab/plugins
+          cp "$RUNNER_TEMP/released/files/"*.oxp target/lib/futab/plugins/
       # The Wayland build in a headless Weston, the X11 build under Xvfb.
       - run: scripts/no-network.sh target/debug/oxiguitar-cli --wayland target/debug/oxiguitar --x11 target/debug/oxiguitar-x11
 

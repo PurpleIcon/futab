@@ -27,7 +27,7 @@ CARGO = /usr/share/cargo/bin/cargo
 
 release = target/$(DEB_HOST_RUST_TYPE)/release
 noto = /usr/share/fonts/truetype/noto/NotoSans-Regular.ttf
-app_id = io.github.mateusrdp.OxiGuitar
+app_id = io.github.purpleicon.FuTab
 
 %:
 	dh $@
@@ -56,10 +56,10 @@ override_dh_auto_install:
 	install -Dm755 $(release)/oxiguitar debian/oxiguitar/usr/bin/oxiguitar
 	install -Dm755 $(release)/oxiguitar-cli debian/oxiguitar/usr/bin/oxiguitar-cli
 	set -e; for s in 16 24 32 48 64 128 256 512; do \
-		install -Dm644 assets/icon/png/oxiguitar-$$s.png \
+		install -Dm644 assets/icon/png/futab-$$s.png \
 			debian/oxiguitar/usr/share/icons/hicolor/$${s}x$${s}/apps/$(app_id).png; \
 	done
-	install -Dm644 assets/icon/oxiguitar-placeholder.svg \
+	install -Dm644 assets/icon/futab.svg \
 		debian/oxiguitar/usr/share/icons/hicolor/scalable/apps/$(app_id).svg
 	install -Dm644 assets/linux/$(app_id).desktop debian/oxiguitar/usr/share/applications/$(app_id).desktop
 	install -Dm644 assets/linux/$(app_id).xml debian/oxiguitar/usr/share/mime/packages/$(app_id).xml

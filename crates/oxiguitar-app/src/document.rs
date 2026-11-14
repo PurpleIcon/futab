@@ -293,7 +293,7 @@ impl Document {
             .cloned()
             .collect();
         let mut score = oxiguitar_model::wire::from_wire2(read.score).map_err(|e| {
-            format!("{name}: the {plugin} plugin gave a score this OxiGuitar can't hold ({e}).")
+            format!("{name}: the {plugin} plugin gave a score this FuTab can't hold ({e}).")
         })?;
         // Notes the file gave as pitches, on strings, get a string and fret
         // (#157): a format without tablature shows its tab at once.
@@ -558,10 +558,9 @@ impl Document {
     pub(crate) fn title(&self) -> String {
         let t = self.score.info.title.trim();
         if t.is_empty() {
-            self.path.file_stem().map_or_else(
-                || "OxiGuitar".to_owned(),
-                |s| s.to_string_lossy().into_owned(),
-            )
+            self.path
+                .file_stem()
+                .map_or_else(|| "FuTab".to_owned(), |s| s.to_string_lossy().into_owned())
         } else {
             t.to_owned()
         }
@@ -640,7 +639,7 @@ impl Prepared {
         let mut lines = Vec::new();
         if let Some(why) = &self.instead {
             lines.push(format!(
-                "{why}, so it is saved in OxiGuitar's fullest format, {}, as {name}. {} stays as it was.",
+                "{why}, so it is saved in FuTab's fullest format, {}, as {name}. {} stays as it was.",
                 self.format.name,
                 file_name(from)
             ));
@@ -1174,7 +1173,7 @@ mod tests {
         let (heading, lines) = prepared.question(&doc.path);
         assert_eq!(heading, "Save song.gp?");
         assert!(
-            lines[0].starts_with("No installed plugin writes Guitar Pro 4 files, so it is saved in OxiGuitar's fullest format, Guitar Pro 7–8, as song.gp. song.gp4 stays as it was."),
+            lines[0].starts_with("No installed plugin writes Guitar Pro 4 files, so it is saved in FuTab's fullest format, Guitar Pro 7–8, as song.gp. song.gp4 stays as it was."),
             "{lines:?}"
         );
         let before = std::fs::read(&path).unwrap();
