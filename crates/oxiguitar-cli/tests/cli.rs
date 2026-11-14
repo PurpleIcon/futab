@@ -163,22 +163,20 @@ fn system_plugin_folders() -> Vec<PathBuf> {
 
     match system {
         "linux" => {
-            let derived = bin
-                .and_then(Path::parent)
-                .map(|prefix| prefix.join("lib").join("futab").join("plugins"));
-            let fallbacks = [
-                PathBuf::from("/usr/lib/futab/plugins"),
-                PathBuf::from("/usr/local/lib/futab/plugins"),
-                PathBuf::from("/usr/lib/oxiguitar/plugins"),
-                PathBuf::from("/usr/local/lib/oxiguitar/plugins"),
-            ];
-            let mut out: Vec<PathBuf> = Vec::with_capacity(5);
-            if let Some(p) = derived
-                && !fallbacks.contains(&p)
-            {
-                out.push(p);
+            let prefix = bin.and_then(Path::parent);
+            let mut out: Vec<PathBuf> = Vec::with_capacity(6);
+            for name in ["futab", "oxiguitar"] {
+                let derived = prefix.map(|p| p.join("lib").join(name).join("plugins"));
+                let standard = [
+                    PathBuf::from(format!("/usr/lib/{name}/plugins")),
+                    PathBuf::from(format!("/usr/local/lib/{name}/plugins")),
+                ];
+                for p in derived.into_iter().chain(standard) {
+                    if !out.contains(&p) {
+                        out.push(p);
+                    }
+                }
             }
-            out.extend(fallbacks);
             out
         }
         "macos" => bin

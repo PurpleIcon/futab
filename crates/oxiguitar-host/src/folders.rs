@@ -126,29 +126,29 @@ impl Folders {
         let bin = exe.and_then(Path::parent);
         let system_plugins = match system {
             // /usr/bin/futab → /usr/lib/futab/plugins; the same rule finds
-            // /usr/local, the AppImage's own tree and a build installed
-            // anywhere else. When the derived path is missing (a dev build
-            // that hasn't been installed), fall back to the standard Linux
-            // plugin directories: FuTab's own, then OxiGuitar's, so the
-            // plugins installed from OxiGuitar's packages are found too.
+            // /usr/local, the AppImage's own tree, the Flatpak's /app and a
+            // build installed anywhere else. Then the standard Linux plugin
+            // directories, for a dev build that hasn't been installed. All
+            // of this first for FuTab's own folder, then for OxiGuitar's
+            // (lib/oxiguitar/plugins), so the plugins installed from
+            // OxiGuitar's packages, or mounted as its Flatpak extensions in
+            // /app/lib/oxiguitar, are found too.
             System::Linux => {
-                let derived = bin
-                    .and_then(Path::parent)
-                    .map(|prefix| prefix.join("lib").join("futab").join("plugins"));
-                let fallbacks = [
-                    PathBuf::from("/usr/lib/futab/plugins"),
-                    PathBuf::from("/usr/local/lib/futab/plugins"),
-                    PathBuf::from("/usr/lib/oxiguitar/plugins"),
-                    PathBuf::from("/usr/local/lib/oxiguitar/plugins"),
-                ];
-                // Deduplicate: the derived path may equal a fallback.
-                let mut out: Vec<PathBuf> = Vec::with_capacity(5);
-                if let Some(p) = derived
-                    && !fallbacks.contains(&p)
-                {
-                    out.push(p);
+                let prefix = bin.and_then(Path::parent);
+                let mut out: Vec<PathBuf> = Vec::with_capacity(6);
+                for name in ["futab", "oxiguitar"] {
+                    let derived = prefix.map(|p| p.join("lib").join(name).join("plugins"));
+                    let standard = [
+                        PathBuf::from(format!("/usr/lib/{name}/plugins")),
+                        PathBuf::from(format!("/usr/local/lib/{name}/plugins")),
+                    ];
+                    // Deduplicate: the derived path may equal a standard one.
+                    for p in derived.into_iter().chain(standard) {
+                        if !out.contains(&p) {
+                            out.push(p);
+                        }
+                    }
                 }
-                out.extend(fallbacks);
                 out
             }
             // FuTab.app/Contents/MacOS/futab → Contents/PlugIns. Then the
@@ -405,25 +405,49 @@ pub(crate) mod tests {
                 PathBuf::from("/home/mat/src/oxiguitar/target/lib/futab/plugins"),
                 PathBuf::from("/usr/lib/futab/plugins"),
                 PathBuf::from("/usr/local/lib/futab/plugins"),
+                PathBuf::from("/home/mat/src/oxiguitar/target/lib/oxiguitar/plugins"),
                 PathBuf::from("/usr/lib/oxiguitar/plugins"),
                 PathBuf::from("/usr/local/lib/oxiguitar/plugins"),
             ]
         );
         // System folders still come before user folders.
         let folders = f.default_plugin_folders();
-        assert_eq!(folders.len(), 6);
+        assert_eq!(folders.len(), 7);
         assert_eq!(
             folders[0],
             PathBuf::from("/home/mat/src/oxiguitar/target/lib/futab/plugins")
         );
         assert_eq!(folders[1], PathBuf::from("/usr/lib/futab/plugins"));
         assert_eq!(
-            folders[4],
+            folders[5],
             PathBuf::from("/usr/local/lib/oxiguitar/plugins")
         );
         assert_eq!(
-            folders[5],
+            folders[6],
             PathBuf::from("/home/mat/.local/share/futab/plugins")
+        );
+    }
+
+    #[test]
+    fn the_flatpak_finds_oxiguitars_plugin_extensions() {
+        // OxiGuitar's Flatpak plugin extensions are mounted in
+        // /app/lib/oxiguitar, beside the program in /app/bin.
+        let f = Folders::resolve(
+            System::Linux,
+            env(&[("HOME", "/home/mat")]),
+            Some(Path::new("/app/bin/oxiguitar")),
+        )
+        .unwrap();
+        assert_eq!(
+            f.system_plugins,
+            vec![
+                PathBuf::from("/app/lib/futab/plugins"),
+                PathBuf::from("/usr/lib/futab/plugins"),
+                PathBuf::from("/usr/local/lib/futab/plugins"),
+                PathBuf::from("/app/lib/oxiguitar/plugins"),
+                PathBuf::from("/usr/lib/oxiguitar/plugins"),
+                PathBuf::from("/usr/local/lib/oxiguitar/plugins"),
+            ]
         );
     }
 

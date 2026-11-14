@@ -8,7 +8,7 @@ FuTab looks for plugins in its own folders first, then in OxiGuitar's (`crates/o
 
 | System | FuTab's plugin folders (for FuTab's own plugins) | Then OxiGuitar's |
 |---|---|---|
-| Linux | `lib/futab/plugins` beside the program (`/usr/bin/futab` → `/usr/lib/futab/plugins`), `/usr/lib/futab/plugins`, `/usr/local/lib/futab/plugins` | `/usr/lib/oxiguitar/plugins`, `/usr/local/lib/oxiguitar/plugins` |
+| Linux | `lib/futab/plugins` beside the program (`/usr/bin/futab` → `/usr/lib/futab/plugins`), `/usr/lib/futab/plugins`, `/usr/local/lib/futab/plugins` | `lib/oxiguitar/plugins` beside the program (in the Flatpak, `/app/lib/oxiguitar/plugins`, where OxiGuitar's plugin extensions are mounted), `/usr/lib/oxiguitar/plugins`, `/usr/local/lib/oxiguitar/plugins` |
 | macOS | `FuTab.app/Contents/PlugIns`, `/Library/Application Support/FuTab/plugins` | `/Library/Application Support/OxiGuitar/plugins` |
 | Windows | `plugins\` beside the program, `C:\Program Files\FuTab\plugins` | `C:\Program Files\OxiGuitar\plugins` |
 
