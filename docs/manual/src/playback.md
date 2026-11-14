@@ -1,6 +1,6 @@
 # Playing a score
 
-OxiGuitar plays the open score through your sound card, with the [sound sets](better-sounds.md) it finds. Its controls are the **Player** tab at the top of the window and each track's row at the bottom.
+FuTab plays the open score through your sound card, with the [sound sets](better-sounds.md) it finds. Its controls are the **Player** tab at the top of the window and each track's row at the bottom.
 
 ![The Player tab](images/player.png)
 
@@ -45,9 +45,9 @@ Every effect of the score is heard as written, the notation of Guitar Pro 8's pa
 
 ## The mixer
 
-Each track's row at the bottom has a **mute** button (the loudspeaker crossed out), a **solo** button (headphones: when any track is soloed, only soloed tracks are heard), a **volume** slider and a **pan** knob (drag it, or use the arrow keys; a double click centres it). They start as the file sets them and change the sound as you move them. **Level**, in the Player tab, is the volume of everything together. None of this is saved into the file; it lasts until you close OxiGuitar.
+Each track's row at the bottom has a **mute** button (the loudspeaker crossed out), a **solo** button (headphones: when any track is soloed, only soloed tracks are heard), a **volume** slider and a **pan** knob (drag it, or use the arrow keys; a double click centres it). They start as the file sets them and change the sound as you move them. **Level**, in the Player tab, is the volume of everything together. None of this is saved into the file; it lasts until you close FuTab.
 
-However loud a song is, OxiGuitar never lets the sound go past just under full scale, so it doesn't distort when many tracks play at once.
+However loud a song is, FuTab never lets the sound go past just under full scale, so it doesn't distort when many tracks play at once.
 
 ## Playing the chords
 
@@ -67,7 +67,7 @@ Sections that change the sound after the instrument (the amp, the equalizer) com
 
 ## Output
 
-**Output** chooses where the sound goes: the system's default, or one of the outputs your system lists. OxiGuitar remembers the choice. It opens the output when you press Play and lets go of it a couple of seconds after the sound stops, so other programs can use it in between.
+**Output** chooses where the sound goes: the system's default, or one of the outputs your system lists. FuTab remembers the choice. It opens the output when you press Play and lets go of it a couple of seconds after the sound stops, so other programs can use it in between.
 
 ## When it can't play
 
@@ -78,4 +78,4 @@ The controls are greyed out when nothing can play the score, and the line at the
 
 Sounds are made ready when a file opens, so Play starts at once. A SoundFont 3 set is decoded the first time it is used, which can take a few seconds.
 
-From a terminal, `oxiguitar-cli play song.gp` plays a score too; `oxiguitar-cli play song.gp --wav song.wav` writes it to a WAV file instead (see `man oxiguitar-cli`).
+From a terminal, `futab-cli play song.gp` plays a score too; `futab-cli play song.gp --wav song.wav` writes it to a WAV file instead (see `man futab-cli`).

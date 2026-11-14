@@ -1,6 +1,6 @@
 # Amp models (NAM)
 
-OxiGuitar can play a guitar or bass track through an **amp model**: a capture of a real amplifier (or pedal, or a whole rig) made with [Neural Amp Modeler](https://github.com/sdatkinson/neural-amp-modeler), stored in a `.nam` file. The track's sound goes through the model, then through a **cabinet**: an impulse response of a speaker cabinet and its microphone. The NAM plugin does it, a plugin of its own (`oxiguitar-nam`, [The official plugins](official-plugins.md)). OxiGuitar downloads nothing: models are files you get and put in a folder.
+FuTab can play a guitar or bass track through an **amp model**: a capture of a real amplifier (or pedal, or a whole rig) made with [Neural Amp Modeler](https://github.com/sdatkinson/neural-amp-modeler), stored in a `.nam` file. The track's sound goes through the model, then through a **cabinet**: an impulse response of a speaker cabinet and its microphone. The NAM plugin does it, a plugin of its own (`oxiguitar-nam`, [The official plugins](official-plugins.md)). FuTab downloads nothing: models are files you get and put in a folder.
 
 ## What you need
 
@@ -12,13 +12,13 @@ If a track's amp is on and a folder is empty, a dialog says what is missing, onc
 
 ## Where to put them
 
-Put `.nam` and `.wav` files in the `nam` folder, beside your `plugins` and `soundfonts` folders (OxiGuitar creates it when it starts), or in folders inside it, up to five levels deep:
+Put `.nam` and `.wav` files in the `nam` folder, beside your `plugins` and `soundfonts` folders (FuTab creates it when it starts), or in folders inside it, up to five levels deep:
 
 | System | The `nam` folder |
 | --- | --- |
-| Linux | `~/.local/share/oxiguitar/nam/` |
-| macOS | `~/Library/Application Support/OxiGuitar/nam/` |
-| Windows | `%APPDATA%\OxiGuitar\nam\` |
+| Linux | `~/.local/share/futab/nam/` |
+| macOS | `~/Library/Application Support/FuTab/nam/` |
+| Windows | `%APPDATA%\FuTab\nam\` |
 
 With `OXIGUITAR_HOME` set, it is the `nam` folder in that folder.
 
@@ -41,7 +41,7 @@ The amp has no tone controls of its own. The **Equalizer** plugin ([Playing a sc
 
 ## How heavy it is
 
-An amp model is a neural network computed for every sample, much heavier than playing samples: measured on GitHub's build machines, a standard model takes a fifth to two fifths of one processor core per track. On Linux on a PC whose processor has AVX2 and FMA (Intel from 2013, AMD from 2015, nearly every one in use), OxiGuitar uses a build of the plugin made for them, which takes about a tenth of that and sounds the same; its cabinets come 64 samples (about 1.3 ms) later, and the other tracks wait for them. OxiGuitar plays each track on the audio device's own thread, so a few amp tracks at once can be too much for a slower computer. If playback stutters, use the amp on fewer tracks, or pick lighter models (captures labelled "lite", "feather" or "nano"). Models run at the rate they were captured at, 48 kHz; on a sound device that runs at another rate, OxiGuitar converts the track to 48 kHz and back, which makes it a millisecond or so late, and moves every other track and the cursor by the same amount so all stays together.
+An amp model is a neural network computed for every sample, much heavier than playing samples: measured on GitHub's build machines, a standard model takes a fifth to two fifths of one processor core per track. On Linux on a PC whose processor has AVX2 and FMA (Intel from 2013, AMD from 2015, nearly every one in use), FuTab uses a build of the plugin made for them, which takes about a tenth of that and sounds the same; its cabinets come 64 samples (about 1.3 ms) later, and the other tracks wait for them. FuTab plays each track on the audio device's own thread, so a few amp tracks at once can be too much for a slower computer. If playback stutters, use the amp on fewer tracks, or pick lighter models (captures labelled "lite", "feather" or "nano"). Models run at the rate they were captured at, 48 kHz; on a sound device that runs at another rate, FuTab converts the track to 48 kHz and back, which makes it a millisecond or so late, and moves every other track and the cursor by the same amount so all stays together.
 
 ## The built-in cabinets
 

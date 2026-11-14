@@ -1,6 +1,6 @@
 # Summary
 
-[OxiGuitar](README.md)
+[FuTab](README.md)
 
 - [Installing](installing.md)
   - [On Linux](install-linux.md)

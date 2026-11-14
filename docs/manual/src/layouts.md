@@ -2,7 +2,7 @@
 
 **View → Layout** chooses how the staves are laid out, as in Guitar Pro 8:
 
-| OxiGuitar | Guitar Pro 8 | What you see |
+| FuTab | Guitar Pro 8 | What you see |
 | --- | --- | --- |
 | **Page** | Page – Vertical | Pages, with systems filling the page width and breaking into pages, as the PDF prints them |
 | **Vertical** | Screen – Vertical | Systems as wide as the window, one under the other, without pages; zooming or resizing the window reflows the bars |

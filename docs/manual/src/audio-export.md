@@ -1,6 +1,6 @@
 # Exporting audio
 
-**File → Export WAV Audio…** saves the song's sound as a WAV file, which every audio program and player opens. OxiGuitar plays the song into the file as fast as your computer can, without a sound card, so a three-minute song takes seconds.
+**File → Export WAV Audio…** saves the song's sound as a WAV file, which every audio program and player opens. FuTab plays the song into the file as fast as your computer can, without a sound card, so a three-minute song takes seconds.
 
 ## What goes in
 
@@ -27,4 +27,4 @@ A minute of sound takes 10 MB at 16 bits and 44.1 kHz, 16 MB at 24 bits and 48 k
 
 ## From the command line
 
-`oxiguitar-cli export song.gp song.wav` does the same: the whole song as written, with the file's own mixer settings and the WAV plugin's format. `--bars 5-8` exports some bars, `--speed 75` plays at 75 %, `--metronome` adds the clicks.
+`futab-cli export song.gp song.wav` does the same: the whole song as written, with the file's own mixer settings and the WAV plugin's format. `--bars 5-8` exports some bars, `--speed 75` plays at 75 %, `--metronome` adds the clicks.

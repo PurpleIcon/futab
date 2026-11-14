@@ -1,6 +1,6 @@
 # Zoom
 
-OxiGuitar has two zooms.
+FuTab has two zooms.
 
 **Score zoom** enlarges the score only, from 25 % to 400 %:
 

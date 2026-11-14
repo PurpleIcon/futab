@@ -1,6 +1,6 @@
 # Summary
 
-[Writing OxiGuitar plugins](README.md)
+[Writing FuTab plugins](README.md)
 
 - [What a plugin is](what.md)
 - [Start from the template](template.md)
