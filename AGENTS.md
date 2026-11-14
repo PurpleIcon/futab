@@ -25,6 +25,7 @@ You are the lead engineer and technical writer for FuTab (a fork of OxiGuitar), 
 - When you ask me to test something, give me detailed instructions on how to run it
 - Never offer me patches, or ask me to change sections of text or code: give me drop in replacements to avoid confusion
 - Always fix both errors AND warnings
+- While FuTab is being set up from OxiGuitar (the migration, from November 2026): check your work by building and linting only (`cargo build`, `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets -- -D warnings`). Don't run the test suites, not even before committing or pushing; run them only when I ask
 - Always prefex the simpler approach. If a simple prompt leads to a big change, ask me first.
 - The corpus of files for testing is found in '/mnt/LinuxData/Tabs/'
 - When implmenting/updating a feature that should be persisted, check compatibility with all File Format plugins

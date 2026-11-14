@@ -1,6 +1,6 @@
 # Start from the template
 
-The template plugin is a complete plugin you copy and change. It lives in OxiGuitar's repository as [`docs/plugins/template/`](https://github.com/mateusrdp/oxiguitar/tree/main/docs/plugins/template), and adds one of each common thing:
+The template plugin is a complete plugin you copy and change. It lives in FuTab's repository as [`docs/plugins/template/`](https://github.com/PurpleIcon/futab/tree/main/docs/plugins/template), and adds one of each common thing:
 
 - a **format**, "Example tab" (`.extab`): a tiny text format of eighth notes on a guitar, read and written;
 - a **tab**, "Statistics", in the right area: how many notes each string of a track plays in the open score, as a small chart you can click, with a setting remembered in settings.json;
@@ -14,12 +14,12 @@ Copy the folder, hidden `.github/` included, to wherever you keep your projects.
 
 ```sh
 git clone --depth 1 --branch v0.11.0 https://github.com/mateusrdp/oxiguitar
-cp -R oxiguitar/docs/plugins/template my-plugin
-rm -rf oxiguitar
+cp -R futab/docs/plugins/template my-plugin
+rm -rf futab
 cd my-plugin
 ```
 
-The template's `Cargo.toml` takes the SDK and the contract suite from OxiGuitar's repository on GitHub, at the same tag, `v0.11.0` (Cargo downloads the repository the first time). `v0.11.0` has interface 1.4 ([Interface versions](versions.md)). The template asks for interface 1.1, so what you build loads in OxiGuitar 0.2 and later; ask for 1.2 when you use its tools or the score version 2, and it needs 0.5; ask for 1.3 for a settings window, a section of the track dialog, footer links, the plugin's folders, instruments, effects or audio devices, and it needs 0.9; ask for 1.4 for links in a tab, exporters, `needs`, `replaces` or advice, and it needs 0.11. To build for a later OxiGuitar, change both tags.
+The template's `Cargo.toml` takes the SDK and the contract suite from FuTab's repository on GitHub, at the same tag, `v0.11.0` (Cargo downloads the repository the first time). `v0.11.0` has interface 1.4 ([Interface versions](versions.md)). The template asks for interface 1.1, so what you build loads in FuTab 0.2 and later; ask for 1.2 when you use its tools or the score version 2, and it needs 0.5; ask for 1.3 for a settings window, a section of the track dialog, footer links, the plugin's folders, instruments, effects or audio devices, and it needs 0.9; ask for 1.4 for links in a tab, exporters, `needs`, `replaces` or advice, and it needs 0.11. To build for a later FuTab, change both tags.
 
 ## 2. Build and test it
 
@@ -31,36 +31,36 @@ The first run downloads and builds the SDK and the contract suite, which takes a
 
 - the template's own unit tests (`src/*.rs`);
 - `the_manifest_matches_the_plugin`, a test `export_plugin!` adds: the manifest is valid, its version is the crate's, and every format, service and tab it declares is implemented, with contents the core can show;
-- `tests/contract.rs`, which builds the plugin file `target/oxp/example.oxp` and checks it through OxiGuitar's own plugin host ([Testing](testing.md)).
+- `tests/contract.rs`, which builds the plugin file `target/oxp/example.oxp` and checks it through FuTab's own plugin host ([Testing](testing.md)).
 
-## 3. Try it in OxiGuitar
+## 3. Try it in FuTab
 
-Copy the file into your plugin folder (OxiGuitar creates it the first time it starts):
+Copy the file into your plugin folder (FuTab creates it the first time it starts):
 
 ```sh
 # Linux
-cp target/oxp/example.oxp ~/.local/share/oxiguitar/plugins/
+cp target/oxp/example.oxp ~/.local/share/futab/plugins/
 # macOS
-cp target/oxp/example.oxp ~/Library/Application\ Support/OxiGuitar/plugins/
+cp target/oxp/example.oxp ~/Library/Application\ Support/FuTab/plugins/
 ```
 
-On Windows, copy `target\oxp\example.oxp` to `%APPDATA%\OxiGuitar\plugins\`.
+On Windows, copy `target\oxp\example.oxp` to `%APPDATA%\FuTab\plugins\`.
 
-Start OxiGuitar. Tools → Plugins lists "Example", not loaded yet. Open `samples/open-strings.extab` (File → Open): the plugin loads and reads it (`oxiguitar-cli info samples/open-strings.extab` also prints its import log, one warning). The right area has a **Statistics** tab, known from the manifest before the plugin loaded; open it, and click a bar of its chart.
+Start FuTab. Tools → Plugins lists "Example", not loaded yet. Open `samples/open-strings.extab` (File → Open): the plugin loads and reads it (`futab-cli info samples/open-strings.extab` also prints its import log, one warning). The right area has a **Statistics** tab, known from the manifest before the plugin loaded; open it, and click a bar of its chart.
 
 ## 4. Make it yours
 
 1. **Rename it.** In `Cargo.toml`, the package's `name`. In `manifest.json`: `id` (lowercase letters and digits joined by `.` or `-`, starting with your own name: `jane.chord-finder`), `name`, `description`, `authors`, `license` and `homepage`. In `build-oxp.sh`, `NAME` (your file's name) and `LIBRARY` (the package's name with `_` for `-`); in `.github/workflows/build.yml`, `NAME` again. In `tests/contract.rs`, the file's name.
 2. **Delete what you don't need.** Each contribution is a module, a line in `src/lib.rs`'s `impl Plugin`, and an entry in `manifest.json`. Remove all three; `cargo test` says if the manifest and the code disagree.
 3. **Write your own.** The next pages explain each part: [the manifest](manifest.md), [the SDK](sdk.md), [formats](formats.md), [tabs](tabs.md), [events](events.md), [services](services.md), [settings](settings.md).
-4. **Keep the versions equal.** The version in `manifest.json` must be the crate's, and you raise both with each release: when two files of the same plugin are installed, OxiGuitar uses the higher version.
+4. **Keep the versions equal.** The version in `manifest.json` must be the crate's, and you raise both with each release: when two files of the same plugin are installed, FuTab uses the higher version.
 
 ## What's in the folder
 
 | File | What it is |
 | --- | --- |
 | `Cargo.toml` | The crate: the `oxp` feature, the SDK, the contract suite for tests, lints, a release profile for small files |
-| `manifest.json` | What the plugin adds, read by OxiGuitar without loading the plugin |
+| `manifest.json` | What the plugin adds, read by FuTab without loading the plugin |
 | `src/lib.rs` | The plugin type, which hands out each contribution, and `export_plugin!` |
 | `src/format.rs` | The Example tab format |
 | `src/statistics.rs` | The Statistics tab |

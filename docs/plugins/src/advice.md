@@ -1,6 +1,6 @@
 # Advice
 
-Since interface 1.4, a plugin can ask OxiGuitar to show the user a dialog: *"Only your system's basic sound set is installed. Free recorded sets sound much better; here is where to get them."* The user reads it, may click a link, and may tick **Don't show this again**. OxiGuitar remembers what was ticked, so your plugin never has to.
+Since interface 1.4, a plugin can ask FuTab to show the user a dialog: *"Only your system's basic sound set is installed. Free recorded sets sound much better; here is where to get them."* The user reads it, may click a link, and may tick **Don't show this again**. FuTab remembers what was ticked, so your plugin never has to.
 
 Advice is for the thing a plugin can't do without help from the user: a model file to put in a folder, a sound set to install. It is not for status messages ([the footer](sdk.md) holds those) and not for anything the plugin can fix itself.
 
@@ -18,7 +18,7 @@ host.advise(Advice {
         .into(),
     links: vec![Link {
         text: "Where to get amp models".into(),
-        url: "https://mateusrdp.github.io/oxiguitar/manual/amp-models.html".into(),
+        url: "https://purpleicon.github.io/futab/manual/amp-models.html".into(),
     }],
 })?;
 ```
@@ -35,7 +35,7 @@ host.advise(Advice {
 ## When it is shown
 
 - **Once the window is up, one dialog at a time.** Ask whenever you find out, even in `start`: a dialog that arrives before the window exists waits for it, and several wait in line.
-- **Once a session.** Ask again as often as your reason holds (every time a score opens, say); OxiGuitar passes on each advice once per session and the plugin is told nothing either way.
+- **Once a session.** Ask again as often as your reason holds (every time a score opens, say); FuTab passes on each advice once per session and the plugin is told nothing either way.
 - **Not at all after the user ticks the box.** It is saved in settings.json, one entry for each plugin and advice, and the dialog never comes back for it:
 
   ```json
@@ -43,11 +43,11 @@ host.advise(Advice {
   ```
 
   A user who wants a dialog back deletes its line. Other advice of the same plugin is untouched.
-- **Never in safe mode** (`oxiguitar --safe-mode`), where no plugin runs.
+- **Never in safe mode** (`futab --safe-mode`), where no plugin runs.
 
 ## Links
 
-A plugin can't open anything itself. The links in an advice dialog open in the system's browser only when the user clicks them, and only `https://` addresses are taken, as with `Widget::Link` ([Tabs](tabs.md)) and the footer's links. OxiGuitar sends nothing anywhere on its own, and nothing about the click goes back to your plugin.
+A plugin can't open anything itself. The links in an advice dialog open in the system's browser only when the user clicks them, and only `https://` addresses are taken, as with `Widget::Link` ([Tabs](tabs.md)) and the footer's links. FuTab sends nothing anywhere on its own, and nothing about the click goes back to your plugin.
 
 Link to a page you keep up to date, and say in the text what to do there: the page may change, the dialog's words can't.
 

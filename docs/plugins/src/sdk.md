@@ -1,6 +1,6 @@
 # The SDK
 
-The SDK is the crate `oxiguitar-plugin`. It wraps the plugin interface in safe Rust: you implement traits, and `export_plugin!` makes the C entry point OxiGuitar loads.
+The SDK is the crate `oxiguitar-plugin`. It wraps the plugin interface in safe Rust: you implement traits, and `export_plugin!` makes the C entry point FuTab loads.
 
 ## The crate
 
@@ -8,12 +8,12 @@ The SDK is the crate `oxiguitar-plugin`. It wraps the plugin interface in safe R
 {{#include ../template/Cargo.toml}}
 ```
 
-Four things in it matter to OxiGuitar:
+Four things in it matter to FuTab:
 
 - **The `oxp` feature.** `export_plugin!` exports the entry point and the manifest's section only with it, so the same crate is an ordinary library for `cargo test` and a plugin file when built with `--features oxp --crate-type cdylib`. Without the feature in `Cargo.toml`, that build fails with "does not have the feature `oxp`".
 - **`unsafe_code = "deny"`**, not `"forbid"`: the two attributes `export_plugin!` generates (`#[unsafe(no_mangle)]` and `#[unsafe(link_section)]`) need `unsafe`, and allow it for themselves only. You write no `unsafe` code.
-- **`panic = "unwind"`**, Rust's default. A panic in a call is then caught, and the plugin is withdrawn for the rest of the session while OxiGuitar carries on; with `panic = "abort"` it closes OxiGuitar.
-- **The SDK's tag**: `v0.11.0`, the release of OxiGuitar you build for; it has interface 1.4, frozen with it (the SDK crates are at version 1.4.0, which follows the interface, not the program). A plugin loads in every OxiGuitar that has both the interface version its manifest asks for and the SDK's it was built with, and in every later one: 0.2 and later for 1.0 and 1.1, 0.5 and later for 1.2, 0.9 and later for 1.3, 0.11 and later for 1.4, 0.14 and later for 1.5 (the tag `v0.14.0`, crates 1.5.0, for an effect that follows its settings while the song plays), 0.17 and later for 1.6 (the tag `v0.17.0`, crates 1.6.0, for a format that reads or writes the notation it adds), 0.18 and later for 1.7 (the tag `v0.18.0`, crates 1.7.0, for a format recognised by its first element; [Interface versions](versions.md)).
+- **`panic = "unwind"`**, Rust's default. A panic in a call is then caught, and the plugin is withdrawn for the rest of the session while FuTab carries on; with `panic = "abort"` it closes FuTab.
+- **The SDK's tag**: `v0.11.0`, the release of FuTab you build for; it has interface 1.4, frozen with it (the SDK crates are at version 1.4.0, which follows the interface, not the program). A plugin loads in every FuTab that has both the interface version its manifest asks for and the SDK's it was built with, and in every later one: 0.2 and later for 1.0 and 1.1, 0.5 and later for 1.2, 0.9 and later for 1.3, 0.11 and later for 1.4, 0.14 and later for 1.5 (the tag `v0.14.0`, crates 1.5.0, for an effect that follows its settings while the song plays), 0.17 and later for 1.6 (the tag `v0.17.0`, crates 1.6.0, for a format that reads or writes the notation it adds), 0.18 and later for 1.7 (the tag `v0.18.0`, crates 1.7.0, for a format recognised by its first element; [Interface versions](versions.md)).
 
 ## The plugin
 
@@ -53,7 +53,7 @@ and takes the lock only to read or change `State`.
 | `notify(level, text)` | Shows a message in the footer, with the plugin's name: `Level::Warning` or `Error`. The footer isn't a log, so `Level::Info` messages aren't shown | 1.0 |
 | `settings()` | The plugin's settings: the JSON object under its id in settings.json ([Settings](settings.md)) | 1.0 |
 | `set_settings(map)` | Replaces them and saves settings.json | 1.0 |
-| `call_service(interface, method, input)` | Calls the service OxiGuitar chose for `interface`, which the manifest must list under `requires` ([Services](services.md)) | 1.0 |
+| `call_service(interface, method, input)` | Calls the service FuTab chose for `interface`, which the manifest must list under `requires` ([Services](services.md)) | 1.0 |
 | `redraw(tab)` | Asks the core to show one of the plugin's tabs again ([Tabs](tabs.md)) | 1.1 |
 | `score()` | The open score, or `None` ([Events](events.md)) | 1.1 |
 | `score2()`, `apply(revision, name, score)` | The open score version 2 with its revision, and a change to it the user can undo ([Tools](tools.md)) | 1.2 |

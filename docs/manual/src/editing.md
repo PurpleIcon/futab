@@ -1,6 +1,6 @@
 # Editing
 
-OxiGuitar is becoming an editor. This page grows with it: today you can move around the score, select, enter and change notes, change bars, copy and paste, add and change tracks ([Tracks and notation](tracks.md)), transpose, find a fingering, add effects, chords, text and lyrics, set the score's information, undo, and find the bars that don't add up.
+FuTab is becoming an editor. This page grows with it: today you can move around the score, select, enter and change notes, change bars, copy and paste, add and change tracks ([Tracks and notation](tracks.md)), transpose, find a fingering, add effects, chords, text and lyrics, set the score's information, undo, and find the bars that don't add up.
 
 ## The caret
 
@@ -105,7 +105,7 @@ Re-barring keeps a bar line wherever the song's structure needs one: at a repeat
 
 ## Copy, cut and paste
 
-OxiGuitar keeps its own clipboard: copying and pasting work inside OxiGuitar, not with other programs.
+FuTab keeps its own clipboard: copying and pasting work inside FuTab, not with other programs.
 
 - **Copy** (Ctrl + C) copies the selected beats or, with nothing selected, the beat at the caret. A selection across tracks copies whole bars of each selected track, with what the bars carry (time and key signatures, repeats, sections, tempo changes).
 - **Cut** (Ctrl + X) copies, then takes the beats out of their voice, or the bars out of every track.
@@ -128,7 +128,7 @@ Up is a positive number, down a negative one. **Keep the fingering** keeps each 
 
 ## Finding a fingering
 
-**Find Fingering** gives every note a string and fret again, so the passage is as easy to play as OxiGuitar can make it: tabs found online often put notes where no hand would. It runs at once, as one step for Undo. There are three ways in, as for Transpose:
+**Find Fingering** gives every note a string and fret again, so the passage is as easy to play as FuTab can make it: tabs found online often put notes where no hand would. It runs at once, as one step for Undo. There are three ways in, as for Transpose:
 
 - **Right-click on the page → Find Fingering**, or **Edit → Find Fingering for Selection**: the selection, or the caret's beat when nothing is selected. The notes just before and after stay as they are, and the new fingering joins them.
 - **Right-click on a track's name → Find Fingering**: the whole track.
@@ -196,7 +196,7 @@ Every other tool of the palette works too (v0.17); they have no keys, as in Guit
 - **Over several beats**: **Legato** (a slur), **Crescendo** and **Decrescendo**, the **8va**, **8vb**, **15ma** and **15mb** lines, **Extended Barre** (at the lowest fret the notes use; the Note tab changes the fret and makes it a half barre), **Slash** notation, the four **beaming** tools and **Force Groups** (equal tuplets bracketed as one group). Select the beats first: a slur runs from the first selected beat to the last; at the caret it joins the caret's beat to the next.
 - **On a note**: upper and lower **mordent**, **turn** and **inverted turn**, **wide vibrato**, **String Number**. **Left-Hand Fingering** and **Right-Hand Fingering** step through the fingers, one press each (the Note tab picks one directly).
 - **On a beat**: **Fermata** (at the beat's moment, for every track; the Note tab makes it short, medium or long), **Sustain Pedal** (down, then up, then off; on a selection, down at its start and up at its end), **Fade-out** and **Volume Swell** (one fade a beat), the whammy bar's slight **vibrato**, **Closed** and **Open Wah-Wah**, **Arpeggio** up and down, **Rasgueado** (the Note tab picks one of Guitar Pro's eighteen patterns), finger and thumb **Golpe**, **Pick Scrape** up and down, **Dead Slap**.
-- **Accidentals**: **Double Flat** to **Double Sharp** write the note with that accidental where one names it (C sharp as D flat), and **Change Accidental** steps through the ways to write it. A file's own spellings are kept where they differ from the ones OxiGuitar would choose.
+- **Accidentals**: **Double Flat** to **Double Sharp** write the note with that accidental where one names it (C sharp as D flat), and **Change Accidental** steps through the ways to write it. A file's own spellings are kept where they differ from the ones FuTab would choose.
 - **Single** and **Double Repeat Sign**: the bar (or the bar and the next) repeats the bar (or two bars) before it: they are copied in and the sign is drawn in their place. Pressing it again, or changing a note in the bar, takes the sign off and keeps the music.
 - **Nested N-tuplet** puts a tuplet inside the one the selected notes already have.
 

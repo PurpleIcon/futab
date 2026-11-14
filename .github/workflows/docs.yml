@@ -5,8 +5,8 @@
 #   pages and examples missing from the template show up before the merge.
 # - On pushes to main that touch them (so they describe the released program),
 #   and by hand: build them and publish the manual to
-#   https://mateusrdp.github.io/oxiguitar/ and the guide to
-#   https://mateusrdp.github.io/oxiguitar/plugin-guide/.
+#   https://purpleicon.github.io/futab/ and the guide to
+#   https://purpleicon.github.io/futab/plugin-guide/.
 #
 # Pages must use "GitHub Actions" as its source (Settings → Pages), and the
 # github-pages environment must allow main (Settings → Environments).

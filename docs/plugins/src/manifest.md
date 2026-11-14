@@ -2,7 +2,7 @@
 
 ## The file
 
-A plugin file is the plugin crate built as a C dynamic library, renamed to `NAME.oxp`. Inside it are the plugin's code and its manifest, in a section of its own (`oxg_manifest`; `oxgmanif` on Windows, whose section names hold eight characters). OxiGuitar reads that section with a parser of library files, so it learns what the plugin adds without running any of its code. Plugin files carry no signature: OxiGuitar checks that the file is whole (a truncated download is refused before it is loaded), that it is a library for this system and processor, and that it asks for an interface version OxiGuitar has.
+A plugin file is the plugin crate built as a C dynamic library, renamed to `NAME.oxp`. Inside it are the plugin's code and its manifest, in a section of its own (`oxg_manifest`; `oxgmanif` on Windows, whose section names hold eight characters). FuTab reads that section with a parser of library files, so it learns what the plugin adds without running any of its code. Plugin files carry no signature: FuTab checks that the file is whole (a truncated download is refused before it is loaded), that it is a library for this system and processor, and that it asks for an interface version FuTab has.
 
 You never write the section yourself: you write `manifest.json` beside `Cargo.toml`, and `export_plugin!` puts its bytes in the section when the file is built.
 
@@ -17,7 +17,7 @@ The template's:
 | Key | Required | What it is |
 | --- | --- | --- |
 | `interface` | yes | The interface version the plugin was built for, `"MAJOR.MINOR"`: `"1.0"`, or the version that brought what it uses ([Interface versions](versions.md)) |
-| `id` | yes | Unique among all plugins: 1 to 64 lowercase letters and digits, in parts joined by single `.` or `-`. Start it with your own name (`jane.chord-finder`); ids starting `oxiguitar.` are ours. Never change it once released: settings and the disabled list refer to it |
+| `id` | yes | Unique among all plugins: 1 to 64 lowercase letters and digits, in parts joined by single `.` or `-`. Start it with your own name (`jane.chord-finder`); ids starting `futab.` are ours. Never change it once released: settings and the disabled list refer to it |
 | `name` | yes | What users see, in the plugin manager and in footer messages |
 | `version` | yes | `MAJOR.MINOR.PATCH`, optionally `-PRERELEASE` (`1.2.0-beta.1`), equal to the crate's version. Of two files with the same `id`, the higher version is used |
 | `description` | no | One or two sentences for the plugin manager |
@@ -35,12 +35,12 @@ The template's:
 | `tools` | no | Its entries in the Tools menu; interface 1.2 ([Tools](tools.md)) |
 | `settings_window` | no | `true` for a settings window, opened from the plugin manager; interface 1.3 ([Settings](settings.md)) |
 | `track_sections` | no | Its sections of the Track tab; interface 1.3 ([Track sections](track-sections.md)) |
-| `folders` | no | The shared folders it reads, `"soundfonts"` and `"nam"`, which OxiGuitar creates at start; interface 1.3 ([Settings](settings.md)) |
+| `folders` | no | The shared folders it reads, `"soundfonts"` and `"nam"`, which FuTab creates at start; interface 1.3 ([Settings](settings.md)) |
 | `exporters` | no | Its entries in File → Export; interface 1.4 ([Exporters](exporters.md)) |
 | `needs` | no | The plugins it can't work without, each `{"id": …, "version": …}` with the lowest version that will do; interface 1.4 (below) |
 | `replaces` | no | The ids of plugins it succeeds; interface 1.4 (below) |
 
-**Unknown keys are refused when you build and ignored when OxiGuitar reads.** The test `export_plugin!` adds fails on a key the SDK doesn't know, so a typing mistake (`"servces"`) shows up in `cargo test`. An older OxiGuitar reading a newer plugin's manifest skips keys it doesn't know, so new keys never stop a plugin from loading.
+**Unknown keys are refused when you build and ignored when FuTab reads.** The test `export_plugin!` adds fails on a key the SDK doesn't know, so a typing mistake (`"servces"`) shows up in `cargo test`. An older FuTab reading a newer plugin's manifest skips keys it doesn't know, so new keys never stop a plugin from loading.
 
 A manifest is at most 1 MiB. Real ones are a few hundred bytes.
 
@@ -52,7 +52,7 @@ A plugin that is no use without another one lists it under `needs` (interface 1.
 "needs": [{ "id": "oxiguitar.midi", "version": "1.0.0" }]
 ```
 
-When a need isn't met (the plugin is missing, older than the version given, disabled, or can't be used here), OxiGuitar doesn't use yours: the footer says so as an error, and Tools → Plugins says why. A plugin that `replaces` the id you need meets the need too. For a service you can do without, list its interface under `requires` instead and handle the error when no plugin implements it ([Services](services.md)).
+When a need isn't met (the plugin is missing, older than the version given, disabled, or can't be used here), FuTab doesn't use yours: the footer says so as an error, and Tools → Plugins says why. A plugin that `replaces` the id you need meets the need too. For a service you can do without, list its interface under `requires` instead and handle the error when no plugin implements it ([Services](services.md)).
 
 ## Taking over another plugin's id
 
@@ -63,7 +63,7 @@ When a need isn't met (the plugin is missing, older than the version given, disa
 "replaces": ["jane.chord-finder"]
 ```
 
-A file with a replaced id is then treated as an older version of yours, whatever its version: Tools → Plugins lists it as replaced and it is never loaded. On the first start with your plugin, OxiGuitar copies what it kept under the old id to the new one, where the new id has nothing yet: the plugin's object in settings.json and its data folder (not its cache), and each score's track sections as the score is opened. Nothing old is deleted, so going back to an older version still works. A plugin can't need what it replaces.
+A file with a replaced id is then treated as an older version of yours, whatever its version: Tools → Plugins lists it as replaced and it is never loaded. On the first start with your plugin, FuTab copies what it kept under the old id to the new one, where the new id has nothing yet: the plugin's object in settings.json and its data folder (not its cache), and each score's track sections as the score is opened. Nothing old is deleted, so going back to an older version still works. A plugin can't need what it replaces.
 
 ## Conditions
 
@@ -77,16 +77,16 @@ Every list given must hold the running system's value; an empty or missing list 
 | --- | --- |
 | `os` | `linux`, `macos`, `windows` (later `android`, `ios`) |
 | `arch` | `x86_64`, `aarch64` |
-| `display` | `wayland`, `x11`, `windows`, `macos`: the display system OxiGuitar was built for. On Linux there are two builds of OxiGuitar, Wayland (the default) and X11 |
+| `display` | `wayland`, `x11`, `windows`, `macos`: the display system FuTab was built for. On Linux there are two builds of FuTab, Wayland (the default) and X11 |
 | `cpu` | Processor features the code needs, all of them, as Rust names them: `avx2`, `fma`, `avx512f`… on x86-64, `neon`, `dotprod`, `sve`… on ARM64. Since interface 1.3: a manifest asking for an older interface can't use it |
 
 A plugin whose conditions don't hold is listed in Tools → Plugins with the reason, and never loaded. A plugin file is already built for one system and processor, so you need `os` and `arch` only for a file that would load but can't work (a universal macOS file that works on Apple Silicon only, say). `display` matters for plugins that talk to the windowing system. Services have conditions of their own, beside the plugin's.
 
-`cpu` lets you ship a faster build beside a plain one. Build the plugin twice, with the same id and version: once plainly, and once with `-C target-cpu=x86-64-v3` and `"cpu": ["avx2", "fma"]` in its manifest. On a processor without those features that file can't be used and the plain one is; where both can be used, the one needing more features is. A feature name OxiGuitar doesn't know counts as missing, so a build is never loaded on a guess.
+`cpu` lets you ship a faster build beside a plain one. Build the plugin twice, with the same id and version: once plainly, and once with `-C target-cpu=x86-64-v3` and `"cpu": ["avx2", "fma"]` in its manifest. On a processor without those features that file can't be used and the plain one is; where both can be used, the one needing more features is. A feature name FuTab doesn't know counts as missing, so a build is never loaded on a guess.
 
 ## Rules the checks enforce
 
-OxiGuitar refuses a manifest that breaks these, and Tools → Plugins names the first problem; `cargo test` (through `export_plugin!`) names them all:
+FuTab refuses a manifest that breaks these, and Tools → Plugins names the first problem; `cargo test` (through `export_plugin!`) names them all:
 
 - the ids are valid and unique: the plugin's; each format's; each instrument's; each tab's; each service's within its interface;
 - names and tab titles aren't empty;
