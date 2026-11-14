@@ -53,13 +53,12 @@ fn main() {
                 description: "FuTab",
                 product: "FuTab",
                 copyright: "Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors",
-                original_filename: "oxiguitar.exe",
+                original_filename: "futab.exe",
             },
         );
-        let out =
-            PathBuf::from(std::env::var("OUT_DIR").expect("set by Cargo")).join("oxiguitar.res");
+        let out = PathBuf::from(std::env::var("OUT_DIR").expect("set by Cargo")).join("futab.res");
         std::fs::write(&out, res).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
-        println!("cargo:rustc-link-arg-bin=oxiguitar={}", out.display());
+        println!("cargo:rustc-link-arg-bin=futab={}", out.display());
     }
     println!("cargo:rerun-if-changed=build/winres.rs");
 }

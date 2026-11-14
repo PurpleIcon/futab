@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: OxiGuitar
-Upstream-Contact: https://github.com/mateusrdp/oxiguitar/issues
-Source: https://github.com/mateusrdp/oxiguitar
+Upstream-Name: FuTab
+Upstream-Contact: https://github.com/PurpleIcon/futab/issues
+Source: https://github.com/PurpleIcon/futab
 Comment:
  The orig tarball is upstream's tree without its copy of Noto Sans, which
  is built from fonts-noto-core instead, and without debian/
@@ -14,6 +14,7 @@ Files-Excluded:
 
 Files: *
 Copyright: 2026 Mateus Rocha de Paula and the OxiGuitar contributors
+           2026 The FuTab contributors
 License: GPL-3.0-or-later
 Comment:
  The programs link Slint, which is GPL-3.0-only, so the binaries as

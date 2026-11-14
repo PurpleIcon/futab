@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-//! `oxiguitar-cli render`: engrave a score file into PNG pages and/or a PDF.
+//! `futab-cli render`: engrave a score file into PNG pages and/or a PDF.
 
 use std::process::ExitCode;
 use std::time::Instant;
@@ -104,7 +104,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
                 Some(t) => tools.push(t),
                 None => {
                     return crate::usage_error(
-                        "--tool takes a tool id; `oxiguitar-cli tools` lists them",
+                        "--tool takes a tool id; `futab-cli tools` lists them",
                     );
                 }
             },
@@ -153,7 +153,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
     let meta = match Metadata::bravura() {
         Ok(m) => m,
         Err(e) => {
-            eprintln!("oxiguitar-cli: Bravura metadata: {e}");
+            eprintln!("futab-cli: Bravura metadata: {e}");
             return ExitCode::FAILURE;
         }
     };
@@ -177,7 +177,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
             // pieces of at most PNG_MAX pixels along its length.
             for view in png_pieces(page, scale) {
                 let Some(pixmap) = raster.render(page, &fonts, &theme, &view) else {
-                    eprintln!("oxiguitar-cli: sheet {} is empty", p + 1);
+                    eprintln!("futab-cli: sheet {} is empty", p + 1);
                     return ExitCode::FAILURE;
                 };
                 n += 1;
@@ -187,7 +187,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
                     .map_err(|e| e.to_string())
                     .and_then(|b| std::fs::write(&path, b).map_err(|e| e.to_string()));
                 if let Err(e) = written {
-                    eprintln!("oxiguitar-cli: {path}: {e}");
+                    eprintln!("futab-cli: {path}: {e}");
                     return ExitCode::FAILURE;
                 }
                 if !quiet {
@@ -221,7 +221,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
         match to_pdf(&pages, &fonts, &Theme::PRINT, title) {
             Ok(bytes) => {
                 if let Err(e) = std::fs::write(&path, bytes) {
-                    eprintln!("oxiguitar-cli: {path}: {e}");
+                    eprintln!("futab-cli: {path}: {e}");
                     return ExitCode::FAILURE;
                 }
                 if !quiet {
@@ -229,7 +229,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
                 }
             }
             Err(e) => {
-                eprintln!("oxiguitar-cli: {e}");
+                eprintln!("futab-cli: {e}");
                 return ExitCode::FAILURE;
             }
         }

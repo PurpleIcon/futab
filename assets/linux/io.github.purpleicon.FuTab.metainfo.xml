@@ -67,8 +67,8 @@
     <keyword>Guitar Pro</keyword>
   </keywords>
   <provides>
-    <binary>oxiguitar</binary>
-    <binary>oxiguitar-cli</binary>
+    <binary>futab</binary>
+    <binary>futab-cli</binary>
     <mediatype>application/x-gtp</mediatype>
   </provides>
   <supports>

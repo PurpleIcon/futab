@@ -98,7 +98,7 @@ pub fn start_in_safe_mode(folders: Option<Folders>, display: &str, core: Arc<dyn
     begin(folders, display, core, true, true)
 }
 
-/// Starts the host for a program without a window (`oxiguitar-cli`): the
+/// Starts the host for a program without a window (`futab-cli`): the
 /// same folders, settings.json and plugins as the app, read only. Nothing
 /// is created, settings are never saved, and the notices hold only what
 /// is wrong (an unreadable settings.json, a plugin file that can't be

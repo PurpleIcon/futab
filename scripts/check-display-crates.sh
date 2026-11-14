@@ -18,7 +18,7 @@ wayland='^(wayland-.*|smithay-client-toolkit|smithay-clipboard|sctk-adwaita|call
 failed=0
 crates() {
     # The crates a build of the app compiles for a target, one name a line.
-    cargo tree --locked -q -p oxiguitar-app -e normal,build --target "$1" --prefix none $2 \
+    cargo tree --locked -q -p futab -e normal,build --target "$1" --prefix none $2 \
         | sed -E 's/ v[0-9].*$//' | sort -u
 }
 
@@ -37,7 +37,7 @@ for target in x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu; do
     }
 
     # Keyboard maps are shared; their X11 part only in the X11 build.
-    if cargo tree --locked -q -p oxiguitar-app -e features --target "$target" -i xkbcommon-dl 2> /dev/null \
+    if cargo tree --locked -q -p futab -e features --target "$target" -i xkbcommon-dl 2> /dev/null \
         | grep -q 'xkbcommon-dl feature "x11"'; then
         echo "::error title=Two Linux builds::the Wayland build for $target turns on xkbcommon-dl's X11 support"
         failed=1

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 #
-# Builds OxiGuitar's Linux packages from release binaries already built for
+# Builds FuTab's Linux packages from release binaries already built for
 # this machine's architecture: a .deb and an .rpm of each build of the core,
 # and one AppImage that holds both builds. None carries a plugin: the plugins
 # live in repositories of their own (#165) with packages of their own. The
@@ -16,24 +16,24 @@
 # Usage: scripts/package/linux.sh deb|rpm|all|appimage VERSION [wayland|x11]
 #   all      the .deb and the .rpm of one build
 #   VERSION  the package version, from scripts/package/version.sh
-#   wayland  the Wayland build (the default): packages `oxiguitar`
-#   x11      the X11 build, deprecated: packages `oxiguitar-x11`, which
-#            Provide, Conflict with and Replace `oxiguitar`
+#   wayland  the Wayland build (the default): packages `futab`
+#   x11      the X11 build, deprecated: packages `futab-x11`, which
+#            Provide, Conflict with and Replace `futab`
 #            (docs/design/plugins.md, the two Linux builds)
 #   appimage takes no build: it holds both (see build_appimage), from
 #            programs built on Ubuntu 22.04
 #            (scripts/package/build-linux.sh)
-# Reads:  target/release/oxiguitar (the Wayland build) and
-#         target/x11/release/oxiguitar (the X11 build, built with
+# Reads:  target/release/futab (the Wayland build) and
+#         target/x11/release/futab (the X11 build, built with
 #         `--no-default-features --features x11 --target-dir target/x11`),
-#         target/release/oxiguitar-cli,
+#         target/release/futab-cli,
 #         dist/THIRD-PARTY-LICENSES.html (scripts/package/licenses.sh)
 #         and, for the AppImage, $APPIMAGE_RUNTIME (the type 2 runtime for
 #         this architecture, from github.com/AppImage/type2-runtime).
-# Writes: dist/oxiguitar_VERSION_ARCH.deb, dist/oxiguitar-VERSION-1.ARCH.rpm;
-#         for the X11 build dist/oxiguitar-x11_…deb and
-#         dist/oxiguitar-x11-…rpm; for `appimage`
-#         dist/OxiGuitar-VERSION-ARCH.AppImage
+# Writes: dist/futab_VERSION_ARCH.deb, dist/futab-VERSION-1.ARCH.rpm;
+#         for the X11 build dist/futab-x11_…deb and
+#         dist/futab-x11-…rpm; for `appimage`
+#         dist/FuTab-VERSION-ARCH.AppImage
 #
 # Only the .deb and the .rpm register the Guitar Pro file types (UI-4); the
 # AppImage registers nothing (the manual shows how to do it by hand).
@@ -47,8 +47,8 @@ root="$(cd "$(dirname "$0")/../.." && pwd)"
 id="io.github.purpleicon.FuTab"
 bin="$root/target/release"
 case "$build" in
-    wayland) app="$root/target/release/oxiguitar"; package=oxiguitar ;;
-    x11) app="$root/target/x11/release/oxiguitar"; package=oxiguitar-x11 ;;
+    wayland) app="$root/target/release/futab"; package=futab ;;
+    x11) app="$root/target/x11/release/futab"; package=futab-x11 ;;
     *) echo "unknown build $build: wayland or x11" >&2; exit 1 ;;
 esac
 dist="$root/dist"
@@ -64,22 +64,22 @@ case "$arch" in
 esac
 
 summary="Guitar tablature and score viewer"
-description="OxiGuitar opens Guitar Pro files (.gp, .gpx, .gp5, .gp4, .gp3) and
+description="FuTab opens Guitar Pro files (.gp, .gpx, .gp5, .gp4, .gp3) and
 shows them as standard notation and tablature in four layouts, with any
 set of tracks together. It edits and saves them, exports them to PDF, and
 plays them with the system's sound set or better ones the user adds
-(SoundFont and SFZ). It opens and plays files through plugins, which are
-packages of their own: oxiguitar-guitarpro, oxiguitar-midi, oxiguitar-alsa
+(SoundFont and SFZ). It opens and plays files through OxiGuitar's plugins,
+which are packages of their own: oxiguitar-guitarpro, oxiguitar-midi, oxiguitar-alsa
 and oxiguitar-pipewire (installed with it by default), oxiguitar-nam for
 amplifier models and oxiguitar-eq for an equalizer. No telemetry: it never
-uploads anything."
+uploads anything. FuTab is a fork of OxiGuitar."
 if [[ "$build" == x11 ]]; then
     summary="$summary (X11 build, deprecated)"
     description="$description
 
 This is the X11 build, for desktops that still run an X server. It is
 deprecated and will be dropped; desktops with Wayland should install the
-package oxiguitar instead."
+package futab instead."
 fi
 
 # Libraries the program loads at run time rather than links, so the
@@ -109,11 +109,11 @@ else
     rpm_recommends=("libGL.so.1()(64bit)" "libdbus-1.so.3()(64bit)" "xdg-desktop-portal")
 fi
 
-x11_app="$root/target/x11/release/oxiguitar"
+x11_app="$root/target/x11/release/futab"
 need=()
 case "$what" in
-    appimage) need=("$root/target/release/oxiguitar" "$x11_app" "$bin/oxiguitar-cli") ;;
-    *) need=("$app" "$bin/oxiguitar-cli") ;;
+    appimage) need=("$root/target/release/futab" "$x11_app" "$bin/futab-cli") ;;
+    *) need=("$app" "$bin/futab-cli") ;;
 esac
 for f in "${need[@]}"; do
     [[ -x "$f" ]] || { echo "missing $f: build it first" >&2; exit 1; }
@@ -126,8 +126,8 @@ done
 # The files every package installs, under a /usr prefix.
 stage() {
     local to="$1"
-    install -Dm755 "$app" "$to/usr/bin/oxiguitar"
-    install -Dm755 "$bin/oxiguitar-cli" "$to/usr/bin/oxiguitar-cli"
+    install -Dm755 "$app" "$to/usr/bin/futab"
+    install -Dm755 "$bin/futab-cli" "$to/usr/bin/futab-cli"
     install -Dm644 "$root/assets/linux/$id.desktop" "$to/usr/share/applications/$id.desktop"
     install -Dm644 "$root/assets/linux/$id.xml" "$to/usr/share/mime/packages/$id.xml"
     install -Dm644 "$root/assets/linux/$id.metainfo.xml" "$to/usr/share/metainfo/$id.metainfo.xml"
@@ -138,7 +138,7 @@ stage() {
     install -Dm644 "$root/assets/icon/futab.svg" \
         "$to/usr/share/icons/hicolor/scalable/apps/$id.svg"
     install -d "$to/usr/share/man/man1"
-    for page in oxiguitar oxiguitar-cli; do
+    for page in futab futab-cli; do
         gzip -9n -c "$root/assets/linux/man/$page.1" > "$to/usr/share/man/man1/$page.1.gz"
     done
     local doc="$to/usr/share/doc/$package"
@@ -151,13 +151,14 @@ stage() {
 }
 
 # The contact in the packages' Maintainer field and changelog: always the
-# GitHub issue tracker, never a personal email (Mateus, 18 Oct 2026).
+# GitHub issue tracker, never a personal email (as OxiGuitar decided:
+# Mateus, 18 Oct 2026).
 # Debian Policy 5.6.2 asks for an email address, so lintian reports
 # malformed-contact and bogus-mail-host-in-debian-changelog (release.yml
 # suppresses those two tags, and only those); dpkg and apt
 # accept it. A package in Debian's own archive carries its Debian
 # maintainer's address instead (debian/).
-maintainer="Mateus Rocha de Paula <https://github.com/mateusrdp/oxiguitar/issues>"
+maintainer="The FuTab contributors <https://github.com/PurpleIcon/futab/issues>"
 
 # What every .deb needs beside its files: doc/PACKAGE/changelog.gz in
 # Debian's format (one entry for this version, pointing to the full
@@ -170,7 +171,7 @@ deb_extras() {
     {
         echo "$name ($version) unstable; urgency=medium"
         echo
-        echo "  * OxiGuitar $version. Every change is listed in"
+        echo "  * FuTab $version. Every change is listed in"
         echo "    $full."
         echo
         echo " -- $maintainer  $when"
@@ -186,11 +187,12 @@ build_deb() {
     # Debian keeps the licence as doc/<package>/copyright.
     {
         echo "Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/"
-        echo "Upstream-Name: OxiGuitar"
-        echo "Source: https://github.com/mateusrdp/oxiguitar"
+        echo "Upstream-Name: FuTab"
+        echo "Source: https://github.com/PurpleIcon/futab"
         echo
         echo "Files: *"
         echo "Copyright: 2026 Mateus Rocha de Paula and the OxiGuitar contributors"
+        echo "           2026 The FuTab contributors"
         echo "License: GPL-3.0-or-later"
         echo " The distributed program is under GPL-3.0 (Slint is GPL-3.0-only)."
         echo " On Debian systems the full licence is in /usr/share/common-licenses/GPL-3."
@@ -203,7 +205,7 @@ build_deb() {
     mkdir -p "$work/shlibs/debian"
     touch "$work/shlibs/debian/control"
     local linked
-    linked="$(cd "$work/shlibs" && dpkg-shlibdeps -O -e"$tree/usr/bin/oxiguitar" -e"$tree/usr/bin/oxiguitar-cli" 2> /dev/null \
+    linked="$(cd "$work/shlibs" && dpkg-shlibdeps -O -e"$tree/usr/bin/futab" -e"$tree/usr/bin/futab-cli" 2> /dev/null \
         | sed -n 's/^shlibs:Depends=//p')"
     local size
     size="$(du -sk --exclude=DEBIAN "$tree" | cut -f1)"
@@ -223,13 +225,13 @@ build_deb() {
         echo "Suggests: oxiguitar-nam, oxiguitar-eq, oxiguitar-musicxml, oxiguitar-midi-file, oxiguitar-tuxguitar"
         if [[ "$build" == x11 ]]; then
             # The same program for another display system: one or the other.
-            echo "Provides: oxiguitar"
-            echo "Conflicts: oxiguitar"
-            echo "Replaces: oxiguitar"
+            echo "Provides: futab"
+            echo "Conflicts: futab"
+            echo "Replaces: futab"
         fi
         echo "Section: sound"
         echo "Priority: optional"
-        echo "Homepage: https://github.com/mateusrdp/oxiguitar"
+        echo "Homepage: https://github.com/PurpleIcon/futab"
         echo "Description: $summary"
         # Continuation lines start with a space; empty lines are " .".
         sed 's/^/ /; s/^ $/ ./' <<< "$description"
@@ -254,7 +256,7 @@ build_rpm() {
         echo "Release: 1"
         echo "Summary: $summary"
         echo "License: GPL-3.0-or-later AND GPL-3.0-only"
-        echo "URL: https://github.com/mateusrdp/oxiguitar"
+        echo "URL: https://github.com/PurpleIcon/futab"
         for r in "${rpm_runtime[@]}"; do echo "Requires: $r"; done
         echo "Recommends: oxiguitar-guitarpro"
         echo "Recommends: oxiguitar-midi"
@@ -267,8 +269,8 @@ build_rpm() {
         echo "Suggests: oxiguitar-tuxguitar"
         for r in "${rpm_recommends[@]}"; do echo "Recommends: $r"; done
         if [[ "$build" == x11 ]]; then
-            echo "Provides: oxiguitar = ${version//-/.}"
-            echo "Conflicts: oxiguitar"
+            echo "Provides: futab = ${version//-/.}"
+            echo "Conflicts: futab"
         fi
         # The binaries are built and stripped by Cargo.
         echo "%global debug_package %{nil}"
@@ -283,14 +285,14 @@ build_rpm() {
         echo
         echo "%files"
         echo "%license /usr/share/licenses/$package/LICENSE"
-        echo "/usr/bin/oxiguitar"
-        echo "/usr/bin/oxiguitar-cli"
+        echo "/usr/bin/futab"
+        echo "/usr/bin/futab-cli"
         echo "/usr/share/applications/$id.desktop"
         echo "/usr/share/mime/packages/$id.xml"
         echo "/usr/share/metainfo/$id.metainfo.xml"
         echo "/usr/share/icons/hicolor/*/apps/$id.*"
-        echo "/usr/share/man/man1/oxiguitar.1.gz"
-        echo "/usr/share/man/man1/oxiguitar-cli.1.gz"
+        echo "/usr/share/man/man1/futab.1.gz"
+        echo "/usr/share/man/man1/futab-cli.1.gz"
         echo "%doc /usr/share/doc/$package"
     } > "$spec"
     # Fedora's shared-mime-info and desktop-file-utils rebuild their
@@ -317,9 +319,9 @@ build_rpm() {
 # plugin file alone) into the user's plugin folder (#165).
 build_appimage() {
     local runtime="${APPIMAGE_RUNTIME:?set APPIMAGE_RUNTIME to the type 2 runtime for $arch}"
-    local dir="$work/OxiGuitar.AppDir"
+    local dir="$work/FuTab.AppDir"
     stage "$dir"
-    install -Dm755 "$x11_app" "$dir/usr/bin/oxiguitar-x11"
+    install -Dm755 "$x11_app" "$dir/usr/bin/futab-x11"
     # The libraries the programs load that not every system has
     # (scripts/package/build-linux.sh), found through the programs' RPATH,
     # and their copyright files.
@@ -328,8 +330,8 @@ build_appimage() {
         echo "missing $libs: build with scripts/package/build-linux.sh" >&2
         exit 1
     }
-    install -d "$dir/usr/lib/oxiguitar/libs" "$dir/usr/share/doc/$package/bundled"
-    install -m644 "$libs"/*.so* "$dir/usr/lib/oxiguitar/libs/"
+    install -d "$dir/usr/lib/futab/libs" "$dir/usr/share/doc/$package/bundled"
+    install -m644 "$libs"/*.so* "$dir/usr/lib/futab/libs/"
     install -m644 "$libs"/licenses/* "$dir/usr/share/doc/$package/bundled/"
     # The desktop entry and icon at the top, as the AppImage format wants,
     # and AppRun choosing the program. The mime file stays inside, unused.
@@ -338,7 +340,7 @@ build_appimage() {
     cp "$root/assets/icon/png/futab-256.png" "$dir/.DirIcon"
     install -m755 "$root/scripts/package/AppRun" "$dir/AppRun"
     mksquashfs "$dir" "$work/image.squashfs" -root-owned -noappend -comp zstd -quiet
-    local out="$dist/OxiGuitar-$version-$arch.AppImage"
+    local out="$dist/FuTab-$version-$arch.AppImage"
     cat "$runtime" "$work/image.squashfs" > "$out"
     chmod 755 "$out"
     echo "Built $out"

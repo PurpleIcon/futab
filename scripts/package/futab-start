@@ -11,6 +11,6 @@
 # Wayland build starts and says what it is missing.
 
 if [ -z "${WAYLAND_DISPLAY:-}" ] && [ -z "${WAYLAND_SOCKET:-}" ] && [ -n "${DISPLAY:-}" ]; then
-    exec /app/bin/oxiguitar-x11 "$@"
+    exec /app/bin/futab-x11 "$@"
 fi
-exec /app/bin/oxiguitar "$@"
+exec /app/bin/futab "$@"

@@ -62,7 +62,7 @@ replace_once("Cargo.toml", r'(\[workspace\.package\][^\[]*?^version = )"' + re.e
              r'\1"' + new + '"', "the workspace version", re.M | re.S)
 for lock in ("Cargo.lock", "fuzz/Cargo.lock", "spikes/gui/Cargo.lock"):
     text = read(lock)
-    out, n = re.subn(r'(name = "oxiguitar[^"]*"\nversion = )"' + re.escape(old) + '"', r'\1"' + new + '"', text)
+    out, n = re.subn(r'(name = "(?:oxiguitar|futab)[^"]*"\nversion = )"' + re.escape(old) + '"', r'\1"' + new + '"', text)
     if n == 0 and lock == "Cargo.lock":
         sys.exit(f"{lock}: none of our crates is at {old}")
     if n:  # the fuzz and spikes locks are bumped only when they were at the old version
@@ -73,7 +73,7 @@ for manifest in ("plugins/test/manifest.json", "plugins/test-second/manifest.jso
     replace_once(manifest, r'("version": )"' + re.escape(old) + '"', r'\1"' + new + '"', "the version")
 
 # The Debian changelog's first entry.
-replace_once("debian/changelog", r'^(oxiguitar \()' + re.escape(old) + r'(\+ds-\d+\))', r'\g<1>' + new + r'\2',
+replace_once("debian/changelog", r'^(futab \()' + re.escape(old) + r'(\+ds-\d+\))', r'\g<1>' + new + r'\2',
              "the first entry", re.M)
 
 # CHANGELOG.md: [Unreleased] becomes the release.
@@ -101,7 +101,7 @@ if not first:
 meta = "assets/linux/io.github.purpleicon.FuTab.metainfo.xml"
 entry = (f'    <release version="{new}" date="{date}" type="development">\n'
          f"      <description>\n        <p>{html.escape(first, quote=False)}</p>\n      </description>\n"
-         f"      <url>https://github.com/mateusrdp/oxiguitar/releases/tag/v{new}</url>\n    </release>\n")
+         f"      <url>https://github.com/PurpleIcon/futab/releases/tag/v{new}</url>\n    </release>\n")
 replace_once(meta, r"(<releases>\n)", lambda m: m.group(1) + entry, "<releases>")
 
 # Last look: no file we changed may still say the old version where it must
@@ -109,7 +109,7 @@ replace_once(meta, r"(<releases>\n)", lambda m: m.group(1) + entry, "<releases>"
 for path in ("Cargo.toml", "plugins/test/manifest.json", "plugins/test-second/manifest.json"):
     if f'"{old}"' in read(path):
         sys.exit(f"{path} still says {old}")
-if not read("debian/changelog").startswith(f"oxiguitar ({new}+ds-"):
+if not read("debian/changelog").startswith(f"futab ({new}+ds-"):
     sys.exit("debian/changelog was not updated")
 
 for path, text in changes.items():

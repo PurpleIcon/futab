@@ -17,12 +17,12 @@
 #      the template's workflow publishes (one universal file on macOS), and
 #      the contract suite on that.
 #   4. Puts the release file in a plugin folder and opens the template's
-#      sample through it with oxiguitar-cli (info, and a PNG of the first
+#      sample through it with futab-cli (info, and a PNG of the first
 #      page).
 #
 # Usage: scripts/check-plugin-template.sh [WORK-FOLDER]
 #   WORK-FOLDER  where to copy the template (default: a new temporary folder)
-# Needs oxiguitar-cli and oxiguitar-plugin-test built (cargo build -p ...);
+# Needs futab-cli and oxiguitar-plugin-test built (cargo build -p ...);
 # it builds them if they are missing.
 
 set -euo pipefail
@@ -81,7 +81,7 @@ cargo test
 exe=""
 [[ "$(rustc -vV | sed -n 's/^host: //p')" == *windows* ]] && exe=".exe"
 bin="$root/target/debug"
-for program in oxiguitar-plugin-test oxiguitar-cli; do
+for program in oxiguitar-plugin-test futab-cli; do
     if [[ ! -x "$bin/$program$exe" ]]; then
         (cd "$root" && cargo build --locked -p "$program")
     fi
@@ -106,9 +106,9 @@ mkdir -p "$home/plugins"
 cp "$oxp" "$home/plugins/example.oxp"
 export OXIGUITAR_HOME="$home"
 sample="$plugin/samples/open-strings.extab"
-"$bin/oxiguitar-cli$exe" info "$sample" | tee "$work/info.txt"
+"$bin/futab-cli$exe" info "$sample" | tee "$work/info.txt"
 grep -q "Example tab" "$work/info.txt"
 grep -q "Open Strings" "$work/info.txt"
-"$bin/oxiguitar-cli$exe" render "$sample" --png "$work/open-strings" > /dev/null
+"$bin/futab-cli$exe" render "$sample" --png "$work/open-strings" > /dev/null
 ls "$work"/open-strings*.png
 echo "check-plugin-template: the template builds a working plugin"

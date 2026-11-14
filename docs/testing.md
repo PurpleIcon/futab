@@ -30,7 +30,7 @@ M1 asks that a 300-bar, 8-track file opens in under a second. `crates/oxiguitar-
 Run it with:
 
 ```sh
-cargo test --release -p oxiguitar-app speed -- --nocapture
+cargo test --release -p futab speed -- --nocapture
 ```
 
 CI's "Speed budget" job runs it on Linux x86_64 on every pull request. Its times show as a notice on the run.

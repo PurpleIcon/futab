@@ -6,7 +6,7 @@ OxiGuitar aims for Debian's main archive (ADR 0008, answer 5): both packages, `o
 
 ## The first audit (19 Oct 2026, Debian sid)
 
-424 crates: the app (both Linux builds), `oxiguitar-cli` and the five basic plugins, for x86_64 and aarch64, normal and build dependencies.
+424 crates: the app (both Linux builds), `futab-cli` and the five basic plugins, for x86_64 and aarch64, normal and build dependencies.
 
 | Status | Crates | Meaning |
 | --- | --- | --- |
@@ -36,4 +36,4 @@ So `debian/` can't build from Debian's crates alone (it builds from a vendor com
 - **Noto Sans comes from `fonts-noto-core`.** `debian/rules` links Debian's `NotoSans-Regular.ttf` where ours was, and the programs embed it when they are built (`Built-Using: fonts-noto`). Bravura stays ours (Mateus, 18 Oct 2026). Debian's Noto Sans is older (2.004 against our 2.015), so text in the Debian build may sit a little differently from our references; the visual-regression tests run upstream, with ours.
 - **The crates come from `vendor/` for now**, the `orig-vendor` component tarball: `cargo vendor` of `Cargo.lock`, with no prebuilt binaries (the Windows crates' import libraries, test DLLs, WebAssembly objects, a minified web worker) and without pdf-writer's example ICC profile, which doesn't allow changes. Each crate keeps its package checksum, as Cargo.lock pins it. The NOTICE files of the vendored crates are installed with `oxiguitar`. When Debian has every crate (the audit above), `prepare-debian` links Debian's registry instead (`--link-from-system`), `Build-Depends` names the `librust-*-dev` packages, and the vendor component goes.
 - **The contact is a placeholder** (Mateus, 18 Oct 2026), never a personal address. Our own .deb packages name the issue tracker, but Debian's tools refuse anything but an email address in `debian/changelog`, so `debian/` says `OxiGuitar <maintainer@oxiguitar.invalid>` (`.invalid` is reserved, so it can never reach anyone). A Debian upload needs its Debian maintainer's address there. CI allows lintian's tags about the contact, and the first upload's `Closes:` (initial-upload-closes-no-bugs) waits for an ITP bug.
-- **Not yet:** the X11 build (`oxiguitar-x11`), deprecated, isn't in `debian/`.
+- **Not yet:** the X11 build (`futab-x11`), deprecated, isn't in `debian/`.

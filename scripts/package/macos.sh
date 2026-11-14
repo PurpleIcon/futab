@@ -2,15 +2,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 #
-# Builds OxiGuitar.app and its disk image, from a universal binary. The app
+# Builds FuTab.app and its disk image, from a universal binary. The app
 # holds no plugin: they have repositories of their own (#165) and come
 # through their own .pkg and zip files. Runs on
 # macOS (iconutil, codesign, hdiutil). Used by .github/workflows/release.yml.
 #
 # Usage: scripts/package/macos.sh VERSION
-# Reads:  dist/macos/oxiguitar (universal, from lipo),
+# Reads:  dist/macos/futab (universal, from lipo),
 #         dist/THIRD-PARTY-LICENSES.html
-# Writes: dist/OxiGuitar-VERSION-macos-universal.dmg
+# Writes: dist/FuTab-VERSION-macos-universal.dmg
 #
 # The app is not signed with a developer certificate, only "ad hoc" (no
 # identity), which Apple Silicon needs to run it at all; Gatekeeper still
@@ -30,15 +30,15 @@ trap 'rm -rf "$work"' EXIT
 # The bundle's version must be numbers only: 0.1.0~dev... becomes 0.1.0.
 plain="${version%%~*}"
 
-app="$work/dmg/OxiGuitar.app"
+app="$work/dmg/FuTab.app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-install -m755 "$dist/macos/oxiguitar" "$app/Contents/MacOS/oxiguitar"
+install -m755 "$dist/macos/futab" "$app/Contents/MacOS/futab"
 sed "s/@VERSION@/$plain/g" "$root/assets/macos/Info.plist" > "$app/Contents/Info.plist"
 plutil -lint "$app/Contents/Info.plist"
 printf 'APPL????' > "$app/Contents/PkgInfo"
 
 # The app and document icon, from the icon PNGs (drawn from assets/icon/futab.svg).
-set_dir="$work/OxiGuitar.iconset"
+set_dir="$work/FuTab.iconset"
 mkdir -p "$set_dir"
 png="$root/assets/icon/png"
 for s in 16 32 128 256 512; do
@@ -47,7 +47,7 @@ for s in 16 32 128 256 512; do
         cp "$png/futab-$((s * 2)).png" "$set_dir/icon_${s}x${s}@2x.png"
     fi
 done
-iconutil -c icns -o "$app/Contents/Resources/OxiGuitar.icns" "$set_dir"
+iconutil -c icns -o "$app/Contents/Resources/FuTab.icns" "$set_dir"
 
 res="$app/Contents/Resources"
 cp "$root/LICENSE" "$res/LICENSE.txt"
@@ -60,7 +60,7 @@ codesign --verify --verbose "$app"
 
 # The disk image: the app and a link to Applications to drag it onto.
 ln -s /Applications "$work/dmg/Applications"
-out="$dist/OxiGuitar-$version-macos-universal.dmg"
+out="$dist/FuTab-$version-macos-universal.dmg"
 rm -f "$out"
-hdiutil create -volname "OxiGuitar" -srcfolder "$work/dmg" -fs HFS+ -format UDZO -ov "$out"
+hdiutil create -volname "FuTab" -srcfolder "$work/dmg" -fs HFS+ -format UDZO -ov "$out"
 echo "Built $out"

@@ -94,23 +94,23 @@ The program opens files only through format plugins (one per format, `.oxp` file
 Run the desktop app, optionally with a file to open:
 
 ```
-cargo run --release -p oxiguitar-app -- path/to/your/song.gp
+cargo run --release -p futab -- path/to/your/song.gp
 ```
 
-That is the Wayland build, the default. On a desktop with only an X server, build the X11 one instead: `cargo run --release -p oxiguitar-app --no-default-features --features x11 -- song.gp`. Each build carries only its own display system's code, and says which build you need if it can't find its session.
+That is the Wayland build, the default. On a desktop with only an X server, build the X11 one instead: `cargo run --release -p futab --no-default-features --features x11 -- song.gp`. Each build carries only its own display system's code, and says which build you need if it can't find its session.
 
-File → New starts a score; OxiGuitar's manual pages [Editing](https://mateusrdp.github.io/oxiguitar/editing.html) and [Keyboard and mouse](https://mateusrdp.github.io/oxiguitar/keys.html) list the keys, which are the same in FuTab. On Linux, the Open and Export dialogs come from the desktop portal (`xdg-desktop-portal` with your desktop's backend, installed by default with GNOME and KDE). The binary is `target/release/oxiguitar`; it finds the plugins in `target/lib/futab/plugins/`, in OxiGuitar's system plugin folders, and in your own plugin folder (`~/.local/share/futab/plugins/` on Linux; OxiGuitar's manual page [Settings and plugins](https://mateusrdp.github.io/oxiguitar/plugins.html) explains the folders, which FuTab names `futab` instead). On Wayland, desktops take an app's icon from its desktop entry rather than from the window; to give a build from source (or an AppImage) its icon, a menu entry and the Guitar Pro file types, run `scripts/install-desktop-entry.sh [path to the program]` (it writes only to `~/.local/share`; `--uninstall` removes it).
+File → New starts a score; OxiGuitar's manual pages [Editing](https://mateusrdp.github.io/oxiguitar/editing.html) and [Keyboard and mouse](https://mateusrdp.github.io/oxiguitar/keys.html) list the keys, which are the same in FuTab. On Linux, the Open and Export dialogs come from the desktop portal (`xdg-desktop-portal` with your desktop's backend, installed by default with GNOME and KDE). The binary is `target/release/futab`; it finds the plugins in `target/lib/futab/plugins/`, in OxiGuitar's system plugin folders, and in your own plugin folder (`~/.local/share/futab/plugins/` on Linux; OxiGuitar's manual page [Settings and plugins](https://mateusrdp.github.io/oxiguitar/plugins.html) explains the folders, which FuTab names `futab` instead). On Wayland, desktops take an app's icon from its desktop entry rather than from the window; to give a build from source (or an AppImage) its icon, a menu entry and the Guitar Pro file types, run `scripts/install-desktop-entry.sh [path to the program]` (it writes only to `~/.local/share`; `--uninstall` removes it).
 
 Try the command-line tool, which reads files through the same plugins (Guitar Pro 3 to 8: .gp3, .gp4, .gp5, .gpx, .gp) and engraves them into PNG pages and a PDF:
 
 ```
-cargo run --release -p oxiguitar-cli -- info fixtures/gp/oxiguitar-test-song.gp
-cargo run --release -p oxiguitar-cli -- info --bars path/to/your/song.gp5
-cargo run --release -p oxiguitar-cli -- render path/to/your/song.gp --png page --pdf song.pdf
-cargo run --release -p oxiguitar-cli -- render path/to/your/song.gp --tracks all --dark --pdf song-dark.pdf
-cargo run --release -p oxiguitar-cli -- render path/to/your/song.gp --tool infer-key-signatures --no-dynamics --pdf keys.pdf
-cargo run --release -p oxiguitar-cli -- convert path/to/your/song.gp3 song.gp
-cargo run --release -p oxiguitar-cli -- play path/to/your/song.gp --wav song.wav
+cargo run --release -p futab-cli -- info fixtures/gp/oxiguitar-test-song.gp
+cargo run --release -p futab-cli -- info --bars path/to/your/song.gp5
+cargo run --release -p futab-cli -- render path/to/your/song.gp --png page --pdf song.pdf
+cargo run --release -p futab-cli -- render path/to/your/song.gp --tracks all --dark --pdf song-dark.pdf
+cargo run --release -p futab-cli -- render path/to/your/song.gp --tool infer-key-signatures --no-dynamics --pdf keys.pdf
+cargo run --release -p futab-cli -- convert path/to/your/song.gp3 song.gp
+cargo run --release -p futab-cli -- play path/to/your/song.gp --wav song.wav
 ```
 
 ## Writing plugins

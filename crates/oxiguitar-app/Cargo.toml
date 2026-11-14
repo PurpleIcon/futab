@@ -1,6 +1,6 @@
 [package]
-name = "oxiguitar-app"
-description = "The OxiGuitar desktop window: open, view and export Guitar Pro scores."
+name = "futab"
+description = "The FuTab desktop window: open, view and export Guitar Pro scores."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,14 +10,14 @@ repository.workspace = true
 publish.workspace = true
 
 [[bin]]
-name = "oxiguitar"
+name = "futab"
 path = "src/main.rs"
 
 # The two Linux builds (Mateus, 18 Oct 2026; docs/design/plugins.md): the
 # Wayland build, the default and the main one, and the X11 build,
 # deprecated from the start. Each carries only its own display system's
-# code: `cargo build -p oxiguitar-app` builds the Wayland one,
-# `cargo build -p oxiguitar-app --no-default-features --features x11` the
+# code: `cargo build -p futab` builds the Wayland one,
+# `cargo build -p futab --no-default-features --features x11` the
 # X11 one. On Windows and macOS the feature only picks the winit backend.
 [features]
 default = ["wayland"]

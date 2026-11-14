@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-//! End-to-end tests of `oxiguitar-cli` on the public fixtures.
+//! End-to-end tests of `futab-cli` on the public fixtures.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -32,7 +32,7 @@ fn copy_oxp(from: &Path, to: &Path) {
 }
 
 fn cli() -> Command {
-    let mut c = Command::new(env!("CARGO_BIN_EXE_oxiguitar-cli"));
+    let mut c = Command::new(env!("CARGO_BIN_EXE_futab-cli"));
     c.env("OXIGUITAR_HOME", home());
     c
 }
@@ -217,7 +217,7 @@ fn system_plugins_available() -> bool {
 fn without_plugins_nothing_opens() {
     let empty = Path::new(env!("CARGO_TARGET_TMPDIR")).join("cli-empty-home");
     std::fs::create_dir_all(&empty).unwrap();
-    let out = Command::new(env!("CARGO_BIN_EXE_oxiguitar-cli"))
+    let out = Command::new(env!("CARGO_BIN_EXE_futab-cli"))
         .env("OXIGUITAR_HOME", &empty)
         .arg("info")
         .arg(fixture("oxiguitar-test-song.gp5"))
@@ -467,7 +467,7 @@ fn sound_home() -> &'static Path {
 fn play_into_a_wav_file_needs_no_sound_card() {
     let out = Path::new(env!("CARGO_TARGET_TMPDIR")).join("played.wav");
     let _ = std::fs::remove_file(&out);
-    let o = Command::new(env!("CARGO_BIN_EXE_oxiguitar-cli"))
+    let o = Command::new(env!("CARGO_BIN_EXE_futab-cli"))
         .env("OXIGUITAR_HOME", sound_home())
         .arg("play")
         .arg(fixture("oxiguitar-test-song.gp5"))
@@ -533,7 +533,7 @@ fn export_names_what_no_plugin_exports() {
 fn export_writes_a_wav_file_through_the_wav_plugin() {
     let out = Path::new(env!("CARGO_TARGET_TMPDIR")).join("exported.wav");
     let _ = std::fs::remove_file(&out);
-    let o = Command::new(env!("CARGO_BIN_EXE_oxiguitar-cli"))
+    let o = Command::new(env!("CARGO_BIN_EXE_futab-cli"))
         .env("OXIGUITAR_HOME", sound_home())
         .arg("export")
         .arg(fixture("oxiguitar-test-song.gp5"))
