@@ -33,3 +33,6 @@ docs/plugins/template/Cargo.lock
 
 # The upstream catch-up report (scripts/upstream/catchup.py).
 /oxiguitar-catchup.md
+
+# Python leaves these beside scripts it imports.
+__pycache__/
