@@ -145,8 +145,15 @@ pub enum Command {
     /// The selection (or the caret's beat) taken out: beats deleted from
     /// their voice, bars from every track (Ctrl + X, after copying).
     Cut,
-    /// The clipboard pasted at the caret (Ctrl + V, Ctrl + Shift + V).
+    /// The clipboard pasted at the caret (Ctrl + V): beats over what the
+    /// caret's voice holds from the caret on, bars before the caret's bar.
     Paste(crate::Paste),
+    /// The bars the selection (or the caret) touches taken out of every
+    /// track (Ctrl + Shift + X, after Copy Bars).
+    CutBars,
+    /// Copied bars put in as new bars before or after the selection's bars
+    /// (Ctrl + Shift + V).
+    PasteBars(crate::PasteBars),
     /// A steel-string guitar track after the caret's.
     AddTrack,
     /// A copy of the caret's track after it.
@@ -170,6 +177,9 @@ pub enum Command {
     /// The selected bars, or the whole song, fitted to the time signature
     /// they have now, in every track (#222).
     FitBars(crate::Fit),
+    /// Chords found for the notes of the selected bars, or of the whole
+    /// song, and written on the caret's track (#235).
+    Harmonize(crate::Harmonize),
     /// An effect switched on or off at the caret, or on the selection
     /// (TAB-1).
     Effect(crate::Effect),
@@ -189,6 +199,11 @@ pub enum Command {
     Beat(crate::BeatChange),
     /// This chord diagram on the caret's beat, or none.
     Chord(Option<oxiguitar_model::ChordDiagram>),
+    /// These names for every track's chord diagrams, one list a track in
+    /// the order the track keeps them: a chord notation style applied to
+    /// the whole song (#278). A track whose list is not as long as its
+    /// chords keeps its names.
+    RenameChords(Vec<Vec<String>>),
     /// This free text above the caret's beat; empty for none.
     Text(String),
     /// The score's information: title, artist and the rest.
@@ -292,6 +307,8 @@ impl Command {
             Command::Bar(_) => "Bar Properties",
             Command::Cut => "Cut",
             Command::Paste(_) => "Paste",
+            Command::CutBars => "Cut Bars",
+            Command::PasteBars(_) => "Paste Bars",
             Command::AddTrack => "Add Track",
             Command::DuplicateTrack => "Duplicate Track",
             Command::DeleteTrack => "Delete Track",
@@ -302,6 +319,7 @@ impl Command {
             Command::Transpose(_) => "Transpose",
             Command::Fingering(_) => "Find Fingering",
             Command::FitBars(_) => "Fit Bars",
+            Command::Harmonize(_) => "Harmonize",
             Command::Effect(e) => e.label(),
             Command::Dynamic(_) => "Dynamic",
             Command::Bend(_) => "Bend",
@@ -309,6 +327,7 @@ impl Command {
             Command::Note(n) => n.label(),
             Command::Beat(b) => b.label(),
             Command::Chord(_) => "Chord",
+            Command::RenameChords(_) => "Chord Style",
             Command::Text(_) => "Text",
             Command::Info(_) => "Score Information",
             Command::Syllable { .. } => "Lyrics",
@@ -379,6 +398,9 @@ pub fn apply(
         return edited;
     }
     if let Some(edited) = crate::fingering::apply(score, history, caret, selection, &command) {
+        return edited;
+    }
+    if let Some(edited) = crate::harmonize::apply(score, history, caret, selection, &command) {
         return edited;
     }
     if let Some(edited) = crate::fit::apply(score, history, caret, selection, &command) {
@@ -837,6 +859,8 @@ fn plan(score: &Score, c: Caret, selection: Option<Selection>, command: Command)
         | Command::Bar(_)
         | Command::Cut
         | Command::Paste(_)
+        | Command::CutBars
+        | Command::PasteBars(_)
         | Command::AddTrack
         | Command::DuplicateTrack
         | Command::DeleteTrack
@@ -846,6 +870,7 @@ fn plan(score: &Score, c: Caret, selection: Option<Selection>, command: Command)
         | Command::Transpose(_)
         | Command::Fingering(_)
         | Command::FitBars(_)
+        | Command::Harmonize(_)
         | Command::Effect(_)
         | Command::Dynamic(_)
         | Command::Bend(_)
@@ -853,6 +878,7 @@ fn plan(score: &Score, c: Caret, selection: Option<Selection>, command: Command)
         | Command::Note(_)
         | Command::Beat(_)
         | Command::Chord(_)
+        | Command::RenameChords(_)
         | Command::Text(_)
         | Command::Info(_)
         | Command::Syllable { .. }
