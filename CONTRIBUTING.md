@@ -7,7 +7,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), by Mateu
 - **Report FuTab's bugs here**, in [PurpleIcon/futab](https://github.com/PurpleIcon/futab/issues), even when they may come from OxiGuitar's code: we check, and pass on what belongs upstream.
 - **The plugins are OxiGuitar's** (`mateusrdp/oxiguitar-NAME`). FuTab uses them as they are. A change to a plugin goes to that plugin's repository, under its own rules.
 
-Before a large change, open an issue or a discussion so we can agree the approach. [ROADMAP.md](ROADMAP.md) shows what is planned, [ARCHITECTURE.md](ARCHITECTURE.md) how the code fits together, and [docs/adr/](docs/adr/) why.
+Before a large change, open an issue or a discussion so we can agree the approach. [ROADMAP.md](ROADMAP.md) shows what is planned, [ARCHITECTURE.md](ARCHITECTURE.md) how the code fits together, and [docs/adr/](docs/adr/) (OxiGuitar's) with [docs/futab-adr/](docs/futab-adr/) (FuTab's) why.
 
 ## Branches and pull requests
 
@@ -133,4 +133,6 @@ FuTab keeps OxiGuitar's plugin interface, so a plugin works in both. A new plugi
 
 ## Decisions
 
-A significant decision — a dependency, a format strategy, a design rule — gets a short record in `docs/adr/`, numbered in order. Copy `docs/adr/0000-template.md`.
+A significant decision — a dependency, a format strategy, a design rule — gets a short record in `docs/futab-adr/`, numbered in order. Copy `docs/futab-adr/0000-template.md`. A feature's design notes go in `docs/futab-design/`.
+
+`docs/adr/` and `docs/design/` are OxiGuitar's records and designs, merged in from upstream: they still stand for FuTab, but don't edit them, as every edit would conflict with later merges. A FuTab record that replaces one of them says so ("Supersedes: OxiGuitar's ADR 0005").

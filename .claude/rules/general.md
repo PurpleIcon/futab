@@ -14,7 +14,7 @@ Project directives for every agent working on FuTab (moved here from AGENTS.md).
 - Always prioritise correctness, reliability and performance in your design. No polling should be used.
 - Keep the code clean and maintainable: no hacks or workarounds.
 - Keep the code readable. A human will eventually need to understand it. And make it easy for other agents too.
-- Remember to update the relevant documentation and the decision records (`docs/adr/`) once we make changes. Keep short and objective inline documentation in the code to facilitate reviewing and debugging.
+- Remember to update the relevant documentation and FuTab's decision records (`docs/futab-adr/`, design notes in `docs/futab-design/`) once we make changes. `docs/adr/` and `docs/design/` are OxiGuitar's, merged from upstream: read them, never edit them. Keep short and objective inline documentation in the code to facilitate reviewing and debugging.
 - Always write it into the project's rules when I tell you to remember something: the matching file in `.claude/rules/`, or AGENTS.md for the session-start steps
 - When you learn or discover something worth remembering for this project, ask me if you should add it to the rules
 - Always be objective when talking to me: do not be too verbose, only give me the information I need to inform a decision

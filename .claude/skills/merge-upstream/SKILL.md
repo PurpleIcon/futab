@@ -71,7 +71,7 @@ What FuTab renamed: always FuTab's side in a merge.
 
 | OxiGuitar (upstream) | FuTab |
 | --- | --- |
-| `OxiGuitar` (the app's name, in text people read: UI strings, messages, docs, manual, man pages, metainfo, README) | `FuTab` |
+| `OxiGuitar` (the app's name, in text users read: UI strings, messages, the user manual `docs/manual/`, the plugin guide `docs/plugins/`, man pages, metainfo, README) | `FuTab` |
 | package and binary `oxiguitar`, `oxiguitar-x11`, `oxiguitar-cli` (`cargo run -p ...`, `target/.../oxiguitar*`, `/usr/bin/...`, `/app/bin/...`, `oxiguitar.exe`) | `futab`, `futab-x11`, `futab-cli`, `futab.exe` |
 | app ID `io.github.mateusrdp.OxiGuitar` (and file names that use it) | `io.github.purpleicon.FuTab` |
 | repository `mateusrdp/oxiguitar` as **this** project's home: `repository`/`homepage`, bug reports, issues, discussions, screenshots | `PurpleIcon/futab` |
@@ -90,6 +90,7 @@ What stays OxiGuitar's: never rename these, in a merge or anywhere else.
 - **Plugins** (OxiGuitar's, used as they are): plugin repo and package names (`oxiguitar-guitarpro`, `oxiguitar-midi`, ...), plugin ids (`oxiguitar.midi`, ...), the core's advice id `oxiguitar` (`advice::CORE`), `oxiguitar-set.json`, `.oxp` files, and the plugin SDK's git source `https://github.com/mateusrdp/oxiguitar` in plugin `Cargo.toml`s.
 - **OxiGuitar's plugin folders as a fallback** (`/usr/lib/oxiguitar/plugins` and the others, searched after FuTab's), and `/usr/share/oxiguitar/soundfonts`.
 - **File formats:** the `.oxg` sidecar and anything else written to a user's files. Renaming those would break files people already have.
+- **Code comments and design records:** comments in the code (`//`, `///`, `//!`, `#`), `docs/design/` and `docs/adr/` keep OxiGuitar's name, and upstream's changes to them are taken as they are. They record OxiGuitar's design and decisions; renaming them would only make every later merge conflict. FuTab's own design notes and decisions go in `docs/futab-design/` and `docs/futab-adr/`, never into these.
 - **Links to upstream as upstream:** the `upstream` remote, links to OxiGuitar's changelog, PRs and issues (`mateusrdp/oxiguitar#N`), the catch-up script.
 
 When a name fits neither list, it's the clash you can't settle: list it with its file and line, and ask me.
