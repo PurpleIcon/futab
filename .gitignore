@@ -30,3 +30,6 @@ docs/plugins/template/Cargo.lock
 .ua/intermediate/
 .ua/tmp/
 .ua/trash-*/
+
+# The upstream catch-up report (scripts/upstream/catchup.py).
+/oxiguitar-catchup.md

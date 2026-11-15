@@ -24,6 +24,14 @@ pub const CORE: &str = "oxiguitar";
 /// The value kept for a silenced advice.
 const HIDDEN: &str = "hidden";
 
+/// Plugins' advice FuTab never shows, as `(plugin id, advice id)`: what
+/// OxiGuitar's own plugins say about OxiGuitar by name, which would only
+/// confuse in FuTab.
+const HIDDEN_IN_FUTAB: &[(&str, &str)] = &[
+    // "OxiGuitar is playing with your system's basic sound set ...".
+    ("oxiguitar.midi", "no-sound-sets"),
+];
+
 /// An advice somebody asked the window to show.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Asked {
@@ -46,15 +54,17 @@ impl Asked {
     }
 }
 
-/// Whether the user silenced the advice `advice` of `plugin`.
+/// Whether the user silenced the advice `advice` of `plugin`, or FuTab
+/// hides it from the start (the plugins' advice that names OxiGuitar).
 pub fn is_hidden(settings: &SharedSettings, plugin: &str, advice: &str) -> bool {
-    settings
-        .get(KEY)
-        .as_ref()
-        .and_then(|v| v.get(plugin))
-        .and_then(|v| v.get(advice))
-        .and_then(Value::as_str)
-        == Some(HIDDEN)
+    HIDDEN_IN_FUTAB.contains(&(plugin, advice))
+        || settings
+            .get(KEY)
+            .as_ref()
+            .and_then(|v| v.get(plugin))
+            .and_then(|v| v.get(advice))
+            .and_then(Value::as_str)
+            == Some(HIDDEN)
 }
 
 /// Silences the advice `advice` of `plugin` for good (until the user edits
@@ -84,7 +94,7 @@ mod tests {
     #[test]
     fn hiding_one_advice_keeps_the_others() {
         let settings = SharedSettings::new(Settings::default(), None);
-        assert!(!is_hidden(&settings, "oxiguitar.midi", "no-sound-sets"));
+        assert!(!is_hidden(&settings, "oxiguitar.midi", "no-model"));
         hide(&settings, "oxiguitar.midi", "no-sound-sets").unwrap();
         hide(&settings, "oxiguitar.nam", "no-model").unwrap();
         hide(&settings, "oxiguitar.nam", "no-cabinet").unwrap();
@@ -93,6 +103,7 @@ mod tests {
         assert!(is_hidden(&settings, "oxiguitar.nam", "no-cabinet"));
         assert!(!is_hidden(&settings, "oxiguitar.midi", "no-model"));
         assert!(!is_hidden(&settings, "oxiguitar", "no-model"));
+        assert!(!is_hidden(&settings, "oxiguitar", "no-sound-sets"));
         assert_eq!(
             settings.get(KEY),
             Some(serde_json::json!({
@@ -100,6 +111,13 @@ mod tests {
                 "oxiguitar.nam": {"no-model": "hidden", "no-cabinet": "hidden"},
             }))
         );
+    }
+
+    #[test]
+    fn the_midi_plugins_oxiguitar_advice_is_hidden_from_the_start() {
+        let settings = SharedSettings::new(Settings::default(), None);
+        assert!(is_hidden(&settings, "oxiguitar.midi", "no-sound-sets"));
+        assert_eq!(settings.get(KEY), None);
     }
 
     #[test]

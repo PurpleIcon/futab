@@ -78,7 +78,7 @@ replace_once("debian/changelog", r'^(futab \()' + re.escape(old) + r'(\+ds-\d+\)
 
 # CHANGELOG.md: [Unreleased] becomes the release.
 changelog = read("CHANGELOG.md")
-m = re.search(r"^## \[Unreleased\]\n(.*?)(?=^## \[)", changelog, re.M | re.S)
+m = re.search(r"^## \[Unreleased\]\n(.*?)(?=^## \[|\Z)", changelog, re.M | re.S)
 if not m or not m.group(1).strip():
     sys.exit("CHANGELOG.md: nothing under [Unreleased]; write what changed first")
 body = m.group(1).strip("\n")

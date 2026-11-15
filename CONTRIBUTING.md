@@ -16,6 +16,7 @@ Before a large change, open an issue or a discussion so we can agree the approac
 - The branch rules enforce this: nobody pushes to `develop` or `main` directly, every change arrives as a pull request, the maintainer (the code owner, `.github/CODEOWNERS`) approves it, and only the maintainer merges.
 - OxiGuitar's `develop` (the `upstream` remote) is merged into FuTab's `develop` from time to time. Keep FuTab's own changes to OxiGuitar's code small and in few places, so those merges stay easy.
 - Feature branches are squash-merged into `develop`; `develop` is merged into `main` with a merge commit.
+- The exception: a pull request that merges OxiGuitar's `develop` into FuTab (`feat/merge-oxiguitar-<version>`) is merged with "Create a merge commit", never squashed or rebased. Squashing it throws away OxiGuitar's history, so the next merge from upstream would conflict all over again. Run `python3 -I scripts/upstream/catchup.py` to see what OxiGuitar has that FuTab hasn't merged.
 - CI must be green. The `ci-success` check sums up every other job.
 - One pull request carries the code, its tests, its documentation and any credit updates together.
 
