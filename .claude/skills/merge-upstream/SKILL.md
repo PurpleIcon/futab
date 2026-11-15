@@ -169,6 +169,48 @@ When I ask for the PR (push only when I say so):
 - **Description:** first, the warning to merge with "Create a merge commit", never squash or rebase, and why. Then the upstream PRs merged (as `mateusrdp/oxiguitar#N`, with what each changes and its merge commit), the skipped ones with reasons, what upstream still has, every conflict and how it was settled, the names changed and kept, behaviour changes users will notice, the checks run, and test steps.
 - Branch, base and sign-off as in step 1 and `.claude/rules/github.md`.
 
+### Merging the pull request
+
+A merge PR must land as a merge commit. The merge button's choice is easy to get wrong (PR #7 was squashed by mistake), so when I ask you to merge it, do it yourself:
+
+1. Check every check on the PR's head has passed, and say which haven't if any:
+
+   ```bash
+   gh pr view <n> --json headRefOid,statusCheckRollup
+   ```
+
+   Nothing tells you when CI finishes, and you don't poll it: if checks are still running, say so and wait for me to tell you it's green.
+2. Merge it with a merge commit:
+
+   ```bash
+   gh pr merge <n> --merge
+   ```
+
+   If the branch rules block it only for want of a review (I can't approve my own PRs), add `--admin` once I've said to merge: that's how I merge them. Never `--squash` or `--rebase`, whatever the repository's default.
+3. Check the result: the commit `develop` now points at has **two** parents (`git log -1 --format=%p origin/develop` after `git fetch origin develop`), and the catch-up report against `origin/develop` (`--ours origin/develop`) no longer lists the merged PRs. If either is wrong, go to "If a merge PR was squashed".
+
+### If a merge PR was squashed
+
+You can tell: the PR's commit on `develop` has one parent, and the catch-up report against `develop` lists the PRs it merged as missing again. The code is all there, only upstream's history is gone, but the next merge from upstream would conflict on all of it again. Restore the history with a merge that changes no file:
+
+1. Check that `develop` really has the merged content: the squash commit's tree must equal the merge branch's last commit's tree.
+
+   ```bash
+   test "$(git rev-parse <squash commit>^{tree})" = "$(git rev-parse <merge branch tip>^{tree})" && echo same
+   ```
+
+   If they differ, stop and tell me what differs: `-s ours` would record upstream's commits as merged while some of their changes are missing.
+2. On a branch from up-to-date `origin/develop` named `fix/oxiguitar-history-pr<N>`, record upstream's target commit as merged, keeping `develop`'s files:
+
+   ```bash
+   git merge -s ours --no-ff --signoff <upstream target commit>
+   ```
+
+   with a message saying which PR was squashed and that the merge changes no file.
+3. Check: `git diff origin/develop HEAD` is empty, and the catch-up report on the branch shows the target as the last common commit.
+4. Add a changelog entry under `### Fixed` ("Upstream history up to mateusrdp/oxiguitar#N", why it was missing, and that the merge changes no file) as a commit of its own.
+5. With my go-ahead, push and open the PR titled `Restore upstream history up to oxiguitar #N`, its description opening with the merge-commit warning, and merge it as above, with `--merge`.
+
 ## 6. Update the catch-up report
 
 Straight after the merge commit, and after any skip reverts, run the report again on the merge branch:
@@ -192,7 +234,7 @@ Never by itself. The file is only rewritten when the script runs, and each run c
 - **While the merge is in progress (not committed yet):** the file still lists the PRs being merged, because `HEAD` hasn't moved. That's expected, not a fault.
 - **After the merge commit on the merge branch:** running the script (this step) drops the merged and skipped PRs; the rest is what FuTab hasn't taken yet.
 - **On GitHub:** the Upstream workflow (`.github/workflows/upstream.yml`) checks `develop`. It shows the new state once the merge PR has landed on `develop`, at its next Monday run or straight away with "Run workflow" on the Actions tab.
-- **The one thing that makes it wrong:** squash-merging (or rebasing) the merge PR. That throws away upstream's ancestry, so every merged PR shows up as missing again, and the next merge conflicts on all of them. Hence "Create a merge commit" for these PRs, always.
+- **The one thing that makes it wrong:** squash-merging (or rebasing) the merge PR. That throws away upstream's ancestry, so every merged PR shows up as missing again, and the next merge conflicts on all of them. Hence "Create a merge commit" for these PRs, always. If it happens anyway, "If a merge PR was squashed" above puts it right.
 
 The file is gitignored, so it never shows up in commits or PRs; each person or run makes their own.
 
