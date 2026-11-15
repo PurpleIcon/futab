@@ -55,7 +55,7 @@ impl Asked {
 }
 
 /// Whether the user silenced the advice `advice` of `plugin`, or FuTab
-/// hides it from the start ([`HIDDEN_IN_FUTAB`]).
+/// hides it from the start (the plugins' advice that names OxiGuitar).
 pub fn is_hidden(settings: &SharedSettings, plugin: &str, advice: &str) -> bool {
     HIDDEN_IN_FUTAB.contains(&(plugin, advice))
         || settings
