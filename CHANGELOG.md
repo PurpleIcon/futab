@@ -12,6 +12,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ### Changed
 
+- **merge-upstream skill: PR title**: a pull request that merges OxiGuitar is titled `Merge upstream to oxiguitar #N`, after the last upstream PR it brings in, and its description opens with the merge-commit warning.
 - **Merged OxiGuitar up to mateusrdp/oxiguitar#290** (mateusrdp/oxiguitar@4ae4593):
   - Play Engraved Beat sounds only when a note or rest is entered or deleted, no longer on other edits such as durations or effects (mateusrdp/oxiguitar#286)
   - Harmonize… (Tools menu, or right-click on the page) finds chords for the caret's track and writes them above it with their diagrams, as one step for Undo (mateusrdp/oxiguitar#270, mateusrdp/oxiguitar#289)
