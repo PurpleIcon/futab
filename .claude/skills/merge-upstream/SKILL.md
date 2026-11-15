@@ -161,6 +161,14 @@ Tell me, short:
 
 Then stop. Commit only when I say so (`git commit -s`, the merge's own message is fine). In the PR, say that it **must be merged with "Create a merge commit", never squash or rebase**: squashing throws away upstream's ancestry, so the next merge would conflict all over again and the catch-up report would list everything again.
 
+### The pull request
+
+When I ask for the PR (push only when I say so):
+
+- **Title:** `Merge upstream to oxiguitar #N`, where `#N` is the last upstream PR the merge brings in (the target's PR, or the last PR before it when the target is a release or other commit without one). For example: `Merge upstream to oxiguitar #290`. Nothing else in the title: no repository prefix, no list of PRs, no release number.
+- **Description:** first, the warning to merge with "Create a merge commit", never squash or rebase, and why. Then the upstream PRs merged (as `mateusrdp/oxiguitar#N`, with what each changes and its merge commit), the skipped ones with reasons, what upstream still has, every conflict and how it was settled, the names changed and kept, behaviour changes users will notice, the checks run, and test steps.
+- Branch, base and sign-off as in step 1 and `.claude/rules/github.md`.
+
 ## 6. Update the catch-up report
 
 Straight after the merge commit, and after any skip reverts, run the report again on the merge branch:
