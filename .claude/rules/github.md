@@ -47,12 +47,21 @@ Read and Write file support
 - oxiguitar-wav: WAV format export
 
 
+## Referring to upstream
+
+Never write a linking reference to an OxiGuitar issue or PR (`mateusrdp/oxiguitar#N`, or a `github.com/mateusrdp/...` issue or PR URL) anywhere that reaches GitHub: commit messages (merge commits included, which carry the PR's title and description), PR titles and descriptions, issue and PR comments, and `CHANGELOG.md` (it becomes the release notes). GitHub then posts "added a commit to PurpleIcon/futab that referenced this pull request" on upstream's PR, for the maintainer to see, and a pushed commit's reference can't be taken back.
+
+- Write `OxiGuitar PR N` or `OxiGuitar issue N` instead, as plain text.
+- A bare `#N` is FuTab's own issue or PR, so it never stands for an upstream one.
+- An upstream commit may be named by its hash (`mateusrdp/oxiguitar@f66b344`): that doesn't post on upstream's PRs.
+- This is about FuTab only. A PR we open on OxiGuitar itself links its issue as upstream asks.
+
 ## Changelog
 
 `CHANGELOG.md` lists FuTab's own changes only (OxiGuitar's history stays in [its changelog](https://github.com/mateusrdp/oxiguitar/blob/develop/CHANGELOG.md)). Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Every PR to `develop` adds at least one entry under `## [Unreleased]`, in the PR itself, under `### Added`, `### Changed`, `### Fixed` or `### Removed` (create the heading if it isn't there). CI's release-script check and `scripts/release/bump.sh` need the `## [Unreleased]` heading; a release fails if the section is empty.
-- One entry per change: `- **Short name** (#N): what the user sees, in a sentence or two.` `#N` is a FuTab issue or PR; write an upstream one as `mateusrdp/oxiguitar#N`, since a bare `#N` points at FuTab's.
+- One entry per change: `- **Short name** (#N): what the user sees, in a sentence or two.` `#N` is a FuTab issue or PR; write an upstream one as `OxiGuitar PR N` (see Referring to upstream).
 - Never touch a released `## [x.y.z]` section; `scripts/release/bump.sh` turns `[Unreleased]` into it.
 
 ### Merges from upstream
@@ -65,8 +74,8 @@ Merging OxiGuitar into FuTab follows the `merge-upstream` skill (`.claude/skills
 
    ```markdown
    - **Merged OxiGuitar 0.19.2** (up to mateusrdp/oxiguitar@f66b344):
-     - Harmonize: chords found for a melody (mateusrdp/oxiguitar#270)
-     - Copy, Cut and Paste Bars (mateusrdp/oxiguitar#288)
+     - Harmonize: chords found for a melody (OxiGuitar PR 270)
+     - Copy, Cut and Paste Bars (OxiGuitar PR 288)
    ```
 
    Name the upstream release when the merge reaches one, else the upstream commit. Leave out upstream changes FuTab drops in the merge (and say in the PR why), and upstream's own release and changelog commits.
