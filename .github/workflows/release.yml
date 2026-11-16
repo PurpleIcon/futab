@@ -1,8 +1,11 @@
 # Release packages: a portable .exe in a zip (Windows x86_64 and ARM64), a
 # .deb and an .rpm of each Linux build (Wayland: futab; X11, deprecated:
 # futab-x11), one AppImage holding both builds (x86_64 and ARM64 each),
-# a Flatpak bundle (x86_64 and ARM64 each; docs/design/flatpak.md) and a
-# universal .dmg (macOS), none of them code-signed. None carries a
+# and a Flatpak bundle (x86_64 and ARM64 each; docs/design/flatpak.md),
+# none of them code-signed. The universal .dmg (macOS) is built only when
+# the workflow is started by hand, and is not part of a release: GitHub's
+# macOS runners were too short of capacity to build it reliably (Nov 2026;
+# FuTab 0.1.0 shipped without macOS). None carries a
 # plugin: the plugins have repositories and releases of their own (#165,
 # github.com/mateusrdp/oxiguitar-guitarpro and the others). The .deb and
 # .rpm recommend the Guitar Pro and MIDI plugins and suggest NAM, so the
@@ -21,7 +24,7 @@
 #
 # Every package is installed or opened and smoke-tested: the .deb in Debian
 # sid, the .rpm in Fedora, the AppImage on the runner, the .exe's resources,
-# the .dmg's bundle. Packaging scripts: scripts/package/.
+# the .dmg's bundle (when it is built). Packaging scripts: scripts/package/.
 name: Release packages
 
 on:
@@ -590,6 +593,9 @@ jobs:
   macos:
     name: macOS (universal)
     needs: meta
+    # Only by hand (Actions → Release packages → Run workflow): not part of
+    # a release, see the top of this file.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-15
     env:
       VERSION: ${{ needs.meta.outputs.version }}
@@ -652,7 +658,7 @@ jobs:
     # Collecting the packages and their checksums runs on every build, so a
     # build by hand tests it before a tag relies on it; only a v* tag goes on
     # to create the draft release.
-    needs: [meta, linux, appimage, flatpak, windows, macos]
+    needs: [meta, linux, appimage, flatpak, windows]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -668,7 +674,7 @@ jobs:
           # are: without it the action unpacks anything that is a zip, so
           # the Windows .zip packages arrived as folders (v0.1.0's first
           # tag build, 18 Oct 2026).
-          pattern: "*.{deb,rpm,AppImage,flatpak,zip,dmg}"
+          pattern: "*.{deb,rpm,AppImage,flatpak,zip}"
           path: dist
           merge-multiple: true
           skip-decompress: true
@@ -676,8 +682,8 @@ jobs:
         run: |
           # Each kind of file, by name. For each Linux architecture: a .deb
           # and an .rpm of each build of the core (Wayland, X11) and one
-          # AppImage holding both builds, and a Flatpak bundle. A zip for each Windows architecture
-          # and the universal .dmg. No plugin anywhere: they have releases of
+          # AppImage holding both builds, and a Flatpak bundle. A zip for each Windows architecture.
+          # No .dmg (macOS isn't released). No plugin anywhere: they have releases of
           # their own (#165).
           find dist -mindepth 1 -maxdepth 1 -printf '%y %s %f\n' | sort -k3
           if find dist -mindepth 1 -maxdepth 1 ! -type f | grep -q .; then
@@ -700,9 +706,9 @@ jobs:
           expect 0 'FuTab-x11-*.AppImage' 'X11 AppImage (the AppImage holds both builds)'
           expect 2 'FuTab-[0-9]*.flatpak' 'Flatpak bundle'
           expect 2 'FuTab-[0-9]*-windows-*.zip' 'Windows zip'
-          expect 1 '*.dmg' '.dmg'
+          expect 0 '*.dmg' '.dmg (macOS is not released)'
           expect 0 '*.oxp' 'plugin on its own'
-          expect 15 '*' 'files in all'
+          expect 14 '*' 'files in all'
           for f in dist/FuTab-[0-9]*-windows-*.zip; do
             unzip -tq "$f" > /dev/null || { echo "::error::$f is not a valid zip" >&2; exit 1; }
             unzip -l "$f" | grep -q 'futab.exe' || { echo "::error::$f has no futab.exe" >&2; exit 1; }
