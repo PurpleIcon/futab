@@ -1,0 +1,36 @@
+# What upstream OxiGuitar has that FuTab hasn't merged yet
+# (scripts/upstream/catchup.py). Weekly, since upstream moves on its own,
+# and by hand from the Actions tab. The report is the run's summary and an
+# artifact; it informs, it fails nothing, and it pushes nothing (develop
+# and main only take approved pull requests). Locally the same script
+# writes oxiguitar-catchup.md at the repository's root.
+name: Upstream
+
+on:
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: upstream-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  catchup:
+    name: OxiGuitar catch-up
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Compare with upstream/develop
+        run: |
+          python3 -I scripts/upstream/catchup.py -o catchup.md
+          cat catchup.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oxiguitar-catchup
+          path: catchup.md

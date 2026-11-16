@@ -4,7 +4,7 @@ Since interface 1.2, a plugin can add entries to the Tools menu and change the o
 
 ## Tools
 
-List each tool under `tools` in the manifest, with an `id`, the menu entry's `name` in title case, and a one-sentence `description` (`oxiguitar-cli tools` shows it):
+List each tool under `tools` in the manifest, with an `id`, the menu entry's `name` in title case, and a one-sentence `description` (`futab-cli tools` shows it):
 
 ```json
 "tools": [

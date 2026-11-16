@@ -21,7 +21,7 @@ cd "$root"
 # (oxiguitar-testgen, oxiguitar-plugin-test, plugins/test) bring no crate of
 # their own outside dev-dependencies, which about.toml ignores, so this is
 # exactly what the packages are built from. (The app alone would miss
-# oxiguitar-cli's crates.) The plugins have their own repositories and
+# futab-cli's crates.) The plugins have their own repositories and
 # their own licence pages (#165).
 cargo about generate --locked --fail --workspace \
     --output-file dist/THIRD-PARTY-LICENSES.html \

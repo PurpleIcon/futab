@@ -225,7 +225,7 @@ pub struct ToolSpec {
     /// The menu entry, in title case: "Transpose by Octave".
     pub name: String,
     /// What it does, in a sentence: shown with the tool where there is
-    /// room (`oxiguitar-cli tools`).
+    /// room (`futab-cli tools`).
     #[serde(default)]
     pub description: String,
 }

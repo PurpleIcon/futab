@@ -62,7 +62,7 @@ pub fn to_pdf(
     doc.set_metadata(
         krilla::metadata::Metadata::new()
             .title(title.to_owned())
-            .creator(format!("OxiGuitar {}", env!("CARGO_PKG_VERSION"))),
+            .creator(format!("FuTab {}", env!("CARGO_PKG_VERSION"))),
     );
     for list in pages {
         let settings =

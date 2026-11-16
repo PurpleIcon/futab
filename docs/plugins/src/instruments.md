@@ -2,7 +2,7 @@
 
 An instrument turns the player's timed events into sound for the tracks given to it: a MIDI synthesiser, a modelled guitar amplifier, sampled drums. The core plays the score: it turns it into a timeline of notes with every effect, tempo, the metronome and count-in, runs the transport, and mixes the instruments' sound (volume, pan, mute, solo) before an audio-device service sends it to the system.
 
-**The instrument interface is interface 1.3** (OxiGuitar 0.9 and later). The player ignores instruments declared by a plugin built for an older interface.
+**The instrument interface is interface 1.3** (FuTab 0.9 and later). The player ignores instruments declared by a plugin built for an older interface.
 
 ## How an instrument works
 
@@ -24,9 +24,9 @@ An effect works on one track's sound after its instrument, in the order the trac
 
 ### Following settings while the song plays
 
-Since interface 1.5 (OxiGuitar 0.14), an effect can follow its track's settings as the user changes them in its [track section](track-sections.md) while the song plays: an equalizer's slider, an amp's level. Without it, the song keeps the settings it started with until it next starts. It takes two methods, one on each side of the audio thread:
+Since interface 1.5 (FuTab 0.14), an effect can follow its track's settings as the user changes them in its [track section](track-sections.md) while the song plays: an equalizer's slider, an amp's level. Without it, the song keeps the settings it started with until it next starts. It takes two methods, one on each side of the audio thread:
 
-- `Effect::update(prepare, previous)`, off the audio thread, gets what the processor was prepared with, but with the track's new settings in `prepare.track.settings`, and the settings it follows now in `previous`, to see what changed. Do the slow work here (read the JSON, compute coefficients, allocate) and hand back `Some(Update::new(value))`, whatever value the processor needs. `Ok(None)`, the default, says the processor can't follow these settings while it runs (a new model file to load, say): OxiGuitar then prepares the effect again when the song next starts.
+- `Effect::update(prepare, previous)`, off the audio thread, gets what the processor was prepared with, but with the track's new settings in `prepare.track.settings`, and the settings it follows now in `previous`, to see what changed. Do the slow work here (read the JSON, compute coefficients, allocate) and hand back `Some(Update::new(value))`, whatever value the processor needs. `Ok(None)`, the default, says the processor can't follow these settings while it runs (a new model file to load, say): FuTab then prepares the effect again when the song next starts.
 - `Processor::apply(update)`, on the audio thread, between two calls of `process`, gets that update (`update.get::<T>()`). The audio thread's rules hold: take the values out, or swap your old ones into it, and allocate nothing; the update is freed off the audio thread. Move towards the new values over a few milliseconds instead of jumping, or the change clicks: ramp a gain, glide a filter's coefficients.
 
 ```rust
@@ -85,4 +85,4 @@ The update reaches the processor before its next `process` call; if the user mov
   ```
 
   `plays` lists what it covers (absent: everything); `does_not_play` takes classes out. The player offers an instrument only for the tracks it plays.
-- **Large data** (sound sets, amplifier models) is files the user puts in a folder, such as the `soundfonts` folder beside `plugins`; OxiGuitar and our plugins download nothing (Mateus, 21 Oct 2026). What a plugin makes from them (a cache) goes in its data folder. The player's design: [docs/design/player.md](https://github.com/mateusrdp/oxiguitar/blob/develop/docs/design/player.md).
+- **Large data** (sound sets, amplifier models) is files the user puts in a folder, such as the `soundfonts` folder beside `plugins`; FuTab and our plugins download nothing (Mateus, 21 Oct 2026). What a plugin makes from them (a cache) goes in its data folder. The player's design: [docs/design/player.md](https://github.com/PurpleIcon/futab/blob/develop/docs/design/player.md).

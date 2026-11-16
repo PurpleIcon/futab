@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-//! `oxiguitar-cli tools`: list the tools of the app's Tools menu: the
+//! `futab-cli tools`: list the tools of the app's Tools menu: the
 //! core's, then those the installed plugins add (interface 1.2).
 
 use std::process::ExitCode;

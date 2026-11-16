@@ -1,13 +1,13 @@
-# Writing OxiGuitar plugins
+# Writing FuTab plugins
 
-OxiGuitar is a small core with plugins. The core holds the score, shows it, exports it as a PDF, edits it and plays it; everything else comes from plugins: every file format, every sound, other exports, and tabs in the window's panels. Our own Guitar Pro readers are plugins like any you write, and the app makes no distinction between ours and yours.
+FuTab is a small core with plugins. The core holds the score, shows it, exports it as a PDF, edits it and plays it; everything else comes from plugins: every file format, every sound, other exports, and tabs in the window's panels. Our own Guitar Pro readers are plugins like any you write, and the app makes no distinction between ours and yours.
 
 This guide shows how to write one, in Rust, with the SDK (`oxiguitar-plugin`). The fastest way in is to copy the [template plugin](template.md): it builds, passes the contract suite and opens in the app as it is, and each part of it is explained in the pages that follow.
 
 ## What you need
 
 - Rust 1.99 or later, from [rustup](https://rustup.rs), for the SDK of v0.11.0.
-- OxiGuitar 0.11 or later (0.9 for a plugin on interface 1.3, 0.5 for one on 1.2, 0.2 for one on 1.0 or 1.1), to try your plugin in the app ([the user manual](https://mateusrdp.github.io/oxiguitar/installing.html)).
+- FuTab 0.11 or later (0.9 for a plugin on interface 1.3, 0.5 for one on 1.2, 0.2 for one on 1.0 or 1.1), to try your plugin in the app ([the user manual](https://purpleicon.github.io/futab/installing.html)).
 - Nothing else: the SDK and the contract suite come through Cargo, and you write no `unsafe` code.
 
 ## The pages
@@ -29,4 +29,4 @@ This guide shows how to write one, in Rust, with the SDK (`oxiguitar-plugin`). T
 | [Installing and sharing](installing.md) | Where users put the file, and what to tell them |
 | [Interface versions](versions.md) | What 1.0 and 1.1 hold, and what stays compatible |
 
-The design behind all this is in [docs/design/plugins.md](https://github.com/mateusrdp/oxiguitar/blob/develop/docs/design/plugins.md) and [ADR 0008](https://github.com/mateusrdp/oxiguitar/blob/develop/docs/adr/0008-plugin-architecture.md). The SDK's own reference is its rustdoc: `cargo doc --open` in your plugin's folder.
+The design behind all this is in [docs/design/plugins.md](https://github.com/PurpleIcon/futab/blob/develop/docs/design/plugins.md) and [ADR 0008](https://github.com/PurpleIcon/futab/blob/develop/docs/adr/0008-plugin-architecture.md). The SDK's own reference is its rustdoc: `cargo doc --open` in your plugin's folder.

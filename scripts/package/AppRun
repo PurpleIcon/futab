@@ -10,6 +10,6 @@
 
 here="$(dirname "$(readlink -f "$0")")"
 if [ -z "${WAYLAND_DISPLAY:-}" ] && [ -z "${WAYLAND_SOCKET:-}" ] && [ -n "${DISPLAY:-}" ]; then
-    exec "$here/usr/bin/oxiguitar-x11" "$@"
+    exec "$here/usr/bin/futab-x11" "$@"
 fi
-exec "$here/usr/bin/oxiguitar" "$@"
+exec "$here/usr/bin/futab" "$@"

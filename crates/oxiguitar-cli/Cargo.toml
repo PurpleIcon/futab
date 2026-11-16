@@ -1,6 +1,6 @@
 [package]
-name = "oxiguitar-cli"
-description = "Command-line tool to inspect, convert and test OxiGuitar files without a window."
+name = "futab-cli"
+description = "Command-line tool to inspect, convert and test FuTab files without a window."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

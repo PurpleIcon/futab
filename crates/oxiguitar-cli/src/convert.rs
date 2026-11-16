@@ -40,7 +40,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
             .flat_map(|f| f.spec.extensions.iter().map(|e| format!(".{e}")))
             .collect();
         eprintln!(
-            "oxiguitar-cli: no installed plugin writes .{ext} files{}",
+            "futab-cli: no installed plugin writes .{ext} files{}",
             if known.is_empty() {
                 String::new()
             } else {
@@ -53,14 +53,14 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
     let data = match std::fs::read(input) {
         Ok(d) => d,
         Err(e) => {
-            eprintln!("oxiguitar-cli: {input}: {e}");
+            eprintln!("futab-cli: {input}: {e}");
             return ExitCode::FAILURE;
         }
     };
     let opened = match open(input, &data) {
         Ok(o) => o,
         Err(e) => {
-            eprintln!("oxiguitar-cli: {input}: {e}");
+            eprintln!("futab-cli: {input}: {e}");
             return ExitCode::FAILURE;
         }
     };
@@ -69,14 +69,14 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
         Ok(w) => w,
         Err(e) => {
             eprintln!(
-                "oxiguitar-cli: {input}: the {} plugin could not write it: {e}",
+                "futab-cli: {input}: the {} plugin could not write it: {e}",
                 format.plugin.name()
             );
             return ExitCode::FAILURE;
         }
     };
     if let Err(e) = std::fs::write(output, &written.data) {
-        eprintln!("oxiguitar-cli: {output}: {e}");
+        eprintln!("futab-cli: {output}: {e}");
         return ExitCode::FAILURE;
     }
     // The tracks' plugin settings, which no format holds, go beside the new
@@ -86,7 +86,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
         .and_then(|s| s.map_or(Ok(()), |s| s.write_for(Path::new(output))))
     {
         Ok(()) => {}
-        Err(e) => eprintln!("oxiguitar-cli: {e}"),
+        Err(e) => eprintln!("futab-cli: {e}"),
     }
     let lost = written
         .losses

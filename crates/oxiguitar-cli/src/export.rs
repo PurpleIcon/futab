@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-//! `oxiguitar-cli export FILE OUT`: File → Export of an audio exporter
+//! `futab-cli export FILE OUT`: File → Export of an audio exporter
 //! plugin (plugin interface 1.4), from the command line. The exporter is
 //! the one whose extension the new file has (`.wav`); the score plays as
 //! the window's export dialog would make it play: the whole song or some
@@ -74,7 +74,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
     match export_file(&asked) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
-            eprintln!("oxiguitar-cli: {}: {e}", asked.path);
+            eprintln!("futab-cli: {}: {e}", asked.path);
             ExitCode::FAILURE
         }
     }

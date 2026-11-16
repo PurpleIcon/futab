@@ -1,6 +1,6 @@
 # Building for every system
 
-A plugin file holds native code for one system and processor, so you build one file for each system you support. OxiGuitar runs on six targets, which make five files (one macOS file serves both Mac processors):
+A plugin file holds native code for one system and processor, so you build one file for each system you support. FuTab runs on six targets, which make five files (one macOS file serves both Mac processors):
 
 | File | Rust target | Library cargo builds |
 | --- | --- | --- |
@@ -47,21 +47,21 @@ The template's release profile (`lto = "thin"`, `codegen-units = 1`, `strip = "s
 The template's `.github/workflows/build.yml` does all of this on GitHub's runners, each system on its own kind of machine, so nothing is cross-compiled but the Intel half of the macOS file. For each of the five files it:
 
 1. runs `cargo test` on that system, the contract suite included;
-2. runs `build-oxp.sh`, which names the file `NAME-VERSION-SYSTEM-ARCH.oxp` (`example-0.1.0-linux-x86_64.oxp`, `example-0.1.0-macos-universal.oxp`), the way OxiGuitar's own plugins are named;
+2. runs `build-oxp.sh`, which names the file `NAME-VERSION-SYSTEM-ARCH.oxp` (`example-0.1.0-linux-x86_64.oxp`, `example-0.1.0-macos-universal.oxp`), the way FuTab's own plugins are named;
 3. keeps it as a workflow artifact.
 
-When you push a tag starting with `v` (`git tag v0.1.0 && git push --tags`), a last job creates a GitHub release with the five files and a `SHA256SUMS` file. Users drop the file as it is into a plugin folder; the name doesn't matter to OxiGuitar.
+When you push a tag starting with `v` (`git tag v0.1.0 && git push --tags`), a last job creates a GitHub release with the five files and a `SHA256SUMS` file. Users drop the file as it is into a plugin folder; the name doesn't matter to FuTab.
 
-The Linux files are built on Ubuntu 22.04, the oldest Ubuntu LTS still in standard support, so they need glibc 2.35 or newer, like OxiGuitar's AppImage, and load with every OxiGuitar package: a library built on a newer system needs that system's glibc and doesn't load on older ones.
+The Linux files are built on Ubuntu 22.04, the oldest Ubuntu LTS still in standard support, so they need glibc 2.35 or newer, like FuTab's AppImage, and load with every FuTab package: a library built on a newer system needs that system's glibc and doesn't load on older ones.
 
 ## Packages and installers (the official plugins' workflow)
 
-The official plugins live in repositories of their own and are released with two reusable workflows from the [`oxiguitar-packages`](https://github.com/mateusrdp/oxiguitar-packages) repository, which any plugin repository may call. They live there, apart from OxiGuitar, so a change to the packaging never waits for an OxiGuitar release: call them `@main`. `plugin-release.yml` runs the same five builds as above (it expects the template's `build-oxp.sh`, which writes `dist/NAME-VERSION-SYSTEM-ARCH.oxp`) and then makes, from those files:
+The official plugins live in repositories of their own and are released with two reusable workflows from the [`oxiguitar-packages`](https://github.com/mateusrdp/oxiguitar-packages) repository, which any plugin repository may call. They live there, apart from FuTab, so a change to the packaging never waits for an FuTab release: call them `@main`. `plugin-release.yml` runs the same five builds as above (it expects the template's `build-oxp.sh`, which writes `dist/NAME-VERSION-SYSTEM-ARCH.oxp`) and then makes, from those files:
 
 - a zip per target, and `SHA256SUMS`;
 - a `.deb` and an `.rpm` per Linux processor, named `oxiguitar-NAME`, that install the file in `/usr/lib/oxiguitar/plugins/`;
-- a Windows installer per processor (Inno Setup), which installs for the user alone, without administrator rights, in `%APPDATA%\OxiGuitar\plugins`, and registers an uninstaller;
-- a macOS `.pkg` (`pkgbuild` and `productbuild` with `enable_currentUserHome`), which installs into the user's own `~/Library/Application Support/OxiGuitar/plugins` without a password.
+- a Windows installer per processor (Inno Setup), which installs for the user alone, without administrator rights, in `%APPDATA%\FuTab\plugins`, and registers an uninstaller;
+- a macOS `.pkg` (`pkgbuild` and `productbuild` with `enable_currentUserHome`), which installs into the user's own `~/Library/Application Support/FuTab/plugins` without a password.
 
 A repository may hold several plugins, as oxiguitar-guitarpro holds five: its `build-oxp.sh` writes one `dist/FILE-VERSION-SYSTEM-ARCH.oxp` for each, `name` is then the package's name (`guitarpro`, for `oxiguitar-guitarpro`), and the zip, the packages and the installers hold every file, each installed as `FILE.oxp`. Give `package` the crate whose version is the release's when the workspace has several crates.
 
@@ -89,5 +89,5 @@ You can use the scripts without the workflows: oxiguitar-packages' `scripts/plug
 
 - Raise the version in both `Cargo.toml` and `manifest.json` (the official plugins' Release button, in oxiguitar-packages, does it for them).
 - Run the contract suite on each system's file, not only on yours (the workflow does).
-- Try the file in OxiGuitar on at least one system ([Testing](testing.md)).
-- Say in your README what the plugin does, which OxiGuitar it needs (0.2 or later for interface 1.1), what it downloads or sends anywhere (ideally nothing), and where to report its bugs.
+- Try the file in FuTab on at least one system ([Testing](testing.md)).
+- Say in your README what the plugin does, which FuTab it needs (0.2 or later for interface 1.1), what it downloads or sends anywhere (ideally nothing), and where to report its bugs.

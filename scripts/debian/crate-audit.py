@@ -10,7 +10,7 @@ whether Debian has it and at which version.
 
     crate-audit.py list > crates.tsv
         On a machine with Cargo: the crates (name, version, builds) of
-        oxiguitar (both Linux builds) and oxiguitar-cli,
+        futab (both Linux builds) and futab-cli,
         for x86_64 and aarch64 Linux, normal and build dependencies (not
         dev-dependencies: Debian's tests may skip those).
 
@@ -41,14 +41,14 @@ import subprocess
 import sys
 
 PACKAGES = [
-    "oxiguitar-cli",
+    "futab-cli",
 ]
 TARGETS = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
 # The Wayland build is the default: the app and the CLI. The
 # X11 build is the app alone with other features.
 BUILDS = {
-    "wayland": ["-p", "oxiguitar-app"] + [a for p in PACKAGES for a in ("-p", p)],
-    "x11": ["-p", "oxiguitar-app", "--no-default-features", "--features", "x11"],
+    "wayland": ["-p", "futab"] + [a for p in PACKAGES for a in ("-p", p)],
+    "x11": ["-p", "futab", "--no-default-features", "--features", "x11"],
 }
 
 

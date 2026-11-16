@@ -192,7 +192,7 @@ struct Inner {
     /// OxiGuitar's folders, for the plugins' own folders and the shared
     /// ones (interface 1.3); unset for programs that keep none.
     folders: OnceLock<Folders>,
-    /// The folders are only read (`oxiguitar-cli`): a plugin's own folders
+    /// The folders are only read (`futab-cli`): a plugin's own folders
     /// are named but not created.
     read_only: std::sync::atomic::AtomicBool,
 }
@@ -531,7 +531,7 @@ impl fmt::Display for Unrecognised {
         match self {
             Unrecognised::NoReaders => write!(
                 f,
-                "no plugin that opens files is installed. The basic plugins come with every OxiGuitar download ({PLUGINS_URL}): install it again, or put plugins in your plugins folder."
+                "no plugin that opens files is installed. The basic plugins are OxiGuitar's ({PLUGINS_URL}): install them, or put plugins in your plugins folder."
             ),
             Unrecognised::Unknown => write!(
                 f,
@@ -547,7 +547,7 @@ impl fmt::Display for Unrecognised {
             ),
             Unrecognised::SafeMode => write!(
                 f,
-                "OxiGuitar was started in safe mode, without plugins, so it can't open any file. Start it again without --safe-mode."
+                "FuTab was started in safe mode, without plugins, so it can't open any file. Start it again without --safe-mode."
             ),
             Unrecognised::NotUsable {
                 plugin,
@@ -786,7 +786,7 @@ impl Plugins {
     }
 
     /// Gives the plugins OxiGuitar's folders to read only, as a program
-    /// that changes nothing in them does (`oxiguitar-cli`): plugins asking
+    /// that changes nothing in them does (`futab-cli`): plugins asking
     /// for their own data and cache folders are told where they are, but
     /// they aren't created, so what a plugin writes there fails unless the
     /// app made them.
@@ -999,9 +999,7 @@ impl Plugins {
                 .into_iter()
                 .map(|(what, bar, count)| LogEntry {
                     level: oxiguitar_plugin_api::message::Level::Warning,
-                    message: format!(
-                        "{what} can't be passed to {name}, made for an older OxiGuitar"
-                    ),
+                    message: format!("{what} can't be passed to {name}, made for an older FuTab"),
                     place: format!("bar {bar}"),
                     count: u32::try_from(count).unwrap_or(u32::MAX),
                 })
@@ -1019,9 +1017,7 @@ impl Plugins {
                 .into_iter()
                 .map(|(what, bar, count)| LogEntry {
                     level: oxiguitar_plugin_api::message::Level::Warning,
-                    message: format!(
-                        "{what} can't be passed to {name}, made for an older OxiGuitar"
-                    ),
+                    message: format!("{what} can't be passed to {name}, made for an older FuTab"),
                     place: format!("bar {bar}"),
                     count: u32::try_from(count).unwrap_or(u32::MAX),
                 })
@@ -1892,7 +1888,7 @@ impl Plugins {
                 .retain(|_, choice| matches!(choice, Ok((i, _)) if *i != index));
             self.0.core.notify(
                 Level::Error,
-                format!("{name} stopped working and isn't used until OxiGuitar restarts: {why}."),
+                format!("{name} stopped working and isn't used until FuTab restarts: {why}."),
             );
             if let Some(m) = &found.manifest {
                 self.0.core.withdrawn(&m.id);
@@ -1954,7 +1950,7 @@ impl Plugins {
                 Status::FAILED,
                 encode(&Error::new(
                     ErrorKind::Failed,
-                    "OxiGuitar's plugin host has closed",
+                    "FuTab's plugin host has closed",
                 ))
                 .unwrap_or_default(),
             ),
@@ -2202,12 +2198,12 @@ fn examine(path: PathBuf, env: &Environment, disabled: &[String]) -> Found {
             let (major, minor) = oxiguitar_plugin_api::INTERFACE;
             let state = if m.interface.major != major {
                 State::Unusable(format!(
-                    "it is built for interface {}, and this OxiGuitar has {major}.{minor}",
+                    "it is built for interface {}, and this FuTab has {major}.{minor}",
                     m.interface
                 ))
             } else if m.interface.minor > minor {
                 State::Unusable(format!(
-                    "it needs interface {}, and this OxiGuitar has {major}.{minor}: update OxiGuitar",
+                    "it needs interface {}, and this FuTab has {major}.{minor}: update FuTab",
                     m.interface
                 ))
             } else if let Some(why) = m.conditions.unmet(env) {

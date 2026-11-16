@@ -17,12 +17,12 @@ use oxiguitar_plugin_api::message::{Advice, Link};
 /// A plugin file's extension, without the dot.
 pub const PLUGIN_EXTENSION: &str = "oxp";
 
-/// Where our own plugins are published.
+/// Where the plugins FuTab uses are published: OxiGuitar's releases.
 pub const PLUGINS_URL: &str = "https://github.com/mateusrdp/oxiguitar/releases";
 
 /// Where to report a bug or ask for a feature, such as a plugin for a
 /// format nobody opens yet.
-pub const ISSUES_URL: &str = "https://github.com/mateusrdp/oxiguitar/issues/new";
+pub const ISSUES_URL: &str = "https://github.com/PurpleIcon/futab/issues/new";
 
 /// How much a notice matters.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -112,7 +112,7 @@ impl Inventory {
     pub fn notices(&self, user_plugins: &Path) -> Vec<Notice> {
         let mut out = Vec::new();
         let get = format!(
-            "The basic plugins come with every OxiGuitar download ({PLUGINS_URL}): install it again, or put plugins in {}.",
+            "The basic plugins are OxiGuitar's ({PLUGINS_URL}): install them, or put plugins in {}.",
             user_plugins.display()
         );
         let (reads, writes) = (
@@ -122,12 +122,14 @@ impl Inventory {
         if !reads && !writes {
             out.push(Notice::new(
                 Level::Warning,
-                format!("No read/write plugins are installed, so OxiGuitar can't open or save any file. {get}"),
+                format!("No read/write plugins are installed, so FuTab can't open or save any file. {get}"),
             ));
         } else if !reads {
             out.push(Notice::new(
                 Level::Warning,
-                format!("No plugin that reads files is installed, so OxiGuitar can't open any file. {get}"),
+                format!(
+                    "No plugin that reads files is installed, so FuTab can't open any file. {get}"
+                ),
             ));
         }
         if self.instruments.is_empty() {
@@ -202,9 +204,9 @@ impl Inventory {
         if self.readers().next().is_none() {
             out.push(Advice {
                 id: NO_FORMAT_PLUGIN.to_owned(),
-                title: "OxiGuitar can't open any file".to_owned(),
+                title: "FuTab can't open any file".to_owned(),
                 text: format!(
-                    "OxiGuitar opens and saves files only through plugins, and no plugin that reads files is installed. The Guitar Pro plugins open Guitar Pro files, versions 3 to 8.\nInstall them from the page of official plugins, or put their .oxp files in {folder}."
+                    "FuTab opens and saves files only through plugins, and no plugin that reads files is installed. The Guitar Pro plugins open Guitar Pro files, versions 3 to 8.\nInstall them from the page of official plugins, or put their .oxp files in {folder}."
                 ),
                 links: links(),
             });
@@ -212,7 +214,7 @@ impl Inventory {
         if self.instruments.is_empty() {
             out.push(Advice {
                 id: NO_PLAYER_PLUGIN.to_owned(),
-                title: "OxiGuitar can't play".to_owned(),
+                title: "FuTab can't play".to_owned(),
                 text: format!(
                     "No plugin that plays a score is installed, so the play buttons stay off. The MIDI plugin plays scores through a sound set (SoundFont or SFZ), and your system has one.\nInstall it from the page of official plugins, or put its .oxp file in {folder}."
                 ),
@@ -221,7 +223,7 @@ impl Inventory {
         } else if self.outputs.is_empty() {
             out.push(Advice {
                 id: NO_OUTPUT_PLUGIN.to_owned(),
-                title: "OxiGuitar has nowhere to send the sound".to_owned(),
+                title: "FuTab has nowhere to send the sound".to_owned(),
                 text: format!(
                     "A plugin that plays scores is installed, but no plugin sends sound to your speakers (PipeWire, ALSA, WASAPI or Core Audio, one for each system), so the play buttons stay off. Exporting audio to a file still works.\nInstall the one for your system from the page of official plugins, or put its .oxp file in {folder}."
                 ),

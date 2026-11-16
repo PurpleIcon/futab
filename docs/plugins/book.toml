@@ -1,6 +1,6 @@
-# The OxiGuitar plugin developer guide, the user manual's sister book
+# The FuTab plugin developer guide, the user manual's sister book
 # (docs/design/plugins.md). Built with mdBook and published beside the manual,
-# at https://mateusrdp.github.io/oxiguitar/plugin-guide/, by
+# at https://purpleicon.github.io/futab/plugin-guide/, by
 # .github/workflows/docs.yml. Build it locally with: mdbook build docs/plugins
 # (the pages land in docs/plugins/book/, which git ignores).
 #
@@ -8,14 +8,14 @@
 # CI builds and checks (scripts/check-plugin-template.sh), so they compile.
 
 [book]
-title = "Writing OxiGuitar plugins"
-authors = ["Mateus Rocha de Paula", "The OxiGuitar contributors"]
+title = "Writing FuTab plugins"
+authors = ["Mateus Rocha de Paula", "The OxiGuitar contributors", "The FuTab contributors"]
 language = "en"
 src = "src"
 
 [output.html]
-git-repository-url = "https://github.com/mateusrdp/oxiguitar"
-edit-url-template = "https://github.com/mateusrdp/oxiguitar/edit/develop/docs/plugins/{path}"
+git-repository-url = "https://github.com/PurpleIcon/futab"
+edit-url-template = "https://github.com/PurpleIcon/futab/edit/develop/docs/plugins/{path}"
 default-theme = "light"
 preferred-dark-theme = "navy"
 no-section-label = true

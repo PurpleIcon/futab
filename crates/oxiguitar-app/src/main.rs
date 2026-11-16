@@ -22,14 +22,14 @@
 //! `--safe-mode` starts with no plugins at all; Help → About lists the
 //! plugin folders.
 //!
-//! Usage: `oxiguitar [--safe-mode] [FILE]`. Nothing here touches the
+//! Usage: `futab [--safe-mode] [FILE]`. Nothing here touches the
 //! network.
 
 #![windows_subsystem = "windows"]
 
 // The windowing backend comes from one of these features (Cargo.toml).
 #[cfg(not(any(feature = "wayland", feature = "x11")))]
-compile_error!("build oxiguitar-app with the `wayland` feature (the default) or `x11`");
+compile_error!("build futab with the `wayland` feature (the default) or `x11`");
 
 mod advice;
 mod audio_export;
@@ -37,6 +37,7 @@ mod bar_form;
 mod bend_form;
 mod canvas;
 mod chord_form;
+mod chord_prefs;
 mod cursor;
 mod document;
 mod editing;
@@ -102,14 +103,14 @@ mod ui {
     slint::include_modules!();
 }
 use ui::{
-    AdviceLink, AltBox, AppWindow, AreaState, BoxItem, FooterRow, GridPoint, InspectorField,
+    AdviceLink, AppWindow, AreaState, BoxItem, FooterRow, GridPoint, InspectorField,
     InspectorVoice, ManagerRow, PaletteGroupRow, PaletteToolRow, PluginLinks, PluginManagerWindow,
     PluginRow, PluginSection, PluginSettingsWindow, PluginWidget, ShortcutLine, SongField,
     TileItem, ToolRow, ToolbarItemRow, ToolbarSectionRow, TrackRow,
 };
 
 /// The app id: the desktop entry's name and the Wayland app id.
-const APP_ID: &str = "io.github.mateusrdp.OxiGuitar";
+const APP_ID: &str = "io.github.purpleicon.FuTab";
 /// Interface zoom steps, as in web browsers.
 const UI_ZOOMS: &[f32] = &[0.5, 0.67, 0.75, 0.8, 0.9, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0];
 /// Size of the track rows' toggle icons (notation, mute, solo), in
@@ -242,6 +243,10 @@ struct App {
     /// Fit Bars to Time Signature… is open: for the whole song (Tools) or
     /// the selected bars (the page's menu).
     fit_whole_song: Option<bool>,
+    /// Harmonize… is open.
+    harmonize_shown: bool,
+    /// Copy, Cut or Paste Bars' dialog is open, for which.
+    bars_dialog: Option<editing::ClipKey>,
     /// What to do once the score is saved (after "Save the changes…?").
     after_save: Option<Then>,
     /// The player (M4): its controls and the engine's window half, its
@@ -461,10 +466,10 @@ fn wrong_build_hint(display: &str) -> Option<&'static str> {
     }
     match display {
         "wayland" => Some(
-            "This is OxiGuitar's Wayland build, and it found no Wayland session (is WAYLAND_DISPLAY set?). On an X11 desktop, install the X11 build instead (the package oxiguitar-x11), or use the AppImage, which holds both builds.",
+            "This is FuTab's Wayland build, and it found no Wayland session (is WAYLAND_DISPLAY set?). On an X11 desktop, install the X11 build instead (the package futab-x11), or use the AppImage, which holds both builds.",
         ),
         "x11" => Some(
-            "This is OxiGuitar's X11 build, and it found no X server (is DISPLAY set?). On a Wayland desktop, install the Wayland build instead (the package oxiguitar), or use the AppImage, which holds both builds.",
+            "This is FuTab's X11 build, and it found no X server (is DISPLAY set?). On a Wayland desktop, install the Wayland build instead (the package futab), or use the AppImage, which holds both builds.",
         ),
         _ => None,
     }
@@ -601,6 +606,8 @@ fn main() -> Result<(), slint::PlatformError> {
         chord_dialog: None,
         transpose_scope: None,
         fit_whole_song: None,
+        harmonize_shown: false,
+        bars_dialog: None,
         after_save: None,
         player: player::Player::new(control),
         sound,
@@ -701,9 +708,10 @@ fn main() -> Result<(), slint::PlatformError> {
             "Guitar tablature and score viewer, editor and player. Version {}.",
             env!("CARGO_PKG_VERSION")
         ),
+        "FuTab is a fork of OxiGuitar, by Mateus Rocha de Paula and the OxiGuitar contributors: https://github.com/mateusrdp/oxiguitar".to_owned(),
         "Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors. Licensed under the GNU GPL, version 3 or later.".to_owned(),
         "Music font: Bravura (Steinberg, SIL OFL 1.1). Text font: Noto Sans (SIL OFL 1.1). GUI: Slint (GPL-3.0).".to_owned(),
-        "OxiGuitar never connects to the internet on its own and sends nothing anywhere.".to_owned(),
+        "FuTab never connects to the internet on its own and sends nothing anywhere.".to_owned(),
     ];
     about.extend(about_folders(&startup.inventory.folders, args.safe_mode));
     ui.set_about_lines(lines(&about.iter().map(String::as_str).collect::<Vec<_>>()));
@@ -767,7 +775,9 @@ fn main() -> Result<(), slint::PlatformError> {
             "cut" => return clipboard(&a, editing::ClipKey::Cut),
             "copy" => return clipboard(&a, editing::ClipKey::Copy),
             "paste" => return clipboard(&a, editing::ClipKey::Paste),
-            "special-paste" => return clipboard(&a, editing::ClipKey::Special),
+            "copy-bars" => return clipboard(&a, editing::ClipKey::CopyBars),
+            "cut-bars" => return clipboard(&a, editing::ClipKey::CutBars),
+            "paste-bars" => return clipboard(&a, editing::ClipKey::PasteBars),
             "add-track" => return track_action(&a, "add"),
             "delete-track" => return track_action(&a, "delete"),
             "transpose-selection" => return open_transpose(&a, oxiguitar_edit::Scope::Selection),
@@ -775,6 +785,7 @@ fn main() -> Result<(), slint::PlatformError> {
             "fingering-selection" => return find_fingering(&a, oxiguitar_edit::Scope::Selection),
             "fingering-all" => return find_fingering(&a, oxiguitar_edit::Scope::All),
             "fit-all" => return open_fit(&a, true),
+            "harmonize-all" => return open_harmonize(&a, true),
             _ => {}
         }
         let Some(command) = editing::menu_command(name.as_str()) else {
@@ -796,7 +807,7 @@ fn main() -> Result<(), slint::PlatformError> {
     let a = app.clone();
     ui.on_tuplet_dialog_done(move |ok| tuplet_dialog_done(&a, ok));
     let a = app.clone();
-    ui.on_paste_dialog_done(move |ok| paste_dialog_done(&a, ok));
+    ui.on_bars_dialog_done(move |ok| bars_dialog_done(&a, ok));
     ui.set_bend_amounts(strings(bend_form::amounts()));
     let a = app.clone();
     ui.on_bend_kind_picked(move |i| {
@@ -814,10 +825,6 @@ fn main() -> Result<(), slint::PlatformError> {
     ui.on_bend_released(move || bend_edit(&a, bend_form::BendForm::release));
     let a = app.clone();
     ui.on_bend_dialog_done(move |ok| bend_dialog_done(&a, ok));
-    ui.set_chord_roots(strings(chord_form::note_names()));
-    ui.set_chord_triads(strings(chord_form::triad_names()));
-    ui.set_chord_extensions(strings(chord_form::extension_names()));
-    ui.set_chord_basses(strings(chord_form::bass_names()));
     let a = app.clone();
     ui.on_chord_changed(move |kind, value, text| {
         chord_changed(&a, kind.as_str(), value, text.as_str())
@@ -892,6 +899,8 @@ fn main() -> Result<(), slint::PlatformError> {
     let a = app.clone();
     ui.on_fit_dialog_done(move |ok| fit_dialog_done(&a, ok));
     let a = app.clone();
+    ui.on_harmonize_dialog_done(move |ok| harmonize_dialog_done(&a, ok));
+    let a = app.clone();
     ui.on_track_menu(move |i, action| {
         let i = usize::try_from(i).unwrap_or(0);
         let a = a.clone();
@@ -911,6 +920,7 @@ fn main() -> Result<(), slint::PlatformError> {
         "transpose" => open_transpose(&a, oxiguitar_edit::Scope::Selection),
         "fingering" => find_fingering(&a, oxiguitar_edit::Scope::Selection),
         "fit" => open_fit(&a, false),
+        "harmonize" => open_harmonize(&a, false),
         "design-more" => design_layout(&a, Some(true)),
         "design-less" => design_layout(&a, Some(false)),
         "design-auto" => design_layout(&a, None),
@@ -1280,12 +1290,6 @@ fn main() -> Result<(), slint::PlatformError> {
     let a = app.clone();
     ui.on_open_link(move |url| {
         if let Err(e) = links::open(&url) {
-            message(&a, Level::Error, e);
-        }
-    });
-    let a = app.clone();
-    ui.on_open_donation(move || {
-        if let Err(e) = links::open(links::DONATE) {
             message(&a, Level::Error, e);
         }
     });
@@ -2101,7 +2105,7 @@ fn install_plugin_tab_callbacks(ui: &AppWindow, app: &Shared) {
     ui.on_plugin_canvas_room(move |area, id, w, h| canvas_room(&a, area, &id, w, h));
 }
 
-/// The command line: `oxiguitar [--safe-mode] [FILE]`.
+/// The command line: `futab [--safe-mode] [FILE]`.
 #[derive(Debug, Default, PartialEq, Eq)]
 struct Args {
     /// Start with no plugins at all.
@@ -2187,7 +2191,7 @@ fn open_plugin_manager(app: &Shared) {
             SharedString::new()
         } else {
             SharedString::from(format!(
-                "{} couldn't be read when OxiGuitar started, so plugins can't be enabled or disabled now: correct it (or remove it) and start OxiGuitar again.",
+                "{} couldn't be read when FuTab started, so plugins can't be enabled or disabled now: correct it (or remove it) and start FuTab again.",
                 oxiguitar_host::SETTINGS_FILE
             ))
         });
@@ -2247,7 +2251,7 @@ fn manager_toggled(app: &Shared, index: i32, on: bool) {
                 app,
                 Level::Info,
                 format!(
-                    "{name} stays in use until you restart OxiGuitar: a loaded plugin can't be unloaded while it runs."
+                    "{name} stays in use until you restart FuTab: a loaded plugin can't be unloaded while it runs."
                 ),
             );
         }
@@ -2266,6 +2270,7 @@ fn apply_prefs(ui: &AppWindow, p: ViewPrefs) {
     ui.set_follow_desktop(p.dark_interface.is_none());
     ui.set_dark_page(p.dark_page);
     ui.set_dynamics(p.dynamics);
+    ui.set_play_engraved_beat(p.play_engraved_beat);
     let index = |found: Option<usize>| found.unwrap_or(0) as i32;
     ui.invoke_pick_layout(index(Layout::ALL.iter().position(|l| *l == p.layout)));
     ui.invoke_pick_paper(index(Paper::ALL.iter().position(|q| *q == p.paper)));
@@ -2396,15 +2401,17 @@ fn handle(app: &Shared, event: Event) {
             bad,
             caret,
             tracks,
+            note_edit,
         } => {
-            {
+            let play = {
                 let mut s = app.borrow_mut();
                 s.editing.changed(score);
                 if let Some(c) = caret {
                     s.editing.edited(c);
                 }
                 s.bad = bad;
-            }
+                s.prefs.play_engraved_beat
+            };
             if let Some((tracks, was)) = tracks {
                 track_list_changed(app, &tracks, &was);
             }
@@ -2416,6 +2423,13 @@ fn handle(app: &Shared, event: Event) {
                 sync_caret(app, false);
             }
             playing::score_changed(app, false);
+            // Play a 1-beat preview after a note edit when the toggle is on
+            // and the change was a note insertion or deletion (#246).
+            if play && note_edit {
+                let dos = playing::play_beats(app, 1);
+                playing::act(app, dos);
+                playing::sync(app);
+            }
         }
         Event::Refused => {
             let text = "Editing waits while the score plays: pause it (Space) to edit.".to_owned();
@@ -2497,9 +2511,9 @@ fn sync_edit_state(app: &Shared, edit: &document::EditState) {
         let mut s = app.borrow_mut();
         s.modified = edit.modified;
         match &s.doc_name {
-            Some(name) if edit.modified => format!("• {name} — OxiGuitar"),
-            Some(name) => format!("{name} — OxiGuitar"),
-            None => "OxiGuitar".to_owned(),
+            Some(name) if edit.modified => format!("• {name} — FuTab"),
+            Some(name) => format!("{name} — FuTab"),
+            None => "FuTab".to_owned(),
         }
     };
     ui.set_window_title(window_title.into());
@@ -2767,6 +2781,7 @@ fn settings_changed(app: &Shared) {
         paper: s.settings.paper,
         score_zoom: s.zoom,
         ui_zoom: s.ui_zoom,
+        play_engraved_beat: ui.get_play_engraved_beat(),
     };
     if prefs != s.prefs {
         s.prefs = prefs;
@@ -2880,7 +2895,7 @@ fn measure_palette() {
             });
         });
     if let Err(e) = spawned {
-        eprintln!("oxiguitar: the palette's icons can't be drawn: {e}");
+        eprintln!("futab: the palette's icons can't be drawn: {e}");
     }
 }
 
@@ -3148,6 +3163,7 @@ fn set_zoom(app: &Shared, v: f32, anchor: Option<(f32, f32)>) {
             paper: s.prefs.paper,
             score_zoom: s.zoom,
             ui_zoom: s.ui_zoom,
+            play_engraved_beat: s.prefs.play_engraved_beat,
         };
         if prefs != s.prefs {
             s.prefs = prefs;
@@ -3289,9 +3305,16 @@ fn open_edit_dialog(app: &Shared, dialog: editing::Dialog) {
             ui.set_bend_dialog_shown(true);
         }
         editing::Dialog::Chord => {
-            let Some(form) = app.borrow().editing.chord_form() else {
+            let (styles, prefs) = chord_settings(app);
+            let style = prefs.style_in(&styles);
+            let form = app
+                .borrow()
+                .editing
+                .chord_form(styles, style, prefs.diagram);
+            let Some(form) = form else {
                 return;
             };
+            ui.set_chord_styles(strings(form.style_names()));
             ui.set_chord_last_fret(i32::from(form.frets_max()));
             sync_chord(&ui, &form);
             app.borrow_mut().chord_dialog = Some(form);
@@ -3391,75 +3414,93 @@ fn edit_at_caret(app: &Shared, command: oxiguitar_edit::Command) {
     }
 }
 
+/// The chord notation styles and the chord dialog's lasting choices, from
+/// settings.json. A settings.json without styles is given the first ones
+/// (`chord_prefs`), so they are there to change.
+fn chord_settings(app: &Shared) -> (oxiguitar_edit::chord_names::Styles, chord_prefs::ChordPrefs) {
+    let mut s = app.borrow_mut();
+    let stored = s.stored.get(chord_prefs::STYLES_KEY).unwrap_or_else(|| {
+        let first = chord_prefs::first_styles();
+        if let Err(e) = s.stored.set(chord_prefs::STYLES_KEY, first.clone()) {
+            s.footer.push(Level::Error, e);
+        }
+        first
+    });
+    let prefs = chord_prefs::ChordPrefs::from_value(s.stored.get(chord_prefs::KEY).as_ref());
+    (chord_prefs::styles(&stored), prefs)
+}
+
+/// Keeps the chord dialog's style and its "Add diagram" choice in
+/// settings.json, for the next chord.
+fn keep_chord_prefs(app: &Shared, form: &chord_form::ChordForm, diagram: Option<bool>) {
+    let mut s = app.borrow_mut();
+    let old = s.stored.get(chord_prefs::KEY);
+    let mut prefs = chord_prefs::ChordPrefs::from_value(old.as_ref());
+    if let Some(style) = form.style_name() {
+        prefs.style = style;
+    }
+    if let Some(diagram) = diagram {
+        prefs.diagram = diagram;
+    }
+    if Some(prefs.to_value(old.as_ref())) != old
+        && let Err(e) = s.stored.set(chord_prefs::KEY, prefs.to_value(old.as_ref()))
+    {
+        s.footer.push(Level::Error, e);
+    }
+}
+
 /// Shows the chord dialog's state.
 fn sync_chord(ui: &AppWindow, f: &chord_form::ChordForm) {
-    use oxiguitar_edit::harmony::{Extension, Triad, alt};
     ui.set_chord_name(f.name.as_str().into());
-    ui.set_chord_library(strings(f.library.iter().map(|d| d.name.clone()).collect()));
-    let c = f.chord;
-    let index = |i: Option<usize>| i.and_then(|i| i32::try_from(i).ok()).unwrap_or(-1);
-    ui.set_chord_root(index(c.map(|c| c.root)));
-    ui.set_chord_triad(index(
-        c.and_then(|c| Triad::ALL.iter().position(|t| *t == c.triad)),
-    ));
-    ui.set_chord_extension(index(
-        c.and_then(|c| Extension::ALL.iter().position(|e| *e == c.extension)),
-    ));
-    ui.set_chord_bass(index(c.map(|c| c.bass.map_or(0, |b| b + 1))));
-    let bits = c.map_or(0, |c| c.alterations);
-    ui.set_chord_alterations(ModelRc::new(VecModel::from(
-        alt::NAMES
-            .iter()
-            .map(|(bit, name)| AltBox {
-                label: name.replace('b', "♭").replace('#', "♯").into(),
-                on: bits & bit != 0,
-            })
-            .collect::<Vec<_>>(),
-    )));
-    ui.set_chord_strings(i32::try_from(f.strings()).unwrap_or(0));
-    ui.set_chord_dots(ModelRc::new(VecModel::from(f.dots())));
-    ui.set_chord_first_fret(i32::from(f.first_fret));
+    ui.set_chord_names(strings(f.names.clone()));
+    ui.set_chord_voicing(f.voicing.as_str().into());
     ui.set_chord_voicings(strings(
         f.voicings
             .iter()
-            .map(|v| chord_form::ChordForm::shape_text(v))
+            .map(|v| chord_form::shape_text(v))
             .collect(),
     ));
-    ui.set_chord_show_diagram(f.show_diagram);
+    ui.set_chord_style(i32::try_from(f.style).unwrap_or(0));
+    ui.set_chord_strings(i32::try_from(f.strings()).unwrap_or(0));
+    ui.set_chord_dots(ModelRc::new(VecModel::from(f.dots())));
+    ui.set_chord_first_fret(i32::from(f.first_fret));
+    ui.set_chord_add_diagram(f.add_diagram);
+}
+
+/// The chord dialog's style applied to every chord of the song, as one
+/// step for Undo: each name rewritten by the style, the ones it has no
+/// alias for left as they are.
+fn apply_chord_style(app: &Shared, form: &chord_form::ChordForm) {
+    let Some(score) = app.borrow().editing.score() else {
+        return;
+    };
+    let names: Vec<Vec<String>> = score
+        .tracks
+        .iter()
+        .map(|t| t.chords.iter().map(|d| form.in_style(&d.name)).collect())
+        .collect();
+    edit_at_caret(app, oxiguitar_edit::Command::RenameChords(names));
 }
 
 /// A change in the chord dialog: `kind` names what, `value` and `text`
 /// carry it.
 fn chord_changed(app: &Shared, kind: &str, value: i32, text: &str) {
-    use oxiguitar_edit::harmony::{Extension, Triad, alt};
     let Some(ui) = app.borrow().ui.upgrade() else {
         return;
     };
-    if kind == "remove" {
-        ui.set_chord_dialog_shown(false);
-        ui.invoke_focus_page();
-        app.borrow_mut().chord_dialog = None;
-        edit_at_caret(app, oxiguitar_edit::Command::Chord(None));
-        return;
-    }
     let i = usize::try_from(value).unwrap_or(0);
     let form = {
         let mut s = app.borrow_mut();
         let Some(f) = s.chord_dialog.as_mut() else {
             return;
         };
-        let bit = alt::NAMES.get(i).map_or(0, |(b, _)| *b);
         match kind {
             "name" => f.type_name(text),
-            "library" => f.pick_library(i),
-            "root" => f.build(|c| c.root = i),
-            "triad" => f.build(|c| c.triad = Triad::ALL.get(i).copied().unwrap_or(c.triad)),
-            "extension" => {
-                f.build(|c| c.extension = Extension::ALL.get(i).copied().unwrap_or(c.extension))
-            }
-            "bass" => f.build(|c| c.bass = i.checked_sub(1)),
-            "alt-on" => f.build(|c| c.alterations |= bit),
-            "alt-off" => f.build(|c| c.alterations &= !bit),
+            "name-picked" => f.pick_name(i),
+            "voicing" => f.type_voicing(text),
+            "voicing-picked" => f.pick_voicing(i),
+            "style" => f.pick_style(i),
+            "apply" => f.song_restyled(),
             "grid" => {
                 let strings = f.strings();
                 let low = i / 100;
@@ -3473,12 +3514,17 @@ fn chord_changed(app: &Shared, kind: &str, value: i32, text: &str) {
                 }
             }
             "first" => f.scroll(u8::try_from(i).unwrap_or(1)),
-            "voicing" => f.pick_voicing(i),
-            "show" => f.show_diagram = value != 0,
+            "diagram" => f.add_diagram = value != 0,
             _ => {}
         }
         f.clone()
     };
+    match kind {
+        "style" => keep_chord_prefs(app, &form, None),
+        "diagram" => keep_chord_prefs(app, &form, Some(form.add_diagram)),
+        "apply" => apply_chord_style(app, &form),
+        _ => {}
+    }
     sync_chord(&ui, &form);
 }
 
@@ -3888,7 +3934,22 @@ fn sync_track(app: &Shared, ui: &AppWindow) {
             s.sections = Some(sections);
             s.sections_touched = false;
         }
-        (reopen, track_form::fields(&f, &message, error))
+        (
+            reopen,
+            track_form::fields(
+                &f,
+                &message,
+                error,
+                t,
+                &score
+                    .as_ref()
+                    .unwrap()
+                    .tracks
+                    .iter()
+                    .map(|tr| tr.name.clone())
+                    .collect::<Vec<_>>(),
+            ),
+        )
     };
     ui.set_track_heading(format!("Track {}: {}", t + 1, track.name).into());
     if reopen {
@@ -3903,6 +3964,33 @@ fn sync_track(app: &Shared, ui: &AppWindow) {
 /// after a question when notes can't be kept. A tuning that can't be says
 /// why in the tab and changes nothing.
 fn track_changed(app: &Shared, id: &str, value: i32, text: &str) {
+    // "chords-from" is not a TrackSettings field: use a ChordsFrom command.
+    if id == "chords-from" {
+        let (score, t, ui) = {
+            let s = app.borrow();
+            (s.editing.score(), s.editing.track(), s.ui.upgrade())
+        };
+        let (Some(_score), Some(_t)) = (score, t) else {
+            return;
+        };
+        let Some(ui) = ui else {
+            return;
+        };
+        let chords_from = if value == 0 {
+            usize::MAX
+        } else {
+            usize::try_from(value - 1).unwrap_or(usize::MAX)
+        };
+        let typed = app
+            .borrow_mut()
+            .editing
+            .tool(oxiguitar_edit::Command::ChordsFrom(chords_from));
+        if let Some(typed) = typed {
+            send_typed(app, typed);
+        }
+        sync_inspector(app, &ui);
+        return;
+    }
     let (score, index, keep) = {
         let s = app.borrow();
         (s.editing.score(), s.editing.track(), s.track_keep_pitches)
@@ -4382,6 +4470,98 @@ fn fit_dialog_done(app: &Shared, ok: bool) {
     }
 }
 
+/// Opens Harmonize… (#235). Its tickbox starts on the whole song from
+/// Tools and on the selected bars (the caret's bar when nothing is
+/// selected) from the page's right-click menu; the user can change it.
+fn open_harmonize(app: &Shared, whole_song: bool) {
+    let Some(ui) = app.borrow().ui.upgrade() else {
+        return;
+    };
+    if app.borrow().question.is_some() {
+        return;
+    }
+    let name = {
+        let s = app.borrow();
+        let Some(track) = s.editing.track() else {
+            return;
+        };
+        let score = s.editing.score();
+        score
+            .as_ref()
+            .and_then(|sc| sc.tracks.get(track))
+            .map_or_else(String::new, |t| t.name.clone())
+    };
+    let part = if app.borrow().editing.selection().is_some() {
+        "the selected bars"
+    } else {
+        "this bar"
+    };
+    app.borrow_mut().harmonize_shown = true;
+    ui.set_harmonize_heading(format!("Find chords for {name}").into());
+    ui.set_harmonize_part(part.into());
+    ui.set_harmonize_whole_song(whole_song);
+    ui.set_harmonize_dialog_shown(true);
+}
+
+/// Harmonize… closed: on OK, the chords as one change. The footer says
+/// when nothing was found, and when the notes fit another key better
+/// than the key signature's.
+fn harmonize_dialog_done(app: &Shared, ok: bool) {
+    let Some(ui) = app.borrow().ui.upgrade() else {
+        return;
+    };
+    ui.set_harmonize_dialog_shown(false);
+    ui.invoke_focus_page();
+    if !std::mem::take(&mut app.borrow_mut().harmonize_shown) || !ok {
+        return;
+    }
+    let harmonize = oxiguitar_edit::Harmonize {
+        sevenths: ui.get_harmonize_sevenths(),
+        inside_bars: ui.get_harmonize_inside_bars(),
+        keep: ui.get_harmonize_keep(),
+        all_tracks: ui.get_harmonize_all_tracks(),
+        whole_song: ui.get_harmonize_whole_song(),
+    };
+    let report = {
+        let s = app.borrow();
+        match (s.editing.score(), s.editing.caret()) {
+            (Some(score), Some(caret)) => {
+                oxiguitar_edit::harmonize_report(&score, caret, s.editing.selection(), &harmonize)
+            }
+            _ => return,
+        }
+    };
+    let Some(report) = report else {
+        message(
+            app,
+            Level::Warning,
+            if harmonize.all_tracks {
+                "No chords found: these bars have no notes, or the track is a drum kit."
+            } else {
+                "No chords found: this track has no notes in these bars, or it is a drum kit."
+            },
+        );
+        return;
+    };
+    let typed = app
+        .borrow_mut()
+        .editing
+        .tool(oxiguitar_edit::Command::Harmonize(harmonize));
+    match typed {
+        Some(typed) => {
+            send_typed(app, typed);
+            if let Some(other_key) = report.other_key {
+                message(app, Level::Warning, other_key);
+            }
+        }
+        None => message(
+            app,
+            Level::Warning,
+            "No new chords: the chords already there are the ones Harmonize finds, or cover every bar.",
+        ),
+    }
+}
+
 /// Transpose… closed: on OK, the transposition as one change, after a
 /// question when notes can't be kept.
 fn transpose_dialog_done(app: &Shared, ok: bool) {
@@ -4430,7 +4610,7 @@ fn transpose_dialog_done(app: &Shared, ok: bool) {
     }
 }
 
-/// Copy, cut, paste, or Special Paste's dialog.
+/// Copy, cut or paste, or the dialog of Copy, Cut or Paste Bars.
 fn clipboard(app: &Shared, key: editing::ClipKey) {
     let typed = match key {
         editing::ClipKey::Copy => {
@@ -4438,14 +4618,9 @@ fn clipboard(app: &Shared, key: editing::ClipKey) {
             return;
         }
         editing::ClipKey::Cut => app.borrow_mut().editing.cut(),
-        editing::ClipKey::Paste => app.borrow_mut().editing.paste(1, false),
-        editing::ClipKey::Special => {
-            let Some(ui) = app.borrow().ui.upgrade() else {
-                return;
-            };
-            if app.borrow().editing.has_clip() && app.borrow().question.is_none() {
-                ui.set_paste_dialog_shown(true);
-            }
+        editing::ClipKey::Paste => app.borrow_mut().editing.paste(),
+        editing::ClipKey::CopyBars | editing::ClipKey::CutBars | editing::ClipKey::PasteBars => {
+            open_bars_dialog(app, key);
             return;
         }
     };
@@ -4455,21 +4630,68 @@ fn clipboard(app: &Shared, key: editing::ClipKey) {
     }
 }
 
-/// Special Paste closed: on OK, the clipboard pasted as asked.
-fn paste_dialog_done(app: &Shared, ok: bool) {
+/// Copy, Cut or Paste Bars' dialog (#287); Paste Bars only once bars have
+/// been copied.
+fn open_bars_dialog(app: &Shared, key: editing::ClipKey) {
     let Some(ui) = app.borrow().ui.upgrade() else {
         return;
     };
-    ui.set_paste_dialog_shown(false);
+    {
+        let s = app.borrow();
+        if s.question.is_some() || s.editing.caret().is_none() {
+            return;
+        }
+    }
+    let (heading, note) = match key {
+        editing::ClipKey::CopyBars => ("Copy Bars", ""),
+        editing::ClipKey::CutBars => (
+            "Cut Bars",
+            "The whole bars the selection touches are copied, then taken out of every track.",
+        ),
+        editing::ClipKey::PasteBars if app.borrow().editing.has_bars() => ("Paste Bars", ""),
+        editing::ClipKey::PasteBars => {
+            message(
+                app,
+                Level::Warning,
+                "No bars to paste: copy some with Copy Bars (Ctrl + Shift + C) first.",
+            );
+            return;
+        }
+        _ => return,
+    };
+    app.borrow_mut().bars_dialog = Some(key);
+    ui.set_bars_heading(heading.into());
+    ui.set_bars_note(note.into());
+    ui.set_bars_asks_place(key == editing::ClipKey::PasteBars);
+    ui.set_bars_dialog_shown(true);
+}
+
+/// Copy, Cut or Paste Bars' dialog closed: on OK, done as asked.
+fn bars_dialog_done(app: &Shared, ok: bool) {
+    let Some(ui) = app.borrow().ui.upgrade() else {
+        return;
+    };
+    ui.set_bars_dialog_shown(false);
     ui.invoke_focus_page();
+    let Some(key) = app.borrow_mut().bars_dialog.take() else {
+        return;
+    };
     if !ok {
         return;
     }
-    let times = u8::try_from(ui.get_paste_times().clamp(1, 99)).unwrap_or(1);
-    let typed = app
-        .borrow_mut()
-        .editing
-        .paste(times, ui.get_paste_replace());
+    let all = ui.get_bars_all_tracks();
+    let typed = match key {
+        editing::ClipKey::CopyBars => {
+            app.borrow_mut().editing.copy_bars(all);
+            return;
+        }
+        editing::ClipKey::CutBars => app.borrow_mut().editing.cut_bars(all),
+        editing::ClipKey::PasteBars => app
+            .borrow_mut()
+            .editing
+            .paste_bars(ui.get_bars_after(), all),
+        _ => None,
+    };
     if let Some(t) = typed {
         send_typed(app, t);
         sync_caret(app, false);
@@ -4879,7 +5101,7 @@ fn no_dialogs() -> Option<String> {
     }
     Some(
         "No file dialog: this session has no D-Bus for the desktop portal. \
-         Start OxiGuitar with a file instead: oxiguitar FILE"
+         Start FuTab with a file instead: futab FILE"
             .to_owned(),
     )
 }
@@ -5062,6 +5284,7 @@ fn install_window_events(ui: &AppWindow, app: &Shared) {
             paper: s.prefs.paper,
             score_zoom: s.zoom,
             ui_zoom: s.ui_zoom,
+            play_engraved_beat: s.prefs.play_engraved_beat,
         };
         if prefs != s.prefs {
             s.prefs = prefs;
@@ -5191,7 +5414,7 @@ mod tests {
             };
             assert_eq!(display_system(), own);
             assert!(wrong_build_hint(own).unwrap().contains(&format!(
-                "OxiGuitar's {} build",
+                "FuTab's {} build",
                 if own == "x11" { "X11" } else { "Wayland" }
             )));
         } else {

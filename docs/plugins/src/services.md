@@ -1,6 +1,6 @@
 # Services
 
-A service is one implementation of an **interface**: a named set of methods that whoever defines it documents. Several plugins may implement the same interface for different systems or environments (an audio device through PipeWire, ALSA, CoreAudio or WASAPI, say), and OxiGuitar chooses one that works here. Plugins call services through the host, so a plugin can build on another without knowing which one is installed.
+A service is one implementation of an **interface**: a named set of methods that whoever defines it documents. Several plugins may implement the same interface for different systems or environments (an audio device through PipeWire, ALSA, CoreAudio or WASAPI, say), and FuTab chooses one that works here. Plugins call services through the host, so a plugin can build on another without knowing which one is installed.
 
 The core defines its interfaces as it needs them (the audio device comes with the player). A plugin may define its own, for other plugins: the template's `note-names` names a pitch.
 
@@ -38,7 +38,7 @@ The template's:
 
 `call` takes a method's name and its input as bytes, and answers with its output as bytes; what the bytes hold is the interface's to define. For anything beyond a few bytes, encode a Rust type with `oxiguitar_plugin::api::encode` and `decode` (postcard, as the interface's own messages use), and publish the type in a small crate both sides depend on.
 
-## How OxiGuitar chooses
+## How FuTab chooses
 
 For an interface, the candidates are the services of every usable plugin whose conditions hold here.
 
@@ -64,7 +64,7 @@ A plugin may call only the interfaces it `requires`. When no installed plugin im
 
 ## The audio device (interface 1.3)
 
-`audio-device` is the core's own interface: the service that sends OxiGuitar's sound to the system. The basic plugins implement it for PipeWire and ALSA (Linux), WASAPI (Windows) and Core Audio (macOS), through cpal. Its types are in `oxiguitar_plugin::api::audio_device`.
+`audio-device` is the core's own interface: the service that sends FuTab's sound to the system. The basic plugins implement it for PipeWire and ALSA (Linux), WASAPI (Windows) and Core Audio (macOS), through cpal. Its types are in `oxiguitar_plugin::api::audio_device`.
 
 | Method | Input | Output |
 | --- | --- | --- |

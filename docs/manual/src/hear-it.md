@@ -1,10 +1,10 @@
 # Hear it
 
-A few of OxiGuitar's own reference songs, played by OxiGuitar exactly as they sound in the window. They were rendered with `oxiguitar-cli play SONG --wav OUT`, with no effects or editing afterwards, and then encoded as MP3. Every set heard here is free and listed on [Better sounds](better-sounds.md).
+A few of FuTab's own reference songs, played by FuTab exactly as they sound in the window. They were rendered with `futab-cli play SONG --wav OUT`, with no effects or editing afterwards, and then encoded as MP3. Every set heard here is free and listed on [Better sounds](better-sounds.md).
 
 ## Recorded guitars, basses and drums
 
-The electric guitars are Karoryfer's Black and Green Guitars (the green Gretsch, CC0), the basses Karoryfer's Black and Blue Basses (CC0) and the drums the MuldjordKit by Lars Muldjord and the DrumGizmo team, SFZ by kinwie (CC BY 4.0); the acoustic guitar, piano, strings and voice FluidR3_GM (MIT). All three are SFZ sets, played by the MIDI plugin's sampler (OxiGuitar 1.0).
+The electric guitars are Karoryfer's Black and Green Guitars (the green Gretsch, CC0), the basses Karoryfer's Black and Blue Basses (CC0) and the drums the MuldjordKit by Lars Muldjord and the DrumGizmo team, SFZ by kinwie (CC BY 4.0); the acoustic guitar, piano, strings and voice FluidR3_GM (MIT). All three are SFZ sets, played by the MIDI plugin's sampler (FuTab 1.0).
 
 **A band**: the same eight tracks as below, with recorded electric guitars, bass and drums.
 
@@ -24,7 +24,7 @@ The electric guitars are Karoryfer's Black and Green Guitars (the green Gretsch,
 
 ## General MIDI sets
 
-Played by OxiGuitar 0.9: the guitars use FreePats' Clean electric guitar (CC0) and everything else uses FluidR3_GM (MIT).
+Played by FuTab 0.9: the guitars use FreePats' Clean electric guitar (CC0) and everything else uses FluidR3_GM (MIT).
 
 **A band**: three guitars, bass, drums, piano, strings and a voice, each track at its file's volume and pan.
 
@@ -42,4 +42,4 @@ Played by OxiGuitar 0.9: the guitars use FreePats' Clean electric guitar (CC0) a
 
 <audio controls preload="none" src="sounds/drums.mp3"></audio>
 
-These songs are short pieces written to test OxiGuitar, not music. Amp modelling (NAM), which turns a plain guitar into a real amp's sound, has its own page ([Amp models](amp-models.md)); examples of it will come here once we have a capture we may publish.
+These songs are short pieces written to test FuTab, not music. Amp modelling (NAM), which turns a plain guitar into a real amp's sound, has its own page ([Amp models](amp-models.md)); examples of it will come here once we have a capture we may publish.

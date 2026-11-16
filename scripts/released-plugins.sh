@@ -8,7 +8,7 @@
 # own, mateusrdp/oxiguitar-NAME). Each release's zip for this system is
 # checked against the release's SHA256SUMS before it is unpacked. Prints the
 # folder and, on stderr, the versions used. The tests download our own
-# releases; OxiGuitar itself never downloads anything.
+# releases; FuTab itself never downloads anything.
 #
 # Usage: scripts/released-plugins.sh OUT-DIR NAME...
 #   OUT-DIR  where the .oxp files go (replaced)

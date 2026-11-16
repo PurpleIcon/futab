@@ -1,7 +1,7 @@
-Source: oxiguitar
+Source: futab
 Section: sound
 Priority: optional
-Maintainer: OxiGuitar <maintainer@oxiguitar.invalid>
+Maintainer: FuTab <maintainer@futab.invalid>
 Rules-Requires-Root: no
 Build-Depends:
  debhelper-compat (= 13),
@@ -18,11 +18,11 @@ Build-Depends:
  libclang-dev,
  fonts-noto-core,
 Standards-Version: 4.7.2
-Homepage: https://github.com/mateusrdp/oxiguitar
-Vcs-Git: https://github.com/mateusrdp/oxiguitar.git
-Vcs-Browser: https://github.com/mateusrdp/oxiguitar
+Homepage: https://github.com/PurpleIcon/futab
+Vcs-Git: https://github.com/PurpleIcon/futab.git
+Vcs-Browser: https://github.com/PurpleIcon/futab
 
-Package: oxiguitar
+Package: futab
 Architecture: any
 Depends:
  ${misc:Depends},
@@ -45,16 +45,17 @@ Suggests:
  oxiguitar-midi-file,
  oxiguitar-tuxguitar,
 Built-Using:
- ${oxiguitar:Built-Using},
+ ${futab:Built-Using},
 Description: guitar tablature and score viewer
- OxiGuitar opens Guitar Pro files (.gp, .gpx, .gp5, .gp4, .gp3) and
- shows them as standard notation and tablature in four layouts, with any
- set of tracks together. It edits and saves them, exports them to PDF,
- and plays them with the system's sound set or better ones the user adds
- (SoundFont and SFZ). No telemetry: it never uploads anything.
+ FuTab, a fork of OxiGuitar, opens Guitar Pro files (.gp, .gpx, .gp5,
+ .gp4, .gp3) and shows them as standard notation and tablature in four
+ layouts, with any set of tracks together. It edits and saves them,
+ exports them to PDF, and plays them with the system's sound set or better
+ ones the user adds (SoundFont and SFZ). No telemetry: it never uploads
+ anything.
  .
- OxiGuitar opens and plays files only through plugins, which are packages
- of their own: oxiguitar-guitarpro (Guitar Pro files), oxiguitar-midi
+ FuTab opens and plays files only through OxiGuitar's plugins, which are
+ packages of their own: oxiguitar-guitarpro (Guitar Pro files), oxiguitar-midi
  (sound) and oxiguitar-alsa and oxiguitar-pipewire (audio output), all
  recommended, and oxiguitar-nam (amplifier models), oxiguitar-eq (an
  equalizer), oxiguitar-musicxml (MusicXML files), oxiguitar-midi-file

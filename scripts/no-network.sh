@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 #
-# NET-5: run an OxiGuitar session under strace and fail if any process tries
+# NET-5: run a FuTab session under strace and fail if any process tries
 # to open an internet connection (IPv4 or IPv6). Local sockets (AF_UNIX) are
 # allowed: desktops use them for windows, audio and D-Bus.
 #
-# Usage: scripts/no-network.sh <path to oxiguitar-cli> [--wayland <app>] [--x11 <app>]
+# Usage: scripts/no-network.sh <path to futab-cli> [--wayland <app>] [--x11 <app>]
 # Needs strace (Debian/Ubuntu: apt install strace). With the desktop app's
 # builds, it also opens each fixture in each of them: the Wayland build in a
 # private headless Weston (apt install weston), the X11 build under Xvfb
@@ -46,10 +46,10 @@ for step in "${session[@]}"; do
         args=("$step")
     fi
     if trace "$cli" "${args[@]}"; then
-        echo "::error title=NET-5::network attempt during: oxiguitar-cli ${args[*]}"
+        echo "::error title=NET-5::network attempt during: futab-cli ${args[*]}"
         failed=1
     else
-        echo "no-network: ok   oxiguitar-cli ${args[*]}"
+        echo "no-network: ok   futab-cli ${args[*]}"
     fi
 done
 
@@ -98,7 +98,7 @@ run_app() { # run_app LABEL APP ENV...
             cat "$out" >&2
             failed=1
         else
-            echo "no-network: ok   oxiguitar ($label) $(basename "$file")"
+            echo "no-network: ok   futab ($label) $(basename "$file")"
         fi
         rm -f "$out"
     done

@@ -27,7 +27,7 @@ export struct ManagerRow {
 
 export component PluginManagerWindow inherits Window {
     title: "Plugins";
-    icon: @image-url("../../../assets/icon/png/oxiguitar-256.png");
+    icon: @image-url("../../../assets/icon/png/futab-256.png");
     preferred-width: 820px;
     preferred-height: 460px;
     min-width: 480px;
@@ -57,13 +57,13 @@ export component PluginManagerWindow inherits Window {
         padding: 12px;
         spacing: 8px;
         Text {
-            text: "Every plugin file in the plugin folders. A change takes effect the next time OxiGuitar starts.";
+            text: "Every plugin file in the plugin folders. A change takes effect the next time FuTab starts.";
             font-size: 12px;
             wrap: word-wrap;
             color: Palette.foreground.transparentize(0.25);
         }
         if root.safe-mode : Text {
-            text: "OxiGuitar was started in safe mode: no plugin is used this time.";
+            text: "FuTab was started in safe mode: no plugin is used this time.";
             font-size: 12px;
             wrap: word-wrap;
             color: Palette.foreground;
@@ -142,7 +142,7 @@ export component PluginManagerWindow inherits Window {
             spacing: 12px;
             if root.restart-needed : Text {
                 horizontal-stretch: 1;
-                text: "Restart OxiGuitar to apply these changes: a plugin can't be unloaded while OxiGuitar runs.";
+                text: "Restart FuTab to apply these changes: a plugin can't be unloaded while FuTab runs.";
                 font-size: 12px;
                 font-weight: 600;
                 wrap: word-wrap;
@@ -166,7 +166,7 @@ export component PluginSettingsWindow inherits Window {
     // "NAME Settings".
     in property <string> window-title: "Settings";
     title: root.window-title;
-    icon: @image-url("../../../assets/icon/png/oxiguitar-256.png");
+    icon: @image-url("../../../assets/icon/png/futab-256.png");
     preferred-width: 820px;
     preferred-height: 460px;
     min-width: 480px;

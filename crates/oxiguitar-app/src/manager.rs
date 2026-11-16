@@ -104,10 +104,10 @@ fn row(f: &Found, safe: bool, disabled: &[String]) -> Row {
             format!("Can't run here: {}.", f.failure().unwrap_or_default())
         }
         State::Ready if f.failure().is_some() => format!(
-            "Stopped working and not used until OxiGuitar restarts: {}.",
+            "Stopped working and not used until FuTab restarts: {}.",
             f.failure().unwrap_or_default()
         ),
-        State::Ready if safe => "Not loaded: OxiGuitar was started in safe mode.".to_owned(),
+        State::Ready if safe => "Not loaded: FuTab was started in safe mode.".to_owned(),
         State::Ready if f.is_loaded() => "Loaded.".to_owned(),
         State::Ready => "Not loaded yet: it loads when it is first needed.".to_owned(),
         State::Disabled => "Disabled.".to_owned(),
@@ -125,11 +125,11 @@ fn row(f: &Found, safe: bool, disabled: &[String]) -> Row {
     if changed {
         state = match (enabled, f.is_loaded()) {
             (false, true) => {
-                "Loaded: it stays in use until OxiGuitar restarts, and is disabled from then on."
+                "Loaded: it stays in use until FuTab restarts, and is disabled from then on."
                     .to_owned()
             }
-            (false, false) => format!("{state} Disabled when OxiGuitar restarts."),
-            (true, _) => format!("{state} Enabled when OxiGuitar restarts."),
+            (false, false) => format!("{state} Disabled when FuTab restarts."),
+            (true, _) => format!("{state} Enabled when FuTab restarts."),
         };
     }
     Row {
@@ -156,7 +156,7 @@ fn row(f: &Found, safe: bool, disabled: &[String]) -> Row {
 pub(crate) fn set_enabled(settings: &SharedSettings, id: &str, on: bool) -> Result<(), String> {
     if settings.path().is_none() {
         return Err(format!(
-            "{} couldn't be read when OxiGuitar started, so it isn't changed: correct it (or remove it) and start OxiGuitar again.",
+            "{} couldn't be read when FuTab started, so it isn't changed: correct it (or remove it) and start FuTab again.",
             oxiguitar_host::SETTINGS_FILE
         ));
     }
@@ -279,7 +279,7 @@ mod tests {
         assert!(!now[0].enabled);
         assert_eq!(
             now[0].state,
-            "Not loaded yet: it loads when it is first needed. Disabled when OxiGuitar restarts."
+            "Not loaded yet: it loads when it is first needed. Disabled when FuTab restarts."
         );
 
         // Started again: disabled. Ticked again: enabled from the next start.
@@ -294,7 +294,7 @@ mod tests {
         assert_eq!(disabled(&shared), ["someone.else"]);
         assert_eq!(
             rows(&plugins, &disabled(&shared))[0].state,
-            "Disabled. Enabled when OxiGuitar restarts."
+            "Disabled. Enabled when FuTab restarts."
         );
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -324,7 +324,7 @@ mod tests {
         assert!(after[0].loaded && after[0].changed && !after[0].enabled);
         assert_eq!(
             after[0].state,
-            "Loaded: it stays in use until OxiGuitar restarts, and is disabled from then on."
+            "Loaded: it stays in use until FuTab restarts, and is disabled from then on."
         );
         assert!(restart_needed(&after));
         // Ticked again: nothing waits for a restart any more.
@@ -348,7 +348,7 @@ mod tests {
         assert_eq!(rows(&plugins, &[]).len(), 2);
         assert_eq!(
             rows(&plugins, &[])[0].state,
-            "Not loaded: OxiGuitar was started in safe mode."
+            "Not loaded: FuTab was started in safe mode."
         );
         // Disabling a plugin still works in safe mode: that is what it is for.
         set_enabled(&shared, "oxiguitar.test", false).unwrap();

@@ -274,7 +274,7 @@ pub const LIMIT: f32 = 0.891;
 const RELEASE: f32 = 0.08;
 
 /// The usual master gain, about +6 dB: the window's default and
-/// `oxiguitar-cli play`'s. Over the corpus a song's peaks then sit near
+/// `futab-cli play`'s. Over the corpus a song's peaks then sit near
 /// −3 dBFS, and the limiter holds the few louder ones (player.md, "The
 /// window, as built").
 pub const MASTER_USUAL: f32 = 1.96;

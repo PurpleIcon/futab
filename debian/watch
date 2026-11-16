@@ -1,6 +1,6 @@
 version=4
 opts="searchmode=plain, \
       dversionmangle=s/\+ds\d*$//, repacksuffix=+ds, \
-      filenamemangle=s%.*/v?(\d[\d.]*)\.tar\.gz%oxiguitar-$1.tar.gz%" \
-  https://api.github.com/repos/mateusrdp/oxiguitar/tags?per_page=50 \
-  https://api.github.com/repos/mateusrdp/oxiguitar/tarball/refs/tags/v?(\d[\d.]*)
+      filenamemangle=s%.*/v?(\d[\d.]*)\.tar\.gz%futab-$1.tar.gz%" \
+  https://api.github.com/repos/PurpleIcon/futab/tags?per_page=50 \
+  https://api.github.com/repos/PurpleIcon/futab/tarball/refs/tags/v?(\d[\d.]*)

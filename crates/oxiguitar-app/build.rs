@@ -28,7 +28,7 @@ fn main() {
         let png = root.join("../../assets/icon/png");
         let mut icons = Vec::new();
         for size in winres::ICON_SIZES {
-            let path = png.join(format!("oxiguitar-{size}.png"));
+            let path = png.join(format!("futab-{size}.png"));
             println!("cargo:rerun-if-changed={}", path.display());
             let data = std::fs::read(&path)
                 .unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
@@ -50,16 +50,15 @@ fn main() {
             &winres::VersionInfo {
                 version: [version[0], version[1], version[2], 0],
                 version_text: std::env::var("CARGO_PKG_VERSION").unwrap_or_default(),
-                description: "OxiGuitar",
-                product: "OxiGuitar",
+                description: "FuTab",
+                product: "FuTab",
                 copyright: "Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors",
-                original_filename: "oxiguitar.exe",
+                original_filename: "futab.exe",
             },
         );
-        let out =
-            PathBuf::from(std::env::var("OUT_DIR").expect("set by Cargo")).join("oxiguitar.res");
+        let out = PathBuf::from(std::env::var("OUT_DIR").expect("set by Cargo")).join("futab.res");
         std::fs::write(&out, res).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
-        println!("cargo:rustc-link-arg-bin=oxiguitar={}", out.display());
+        println!("cargo:rustc-link-arg-bin=futab={}", out.display());
     }
     println!("cargo:rerun-if-changed=build/winres.rs");
 }

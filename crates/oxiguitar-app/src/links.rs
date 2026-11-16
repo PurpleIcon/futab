@@ -2,14 +2,10 @@
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
 //! Opening a web address in the system's browser, only when the user clicks
-//! a link (Help → About's donation button; the player's link to better
-//! sounds, M4). OxiGuitar itself never connects anywhere: the browser does,
-//! as a program of its own.
+//! a link (the player's link to better sounds, M4). FuTab itself never
+//! connects anywhere: the browser does, as a program of its own.
 
 use std::process::{Command, Stdio};
-
-/// Where donations go: Mateus's PayPal page (the README's button).
-pub(crate) const DONATE: &str = "https://www.paypal.com/donate/?business=4QYDZY4RP8V8L&no_recurring=0&item_name=Thanks+heaps!+You+rock!&currency_code=AUD";
 
 /// The system's command that opens an address in the default browser.
 fn opener(url: &str) -> Command {
@@ -64,11 +60,5 @@ mod tests {
         assert!(open("file:///etc/passwd").is_err());
         assert!(open("/usr/bin/true").is_err());
         assert!(open("http://example.org").is_err());
-    }
-
-    #[test]
-    fn the_donation_address_is_paypal_over_https() {
-        assert!(DONATE.starts_with("https://www.paypal.com/donate/"));
-        assert!(!DONATE.contains(' '));
     }
 }

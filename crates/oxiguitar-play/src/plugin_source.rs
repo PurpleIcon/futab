@@ -4,7 +4,7 @@
 //! An instrument plugin's prepared instance as one of the engine's
 //! sources, with the effects of each of its tracks after it (interface
 //! 1.3), and the instruments for a score's tracks, chosen and prepared
-//! ([`plan`], [`prepare`]), as the window and `oxiguitar-cli play` share
+//! ([`plan`], [`prepare`]), as the window and `futab-cli play` share
 //! them.
 
 use oxiguitar_host::Plugins;
@@ -162,8 +162,12 @@ pub fn plan(plugins: &Plugins, score: &Score) -> Plan {
 }
 
 /// Whether a track's chord diagrams play (#151): asked for, and a track
-/// with strings that shows some.
+/// with strings that shows some; or cross-referenced chords are active
+/// (`chords_from` set), which still needs a chord voice for cursor cues.
 fn plays_chords(track: &oxiguitar_model::Track) -> bool {
+    if track.chords_from != usize::MAX {
+        return true;
+    }
     track.play_chords
         && !track.chords.is_empty()
         && track.staves.first().is_some_and(|s| !s.tuning.is_empty())

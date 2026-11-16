@@ -14,7 +14,7 @@
 # machine (packages, Firejail in /usr, a dummy sound card): CI only.
 # .github/workflows/release.yml, job "AppImage catalog".
 #
-# Usage: scripts/package/appimage-catalog-test.sh OxiGuitar-VERSION-x86_64.AppImage
+# Usage: scripts/package/appimage-catalog-test.sh FuTab-VERSION-x86_64.AppImage
 # Writes catalog-result/: log.txt, the screenshot, the labels and hints
 # their bot would post on the pull request.
 
@@ -71,19 +71,19 @@ python3 -m http.server 8642 --bind 127.0.0.1 --directory "$work/serve" > /dev/nu
 server=$!
 sleep 1
 name="$(basename "$appimage")"
-echo "http://127.0.0.1:8642/$name" > data/OxiGuitar
+echo "http://127.0.0.1:8642/$name" > data/FuTab
 
 set +e
 IS_PULLREQUEST=true STRICT=true timeout --kill-after=30 600 \
-    bash -e code/worker.sh "$(readlink -f data/OxiGuitar)" > log.txt 2>&1
+    bash -e code/worker.sh "$(readlink -f data/FuTab)" > log.txt 2>&1
 rc=$?
 set -e
 kill "$server" "$xvfb" 2> /dev/null || true
 
 cp log.txt "$out/"
-cp database/OxiGuitar/screenshot.png "$out/" 2> /dev/null || true
+cp database/FuTab/screenshot.png "$out/" 2> /dev/null || true
 cp failure-screens/*.png "$out/" 2> /dev/null || true
-cp database/OxiGuitar/*.desktop "$out/" 2> /dev/null || true
+cp database/FuTab/*.desktop "$out/" 2> /dev/null || true
 bash code/diagnose.sh --labels log.txt > "$out/labels.txt"
 bash code/diagnose.sh log.txt > "$out/hints.md"
 grep -hE '^(ERROR|WARNING|FATAL|X-AppImage-[A-Za-z-]+=|Screenshot:)' log.txt | sort -u > "$out/remarks.txt" || true

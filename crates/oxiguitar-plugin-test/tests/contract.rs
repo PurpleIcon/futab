@@ -592,7 +592,7 @@ fn a_plugin_that_fails_is_withdrawn_as_if_it_were_not_installed() {
         .collect();
     assert_eq!(errors.len(), 1, "{told:?}");
     assert!(
-        errors[0].starts_with("Test plugin stopped working and isn't used until OxiGuitar restarts: it crashed (a panic: panicked on purpose, reading)"),
+        errors[0].starts_with("Test plugin stopped working and isn't used until FuTab restarts: it crashed (a panic: panicked on purpose, reading)"),
         "{}",
         errors[0]
     );

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
-//! `oxiguitar-cli play FILE`: plays a score through the installed
+//! `futab-cli play FILE`: plays a score through the installed
 //! instrument and audio-device plugins (M4 slice 2), from the terminal,
 //! printing each bar as it is heard. Ctrl + C stops it. With `--wav OUT`
 //! it plays into a WAV file instead (48 kHz, 16-bit stereo), as fast as it
@@ -114,7 +114,7 @@ pub(crate) fn run(args: &[String]) -> ExitCode {
     match play(&asked) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
-            eprintln!("oxiguitar-cli: {}: {e}", asked.path);
+            eprintln!("futab-cli: {}: {e}", asked.path);
             ExitCode::FAILURE
         }
     }
@@ -272,8 +272,8 @@ fn play(asked: &Asked) -> Result<(), String> {
 fn mix(control: &mut engine::Control, score: &Score, asked: &Asked) {
     control.set_master(engine::MASTER_USUAL);
     let solo = !asked.tracks.is_empty();
-    for t in 0..score.tracks.len() {
-        let m = &score.tracks[t].mix;
+    for (t, track) in score.tracks.iter().enumerate() {
+        let m = &track.mix;
         control.set_mix(
             t,
             TrackMix {

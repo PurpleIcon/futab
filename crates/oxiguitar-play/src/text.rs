@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
 //! The timeline as text, one line per bar played, note and click: what
-//! `oxiguitar-cli events` prints and what the golden files hold
+//! `futab-cli events` prints and what the golden files hold
 //! (`fixtures/events/`). Times are in seconds with six decimals (a
 //! microsecond, a twentieth of a sample at 48 kHz).
 //!

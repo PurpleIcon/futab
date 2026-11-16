@@ -1,6 +1,6 @@
 # Tabs: widgets and canvases
 
-A tab sits in one of the window's four areas, beside the core's own (Player, Tracks, Palette). Its contents are rows of standard widgets that the core draws in the window's own style, so it looks like the rest of OxiGuitar and follows the dark or light interface by itself, and, if it needs one, a canvas the plugin draws. Tabs need interface 1.1.
+A tab sits in one of the window's four areas, beside the core's own (Player, Tracks, Palette). Its contents are rows of standard widgets that the core draws in the window's own style, so it looks like the rest of FuTab and follows the dark or light interface by itself, and, if it needs one, a canvas the plugin draws. Tabs need interface 1.1.
 
 ## Declaring a tab
 

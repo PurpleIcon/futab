@@ -20,7 +20,7 @@ use oxiguitar_model::Score;
 use crate::{Schedule, Timeline, TrackMix, engine, plugin_source};
 
 /// How long the sound goes on after the end, so the last notes' release
-/// is heard: two seconds, as `oxiguitar-cli play --wav` does.
+/// is heard: two seconds, as `futab-cli play --wav` does.
 pub const TAIL_SECONDS: f64 = 2.0;
 
 /// The frames rendered at once.

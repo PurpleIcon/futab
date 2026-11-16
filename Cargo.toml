@@ -8,15 +8,15 @@ members = ["crates/*", "plugins/*"]
 exclude = ["spikes", "fuzz", "docs/plugins/template"]
 
 [workspace.package]
-version = "0.19.1"
+version = "0.1.0"
 edition = "2024"
 # Rust from rustup, raised only when something needs it, so Debian unstable
 # can catch up before an upload (CONTRIBUTING.md, "Minimum Rust version").
 rust-version = "1.99"
 license = "GPL-3.0-or-later"
 authors = ["Mateus Rocha de Paula", "The OxiGuitar contributors"]
-repository = "https://github.com/mateusrdp/oxiguitar"
-homepage = "https://github.com/mateusrdp/oxiguitar"
+repository = "https://github.com/PurpleIcon/futab"
+homepage = "https://github.com/PurpleIcon/futab"
 publish = false
 
 [workspace.dependencies]
@@ -45,6 +45,9 @@ object = { version = "0.37", default-features = false, features = ["read_core", 
 libloading = "0.8"
 # Fonts: skrifa reads outlines and metrics; keep it on the version krilla uses.
 skrifa = "0.42"
+# Chord names read in any convention and notes named as chords (the chord
+# dialog, #278; oxiguitar-edit's `chord_names`).
+chordparser = "4.0.4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # The audio thread's queues (the player's engine, oxiguitar-play): lock-free,
