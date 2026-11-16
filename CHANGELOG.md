@@ -6,8 +6,13 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-16
+
+FuTab's first release, from OxiGuitar 0.19.1 with OxiGuitar's changes up to OxiGuitar PR 290.
+
 ### Added
 
+- **First release** (#13): FuTab 0.1.0 for Linux (.deb, .rpm, AppImage), Windows (portable zip) and macOS (.dmg), on the Releases page. The Flatpak is a preview: it runs, but opens and plays nothing until OxiGuitar publishes its Guitar Pro and audio-output plugins as Flatpaks. FuTab's own version numbers start here, apart from OxiGuitar's.
 - **Upstream catch-up report**: `python3 -I scripts/upstream/catchup.py` writes `oxiguitar-catchup.md` (gitignored): the OxiGuitar releases and commits FuTab hasn't merged yet, each with its upstream pull request, and the files a catch-up merge would conflict in. The Upstream workflow runs it every Monday and by hand, and shows it in the run's summary. It holds while FuTab catches up by merging `upstream/develop`, not by cherry-picking.
 
 ### Changed

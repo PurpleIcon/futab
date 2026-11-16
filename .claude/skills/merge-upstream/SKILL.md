@@ -49,6 +49,8 @@ Git merges a commit together with everything before it, so a merge can only stop
 
    Never cherry-pick or rebase upstream commits. FuTab tracks upstream by git ancestry: a copy of a commit keeps it on the catch-up list forever, and the next merge conflicts again.
 
+   Never bring OxiGuitar's tags into FuTab: FuTab's `v*` tags are its own releases (from 0.1.0), and a pushed `v*` tag starts FuTab's release workflow. Fetch upstream without tags (`git fetch --no-tags upstream`, or once `git config remote.upstream.tagOpt --no-tags`), and never push with `--tags` or `--follow-tags`.
+
 ## 2. Resolving conflicts
 
 Go conflict by conflict (`git diff --name-only --diff-filter=U`). For each hunk, decide which kind it is:
@@ -63,7 +65,7 @@ Files:
 - A file FuTab renamed (desktop entry, metainfo, mime XML, man pages, `debian/*.manpages`, `scripts/package/oxiguitar-start`, icons): upstream's changes go into **FuTab's** file. If git reports modify/delete or leaves upstream's old-named file behind, apply upstream's change to FuTab's file and `git rm` the old name.
 - A file FuTab deleted on purpose (`scripts/new-repo.sh`, `scripts/split-history.sh`, the PayPal button and QR code, the placeholder icon): keep it deleted. If upstream changed it, tell me in one line.
 - A file upstream added: keep it. If its name or contents carry OxiGuitar names that the table renames, rename them. For example, upstream's new `FUNDING.yml` points at OxiGuitar's donations: ask me whether FuTab keeps it.
-- Version numbers (`Cargo.toml`, `Cargo.lock`, `debian/changelog`, metainfo `<release>`): FuTab has its own version. Keep FuTab's version and FuTab's `debian/changelog` entries, and take only upstream's dependency changes in `Cargo.lock`. If `Cargo.lock` doesn't settle cleanly, take theirs and then run `cargo build` so Cargo writes FuTab's own entries back. If upstream's release is a good point for a FuTab release too, say so; don't bump anything yourself.
+- Version numbers (`Cargo.toml`, `Cargo.lock`, `debian/changelog`, the test plugins' `manifest.json`, metainfo `<release>`): FuTab has its own version (0.1.0 was its first release; OxiGuitar's are 0.19 and up). Keep FuTab's version, FuTab's `debian/changelog` entries and FuTab's metainfo `<release>` entries only (never add upstream's), and take only upstream's dependency changes in `Cargo.lock`. If `Cargo.lock` doesn't settle cleanly, take theirs and then run `cargo build` so Cargo writes FuTab's own entries back. If upstream's release is a good point for a FuTab release too, say so; don't bump anything yourself.
 
 ## The name table
 

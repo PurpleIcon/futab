@@ -22,7 +22,18 @@ These promises cover FuTab itself and nothing else: we make no promises about pl
 
 ## Install
 
-FuTab doesn't publish packages yet. Until it does, build it from source (see [Building from source](#building-from-source)).
+Download FuTab for your system from the [latest release](https://github.com/PurpleIcon/futab/releases/latest), or build it from source (see [Building from source](#building-from-source)). The release page says which file is which.
+
+| System | Install |
+| --- | --- |
+| Fedora and relatives | `sudo dnf install ./futab-VERSION-1.x86_64.rpm` |
+| Debian, Ubuntu and relatives | `sudo apt install ./futab_VERSION_amd64.deb` |
+| Any Linux | Make the AppImage executable (`chmod +x FuTab-VERSION-x86_64.AppImage`) and run it |
+| Windows 10 and 11 | Unzip `FuTab-VERSION-windows-x86_64.zip` anywhere and run `futab.exe`. It isn't signed: on SmartScreen's warning choose **More info → Run anyway** |
+| macOS | Open the .dmg and drag FuTab to Applications. It isn't signed: the first time, open it, then allow it in **System Settings → Privacy & Security → Open Anyway** |
+| Flatpak (preview) | `flatpak install --user ./FuTab-VERSION-x86_64.flatpak`. It runs, but opens and plays nothing yet: the Guitar Pro and audio-output plugins aren't published as Flatpaks |
+
+On a Linux desktop without Wayland, take the `futab-x11` .deb or .rpm instead. FuTab installs beside OxiGuitar without sharing a file or a setting with it.
 
 FuTab is the program plus **plugins**: it opens, plays and exports files only through them. It uses OxiGuitar's plugins, as they are, and finds them where OxiGuitar's packages install them. A usable set is the **Guitar Pro** and **MIDI** plugins and an audio output; **WAV** (export your song as audio), **NAM** (amp models) and **Equalizer** are extras.
 
@@ -43,7 +54,7 @@ sudo curl -fsSL https://mateusrdp.github.io/oxiguitar-packages/oxiguitar.repo -o
 sudo dnf install oxiguitar-guitarpro oxiguitar-midi oxiguitar-pipewire oxiguitar-wav oxiguitar-nam oxiguitar-eq
 ```
 
-Install only the plugin packages, never the `oxiguitar` package itself, or you get OxiGuitar alongside FuTab. The plugins and their repository are OxiGuitar's, signed with its maintainer's key; report problems you meet through FuTab [here](https://github.com/PurpleIcon/futab/issues) first. Elsewhere, download each plugin from its own repository's latest release (for example [Guitar Pro](https://github.com/mateusrdp/oxiguitar-guitarpro/releases/latest)) and put its `.oxp` file in your own plugin folder (`~/.local/share/futab/plugins/` on Linux).
+Install only the plugin packages, never the `oxiguitar` package itself, or you get OxiGuitar alongside FuTab. The plugins and their repository are OxiGuitar's, signed with its maintainer's key; report problems you meet through FuTab [here](https://github.com/PurpleIcon/futab/issues) first. On Windows and macOS, and on Linux without those repositories, download each plugin's zip for your system from its own repository's latest release (for example [Guitar Pro](https://github.com/mateusrdp/oxiguitar-guitarpro/releases/latest)) and put its `.oxp` file in FuTab's plugin folder: `%APPDATA%\FuTab\plugins\` on Windows (or a `plugins` folder beside `futab.exe`), `~/Library/Application Support/FuTab/plugins/` on macOS, `~/.local/share/futab/plugins/` on Linux. OxiGuitar's Windows and macOS plugin installers put plugins in OxiGuitar's own folder, which FuTab doesn't look in.
 
 ### After installing
 
