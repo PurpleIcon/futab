@@ -69,10 +69,10 @@ shows them as standard notation and tablature in four layouts, with any
 set of tracks together. It edits and saves them, exports them to PDF, and
 plays them with the system's sound set or better ones the user adds
 (SoundFont and SFZ). It opens and plays files through OxiGuitar's plugins,
-which are packages of their own: oxiguitar-guitarpro, oxiguitar-midi, oxiguitar-alsa
-and oxiguitar-pipewire (installed with it by default), oxiguitar-nam for
-amplifier models and oxiguitar-eq for an equalizer. No telemetry: it never
-uploads anything. FuTab is a fork of OxiGuitar."
+which are packages of their own: oxiguitar-guitarpro, oxiguitar-midi,
+oxiguitar-alsa and oxiguitar-pipewire (installed with it by default),
+oxiguitar-nam for amplifier models and oxiguitar-eq for an equalizer. No
+telemetry: it never uploads anything. FuTab is a fork of OxiGuitar."
 if [[ "$build" == x11 ]]; then
     summary="$summary (X11 build, deprecated)"
     description="$description
