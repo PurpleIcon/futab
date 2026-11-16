@@ -27,6 +27,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 ### Fixed
 
 - **Upstream history up to OxiGuitar PR 290**: the merge of OxiGuitar #286 to #290 (#7) was squash-merged, which dropped upstream's commits from FuTab's history, so the catch-up report listed them as missing again and the next merge would have conflicted on them. A merge that changes no file links them back in.
+- **Linux packages build again** (#12): the .deb packages' description had a line over 80 characters, which Debian's package checker (Lintian) rejects, so the Linux package builds failed. The description is rewrapped; its text is unchanged.
 
 ### Removed
 
