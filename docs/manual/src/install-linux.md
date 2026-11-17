@@ -16,7 +16,7 @@ sudo apt update
 sudo apt install oxiguitar-guitarpro oxiguitar-midi oxiguitar-pipewire oxiguitar-alsa
 ```
 
-Add `oxiguitar-nam` for amp models, `oxiguitar-eq` for an equalizer, and `oxiguitar-musicxml`, `oxiguitar-midi-file` and `oxiguitar-tuxguitar` to open and save MusicXML, MIDI and TuxGuitar files. **Never install the `oxiguitar` package itself**, or you get OxiGuitar beside FuTab. `sudo apt upgrade` then keeps the plugins current. They install into `/usr/lib/oxiguitar/plugins`, where FuTab finds them. The repository and its key are OxiGuitar's; its fingerprint is on the [repository's page](https://github.com/mateusrdp/oxiguitar-packages). Report problems you meet through FuTab to [FuTab](https://github.com/PurpleIcon/futab/issues) first.
+Add `oxiguitar-nam` for amp models, `oxiguitar-eq` for an equalizer, `oxiguitar-wah` for a wah-wah pedal, and `oxiguitar-musicxml`, `oxiguitar-midi-file` and `oxiguitar-tuxguitar` to open and save MusicXML, MIDI and TuxGuitar files. **Never install the `oxiguitar` package itself**, or you get OxiGuitar beside FuTab. `sudo apt upgrade` then keeps the plugins current. They install into `/usr/lib/oxiguitar/plugins`, where FuTab finds them. The repository and its key are OxiGuitar's; its fingerprint is on the [repository's page](https://github.com/mateusrdp/oxiguitar-packages). Report problems you meet through FuTab to [FuTab](https://github.com/PurpleIcon/futab/issues) first.
 
 ## From OxiGuitar's dnf repository (Fedora and relatives)
 
