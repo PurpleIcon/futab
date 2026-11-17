@@ -11,6 +11,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 - **build-test-rpm skill** (#17): the agent skill builds a test `.rpm` from the working copy (release build, licence report, package) and says how to install it with dnf, to test FuTab as a packaged app.
 - **upstream-report skill** (#18): the agent skill updates `oxiguitar-catchup.md` with `scripts/upstream/catchup.py` and sums up what OxiGuitar has that FuTab hasn't merged yet, and which files a merge would conflict in. The merge-upstream skill uses it.
 - **Lean CI label** (#19): a pull request labelled `lean-ci` runs only formatting, lint and the sign-off check, and skips the tests, packages and other long checks, which still run after the merge into `develop`. CONTRIBUTING.md says when to use it.
+- **Lean PRs in the agent rules** (#20): before opening a pull request, the agent asks whether it's lean, and if so opens it with the `lean-ci` label.
 
 ### Fixed
 
