@@ -64,7 +64,7 @@ Go conflict by conflict (`git diff --name-only --diff-filter=U`). Settle each hu
 Files:
 
 - `CHANGELOG.md`: always keep ours (`git checkout --ours CHANGELOG.md`). FuTab's changelog lists FuTab's changes only; the merge gets its own entry (step 4).
-- `ROADMAP.md` is FuTab's own roadmap: never merge anything from upstream into it, conflict or not. Keep ours (`git checkout --ours ROADMAP.md`). A file only upstream changed merges without a conflict, so check after every merge: `git diff --cached --name-only HEAD -- ROADMAP.md` must print nothing. Upstream's mentions of `ROADMAP.md` elsewhere (its milestones M1, M2…, "see ROADMAP.md") mean OxiGuitar's roadmap: in FuTab's files write them as "OxiGuitar's roadmap" (plain text, no link), as in `CREDITS.md`; comments, `docs/design/` and `docs/adr/` keep them as they are. Step 3 checks for them.
+- `ROADMAP.md` is FuTab's own roadmap: never merge anything from upstream into it, conflict or not. Keep ours (`git checkout --ours ROADMAP.md`). A file only upstream changed merges without a conflict, so check after every merge: `git diff --cached --name-only HEAD -- ROADMAP.md` must print nothing. Upstream's mentions of `ROADMAP.md` elsewhere (its milestones M1, M2…, "see ROADMAP.md") mean OxiGuitar's roadmap: in FuTab's files write them as "OxiGuitar's roadmap" (plain text, no link), as in `CREDITS.md`; comments, `docs/design/`, `docs/adr/` and `docs/parity.md` keep them as they are. Step 3 checks for them.
 - `CREDITS.md` is FuTab's:
   - **The opening is static**, everything from `# Credits` to the end of `## Special thanks` (FuTab's copyright, FuTab's intro, "FuTab is a fork of OxiGuitar", OxiGuitar's copyright, the thanks). Keep ours exactly; take none of upstream's changes there, not even a wording change.
   - **The sections after Special thanks** (the projects, the crates, fonts and assets) merge as usual: upstream's changes, with FuTab's names. FuTab's own rows (the OxiGuitar row, the FuTab icon) stay. No row names a version (since OxiGuitar PR 295: "MuseScore Studio", not "MuseScore Studio 4.7"; the licence report from `Cargo.lock` has the exact ones), FuTab's OxiGuitar row included: "OxiGuitar", not "OxiGuitar 0.19.1".
@@ -107,7 +107,7 @@ What stays OxiGuitar's: never rename these, in a merge or anywhere else.
 - **Plugins** (OxiGuitar's, used as they are): plugin repo and package names (`oxiguitar-guitarpro`, `oxiguitar-midi`, ...), plugin ids (`oxiguitar.midi`, ...), the core's advice id `oxiguitar` (`advice::CORE`), `oxiguitar-set.json`, `.oxp` files, and the plugin SDK's git source `https://github.com/mateusrdp/oxiguitar` in plugin `Cargo.toml`s.
 - **OxiGuitar's plugin folders as a fallback** (`/usr/lib/oxiguitar/plugins` and the others, searched after FuTab's), the shared folders beside them (`/usr/lib/oxiguitar/<name>`), and `/usr/share/oxiguitar/soundfonts`.
 - **File formats:** the `.oxg` sidecar and anything else written to a user's files. Renaming those would break files people already have.
-- **Code comments and design records:** comments in the code (`//`, `///`, `//!`, `#`), `docs/design/` and `docs/adr/` keep OxiGuitar's name, and upstream's changes to them are taken as they are. They record OxiGuitar's design and decisions; renaming them would only make every later merge conflict. FuTab's own design notes and decisions go in `docs/futab-design/` and `docs/futab-adr/`, never into these.
+- **Code comments and design records:** comments in the code (`//`, `///`, `//!`, `#`), `docs/design/`, `docs/adr/` and `docs/parity.md` (OxiGuitar's feature check against Guitar Pro, TuxGuitar and alphaTab, from OxiGuitar PR 298) keep OxiGuitar's name, and upstream's changes to them are taken as they are. They record OxiGuitar's design, decisions and checks; renaming them would only make every later merge conflict. FuTab's own design notes and decisions go in `docs/futab-design/` and `docs/futab-adr/`, never into these.
 - **Links to upstream as upstream:** the `upstream` remote, links to OxiGuitar's changelog, PRs and issues, the catch-up script. In anything that reaches GitHub (commit messages, PR text, the changelog), name upstream PRs as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`: see Referring to upstream in `.claude/rules/github.md`.
 
 When a name fits neither list, it's the clash you can't settle: list it with its file and line, and ask me.
@@ -144,7 +144,7 @@ git diff --cached --name-only --diff-filter=A HEAD | grep -i oxiguitar
 These are new files with OxiGuitar in their name; rename them by the table. Then:
 
 ```bash
-git diff --cached HEAD -U0 -- . ':!docs/design' ':!docs/adr' | grep -n '^+.*ROADMAP' | grep -v '^[0-9]*:+++'
+git diff --cached HEAD -U0 -- . ':!docs/design' ':!docs/adr' ':!docs/parity.md' | grep -n '^+.*ROADMAP' | grep -v '^[0-9]*:+++'
 ```
 
 These are mentions of upstream's roadmap: write each as "OxiGuitar's roadmap" (step 2, `ROADMAP.md`), unless it's a code comment. Then do the build and lint checks (not the tests unless I ask):
