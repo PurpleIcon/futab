@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- SPDX-License-Identifier: GPL-3.0-or-later
-     Copyright (C) 2026 The FuTab contributors
-     FuTab's app icon: a guitar plectrum split down the middle, with a note
-     in each half, on a dark rounded square. Only the left half is drawn;
-     the right half is the same, mirrored. Traced from the artwork
-     futab.png. -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- SPDX-License-Identifier: GPL-3.0-or-later
+       Copyright (C) 2026 The FuTab contributors
+       FuTab's app icon: a guitar plectrum split down the middle, with a note
+       in each half, on a dark rounded square. Only the left half is drawn;
+       the right half is the same, mirrored. Traced from the artwork
+       futab.png.
+       This comment stays inside the <svg> element: desktops sniff the file's
+       first 256 bytes for "<svg" to recognise it as an SVG, and a comment
+       before the tag pushes it out of reach, so the icon doesn't show. -->
   <title>FuTab</title>
   <defs>
     <!-- The fill of every shape: cyan at the top to blue at the bottom. -->
