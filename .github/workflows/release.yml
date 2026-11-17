@@ -60,6 +60,9 @@ env:
 jobs:
   meta:
     name: Version and licences
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI");
+    # every other job needs this one, so they are skipped too.
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.version }}

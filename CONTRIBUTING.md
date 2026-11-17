@@ -20,6 +20,14 @@ Before a large change, open an issue or a discussion so we can agree the approac
 - CI must be green. The `ci-success` check sums up every other job.
 - One pull request carries the code, its tests, its documentation and any credit updates together.
 
+### Lean CI
+
+A pull request labelled `lean-ci` runs only formatting, lint (Clippy, which builds the code) and the sign-off check. Everything else is skipped: the tests, the plugin template, the speed budget, the licence and advisory check, the no-network test, the release script, the lint on the latest stable Rust, and the release-package, Debian, fuzz and manual workflows. `ci-success` still reports, and passes when the jobs that ran passed.
+
+- Use it for pull requests the skipped checks have nothing to say about, such as documentation, agent rules and skills, or the changelog. Leave it off for code, packaging and dependency changes.
+- The skipped checks still run on the push to `develop` after the merge, so a problem shows there instead of in the pull request.
+- Add the label when opening the pull request (`gh pr create --label lean-ci`). A run reads the labels when it starts: adding or removing the label on an open pull request takes effect from the next push (or after closing and reopening it), and re-running a run doesn't see the change.
+
 ## Sign-off (Developer Certificate of Origin)
 
 We use the [Developer Certificate of Origin](https://developercertificate.org/) instead of a contributor license agreement. By signing off a commit you state that you wrote it, or otherwise have the right to submit it under the project's license. Sign off with `-s`:
