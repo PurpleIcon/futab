@@ -63,7 +63,7 @@ Go conflict by conflict (`git diff --name-only --diff-filter=U`). Settle each hu
 
 Files:
 
-- `CHANGELOG.md`: always keep ours (`git checkout --ours CHANGELOG.md`). FuTab's changelog lists FuTab's changes only; the merge gets its own entry (step 4).
+- `CHANGELOG.md`: always keep ours, conflict or not: `git checkout HEAD -- CHANGELOG.md`. Not `--ours`, which does nothing when there's no conflict: upstream's entries, and even its release heading (`## [0.20.1]` above FuTab's entries, from OxiGuitar PR 306), can merge in cleanly. Check after every merge, before adding the merge's own entry (step 4): `git diff --cached --name-only HEAD -- CHANGELOG.md` must print nothing. FuTab's changelog lists FuTab's changes only.
 - `ROADMAP.md` is FuTab's own roadmap: never merge anything from upstream into it, conflict or not. Keep ours (`git checkout --ours ROADMAP.md`). A file only upstream changed merges without a conflict, so check after every merge: `git diff --cached --name-only HEAD -- ROADMAP.md` must print nothing. Upstream's mentions of `ROADMAP.md` elsewhere (its milestones M1, M2…, "see ROADMAP.md") mean OxiGuitar's roadmap: in FuTab's files write them as "OxiGuitar's roadmap" (plain text, no link), as in `CREDITS.md`; comments, `docs/design/`, `docs/adr/` and `docs/parity.md` keep them as they are. Step 3 checks for them.
 - `CREDITS.md` is FuTab's:
   - **The opening is static**, everything from `# Credits` to the end of `## Special thanks` (FuTab's copyright, FuTab's intro, "FuTab is a fork of OxiGuitar", OxiGuitar's copyright, the thanks). Keep ours exactly; take none of upstream's changes there, not even a wording change.
