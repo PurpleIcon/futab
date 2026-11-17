@@ -38,7 +38,7 @@ Git merges a commit together with everything before it, so a merge can only stop
 ## 1. Before merging
 
 1. Check the work tree is clean (`git status`) and that you're on a branch made from up-to-date `origin/develop`, named `feat/merge-oxiguitar-<version>` when the target is an upstream release, else `feat/merge-oxiguitar-pr<N>` for one PR or `feat/merge-oxiguitar-pr<A>-<B>` for a range.
-2. Run `python3 -I scripts/upstream/catchup.py` and read `oxiguitar-catchup.md`: the upstream PRs coming in, the releases, and the files that will conflict. Tell me what's coming, in a few lines, before you start.
+2. Update the catch-up report as the `upstream-report` skill says (`python3 -I scripts/upstream/catchup.py`) and read `oxiguitar-catchup.md`: the upstream PRs coming in, the releases, and the files that will conflict. Tell me what's coming, in a few lines, before you start.
 3. Merge without committing, so the checks in step 3 below also cover lines that merged cleanly:
 
    ```bash
@@ -229,16 +229,7 @@ Check it against what was merged:
 
 Then tell me in one line what upstream still has that FuTab doesn't (count, and the next PR or two). If a merged PR is still listed, something broke the ancestry (a cherry-pick, a rebase, or a merge of the wrong commit): stop and tell me.
 
-### When is `oxiguitar-catchup.md` up to date?
-
-Never by itself. The file is only rewritten when the script runs, and each run compares `upstream/develop` with the branch that is checked out at that moment (`HEAD`). So:
-
-- **While the merge is in progress (not committed yet):** the file still lists the PRs being merged, because `HEAD` hasn't moved. That's expected, not a fault.
-- **After the merge commit on the merge branch:** running the script (this step) drops the merged and skipped PRs; the rest is what FuTab hasn't taken yet.
-- **On GitHub:** the Upstream workflow (`.github/workflows/upstream.yml`) checks `develop`. It shows the new state once the merge PR has landed on `develop`, at its next Monday run or straight away with "Run workflow" on the Actions tab.
-- **The one thing that makes it wrong:** squash-merging (or rebasing) the merge PR. That throws away upstream's ancestry, so every merged PR shows up as missing again, and the next merge conflicts on all of them. Hence "Create a merge commit" for these PRs, always. If it happens anyway, "If a merge PR was squashed" above puts it right.
-
-The file is gitignored, so it never shows up in commits or PRs; each person or run makes their own.
+When the report says what, and why it can lag behind, is in the `upstream-report` skill (`.claude/skills/upstream-report/SKILL.md`).
 
 ## Keeping this skill current
 

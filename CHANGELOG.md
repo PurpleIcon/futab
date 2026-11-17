@@ -6,6 +6,10 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ## [Unreleased]
 
+### Added
+
+- **upstream-report skill** (#18): the agent skill updates `oxiguitar-catchup.md` with `scripts/upstream/catchup.py` and sums up what OxiGuitar has that FuTab hasn't merged yet, and which files a merge would conflict in. The merge-upstream skill uses it.
+
 ## [0.1.0] - 2026-11-16
 
 FuTab's first release, from OxiGuitar 0.19.1 with OxiGuitar's changes up to OxiGuitar PR 290.
