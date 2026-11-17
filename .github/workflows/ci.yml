@@ -1,6 +1,9 @@
 # Formatting, lint, tests, licence check, sign-off check and the no-network test.
 # The final job, ci-success, passes only if every other job passed; branch rules
 # require it before anything merges into develop or main.
+# A pull request labelled lean-ci runs only formatting, lint (which builds the
+# code) and the sign-off check; every other job is skipped, and runs again on
+# the push to develop after the merge (CONTRIBUTING.md, "Lean CI").
 name: CI
 
 on:
@@ -80,6 +83,8 @@ jobs:
   # release's clippy will ask for, before Debian unstable ships it.
   lint-next:
     name: Lint on latest stable (advisory)
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -107,6 +112,8 @@ jobs:
 
   test:
     name: Test (${{ matrix.name }})
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -174,6 +181,8 @@ jobs:
   # each of the three systems, as the guide's "Building for every system".
   template:
     name: Plugin template (${{ matrix.name }})
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -226,6 +235,8 @@ jobs:
   # turned off to build faster; that makes the check a little stricter.
   speed:
     name: Speed budget
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     env:
       CARGO_PROFILE_RELEASE_LTO: "false"
@@ -261,6 +272,8 @@ jobs:
 
   deny:
     name: Licences and advisories
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -271,6 +284,8 @@ jobs:
 
   no-network:
     name: No network (NET-5)
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -313,6 +328,8 @@ jobs:
 
   release-script:
     name: Release script
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -341,7 +358,8 @@ jobs:
           RESULTS: ${{ toJSON(needs.*.result) }}
         run: |
           echo "$RESULTS"
-          # 'skipped' is fine: the DCO job runs on pull requests only.
+          # 'skipped' is fine: the DCO job runs on pull requests only, and
+          # a lean-ci pull request skips the heavy jobs.
           if echo "$RESULTS" | grep -Eq '"(failure|cancelled)"'; then
             exit 1
           fi

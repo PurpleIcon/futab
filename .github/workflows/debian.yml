@@ -31,6 +31,8 @@ concurrency:
 jobs:
   crates:
     name: Crates against Debian
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -56,6 +58,8 @@ jobs:
   # packages installed into a clean sid.
   packages:
     name: Debian packages, built offline in sid
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
