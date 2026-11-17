@@ -9,6 +9,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 ### Added
 
 - **build-test-rpm skill** (#17): the agent skill builds a test `.rpm` from the working copy (release build, licence report, package) and says how to install it with dnf, to test FuTab as a packaged app.
+- **upstream-report skill** (#18): the agent skill updates `oxiguitar-catchup.md` with `scripts/upstream/catchup.py` and sums up what OxiGuitar has that FuTab hasn't merged yet, and which files a merge would conflict in. The merge-upstream skill uses it.
 
 ### Fixed
 
