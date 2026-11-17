@@ -775,7 +775,6 @@ fn main() -> Result<(), slint::PlatformError> {
         ),
         "FuTab is a fork of OxiGuitar, by Mateus Rocha de Paula and the OxiGuitar contributors: https://github.com/mateusrdp/oxiguitar".to_owned(),
         "Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors. Licensed under the GNU GPL, version 3 or later.".to_owned(),
-        "Music font: Bravura (Steinberg, SIL OFL 1.1). Text font: Noto Sans (SIL OFL 1.1). GUI: Slint (GPL-3.0).".to_owned(),
         "FuTab never connects to the internet on its own and sends nothing anywhere.".to_owned(),
     ];
     about.extend(about_folders(&startup.inventory.folders, args.safe_mode));
@@ -1404,6 +1403,12 @@ fn main() -> Result<(), slint::PlatformError> {
     let a = app.clone();
     ui.on_open_link(move |url| {
         if let Err(e) = links::open(&url) {
+            message(&a, Level::Error, e);
+        }
+    });
+    let a = app.clone();
+    ui.on_open_credits(move || {
+        if let Err(e) = links::open(links::CREDITS) {
             message(&a, Level::Error, e);
         }
     });
@@ -2798,6 +2803,10 @@ fn handle(app: &Shared, event: Event) {
         }
         Event::Tools(tools) => set_tools(&ui, &tool_rows(&tools)),
         Event::Message(level, text) => message(app, level, text),
+        Event::Report(text) => {
+            app.borrow_mut().footer.push_report(text);
+            sync_footer(app);
+        }
     }
 }
 
