@@ -19,12 +19,13 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 - **merge-upstream skill** (#22): conflicts show the common ancestor and are settled line by line; a deletion upstream wins over a FuTab rename; OxiGuitar's version numbers never become FuTab's (a table maps them to FuTab releases); the shared folders beside the plugin folders take FuTab's names; upstream's `FUNDING.yml` is never taken; release commits' version changes cover the spikes' lockfiles and the renamed metainfo too.
 - **Roadmap** (#23): ROADMAP.md is FuTab's own, a table of milestones: 0.1.0 (released) and M1, the rules for merging upstream (in progress). OxiGuitar's milestones are no longer listed; CREDITS.md now points to OxiGuitar's roadmap for them.
 - **merge-upstream skill, more rules** (#23): CREDITS.md keeps FuTab's opening and trademark sentence, and its rows name no versions; links to OxiGuitar are never merged or renamed without a decision; install instructions take only which plugin packages exist; ROADMAP.md is never merged from upstream.
-- **Merged OxiGuitar up to OxiGuitar PR 299** (up to mateusrdp/oxiguitar@8d6a86f):
+- **Merged OxiGuitar up to OxiGuitar PR 300** (up to mateusrdp/oxiguitar@b6a2926):
   - Plugin interface 1.8: plugins add their own palette buttons, menu entries (a new Plugins menu, between Tools and Help), toolbar buttons, keys and dialogs; keep their own data and marks on beats, saved in the `.oxg` file beside the score; draw on the page; play the notes their own way; and have shared folders of their own name. Closed and Open Wah-Wah move to the Wah-wah plugin. Save always writes the file's own format, and can keep what the format can't hold in the `.oxg` file. FuTab writes a crash report naming the plugin that crashed it (OxiGuitar PR 292)
   - Help → About links to the credits, CREDITS.md, in place of its own list of fonts; the footer shows what a plugin's tool did; plugins built for macOS are recognised from their file headers (OxiGuitar PR 295)
   - The Wah-wah plugin (`oxiguitar-wah`) is suggested by FuTab's packages and in the install instructions (OxiGuitar PR 296)
   - OxiGuitar's feature check against Guitar Pro 8, TuxGuitar and alphaTab (docs/parity.md); the amp models' manual page says which computers use the plugin's faster engine (OxiGuitar PR 298)
   - The feature check places each gap it found in OxiGuitar's plan (OxiGuitar PR 299)
+  - The mixer is saved in the file: each track's volume, pan, mute and solo, as much as the format holds; moving them is one step for Undo (OxiGuitar PR 300)
 
 ### Fixed
 
