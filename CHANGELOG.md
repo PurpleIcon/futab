@@ -16,7 +16,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 ### Changed
 
 - **Credits** (#21): CREDITS.md reads as FuTab's: FuTab's own copyright line, and OxiGuitar listed first among the projects FuTab comes from, with its authors and licence.
-- **merge-upstream skill** (#22): conflicts show the common ancestor and are settled line by line; a deletion upstream wins over a FuTab rename; OxiGuitar's version numbers never become FuTab's (a table maps them to FuTab releases); the shared folders beside the plugin folders take FuTab's names; upstream's `FUNDING.yml` is never taken.
+- **merge-upstream skill** (#22): conflicts show the common ancestor and are settled line by line; a deletion upstream wins over a FuTab rename; OxiGuitar's version numbers never become FuTab's (a table maps them to FuTab releases); the shared folders beside the plugin folders take FuTab's names; upstream's `FUNDING.yml` is never taken; release commits' version changes cover the spikes' lockfiles and the renamed metainfo too.
 
 ### Fixed
 
