@@ -10,6 +10,10 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 - **build-test-rpm skill** (#17): the agent skill builds a test `.rpm` from the working copy (release build, licence report, package) and says how to install it with dnf, to test FuTab as a packaged app.
 
+### Fixed
+
+- **Desktop icon** (#16): FuTab's icon shows again when searching for the app on the desktop. The icon file opened with a long comment, so desktops didn't recognise it as an SVG image and showed a blank icon.
+
 ## [0.1.0] - 2026-11-16
 
 FuTab's first release, from OxiGuitar 0.19.1 with OxiGuitar's changes up to OxiGuitar PR 290.
