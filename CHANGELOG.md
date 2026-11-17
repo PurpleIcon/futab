@@ -13,6 +13,10 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 - **Lean CI label** (#19): a pull request labelled `lean-ci` runs only formatting, lint and the sign-off check, and skips the tests, packages and other long checks, which still run after the merge into `develop`. CONTRIBUTING.md says when to use it.
 - **Lean PRs in the agent rules** (#20): before opening a pull request, the agent asks whether it's lean, and if so opens it with the `lean-ci` label.
 
+### Changed
+
+- **Credits** (#21): CREDITS.md reads as FuTab's: FuTab's own copyright line, and OxiGuitar listed first among the projects FuTab comes from, with its authors and licence.
+
 ### Fixed
 
 - **Desktop icon** (#16): FuTab's icon shows again when searching for the app on the desktop. The icon file opened with a long comment, so desktops didn't recognise it as an SVG image and showed a blank icon.
