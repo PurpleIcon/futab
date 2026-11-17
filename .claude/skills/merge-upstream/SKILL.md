@@ -89,6 +89,7 @@ What FuTab renamed: always FuTab's side in a merge.
 | --- | --- |
 | `OxiGuitar` (the app's name, in text users read: UI strings, messages, the user manual `docs/manual/`, the plugin guide `docs/plugins/`, man pages, metainfo, README) | `FuTab` |
 | package and binary `oxiguitar`, `oxiguitar-x11`, `oxiguitar-cli` (`cargo run -p ...`, `target/.../oxiguitar*`, `/usr/bin/...`, `/app/bin/...`, `oxiguitar.exe`) | `futab`, `futab-x11`, `futab-cli`, `futab.exe` |
+| package `oxiguitar-app` (`-p`, `--exclude`, `cargo tree -p`, messages such as "build oxiguitar-app with…") | `futab` (the folder `crates/oxiguitar-app/` stays) |
 | app ID `io.github.mateusrdp.OxiGuitar` (and file names that use it) | `io.github.purpleicon.FuTab` |
 | repository `mateusrdp/oxiguitar` as **this** project's home: `repository`/`homepage`, bug reports, issues, discussions, screenshots (web addresses: only those in "Web addresses" below; ask about any other) | `PurpleIcon/futab` |
 | settings, data and cache folders `oxiguitar` / `OxiGuitar` | `futab` / `FuTab` |
@@ -152,7 +153,13 @@ These are new files with OxiGuitar in their name; rename them by the table. Then
 git diff --cached HEAD -U0 -- . ':!docs/design' ':!docs/adr' ':!docs/parity.md' | grep -n '^+.*ROADMAP' | grep -v '^[0-9]*:+++'
 ```
 
-These are mentions of upstream's roadmap: write each as "OxiGuitar's roadmap" (step 2, `ROADMAP.md`), unless it's a code comment. Then do the build and lint checks (not the tests unless I ask):
+These are mentions of upstream's roadmap: write each as "OxiGuitar's roadmap" (step 2, `ROADMAP.md`), unless it's a code comment. Then:
+
+```bash
+git diff --cached HEAD -U0 -- . ':!docs/design' ':!docs/adr' ':!docs/parity.md' ':!CHANGELOG.md' | grep -nE '^\+.*(-p oxiguitar(-app|-cli)?\b|--exclude oxiguitar-app|\boxiguitar-(app|cli|x11)\b[^/]|/bin/oxiguitar|oxiguitar\.exe|target/[a-z]+/oxiguitar)' | grep -v '^[0-9]*:+++'
+```
+
+These are package and binary names, often in lines that merged cleanly (OxiGuitar PR 305's new Clippy steps in `ci.yml` used `-p oxiguitar-app`, which would have failed FuTab's CI). The first check above lists them too, but among the crate names that stay; this one lists only these. Rename each by the table (`oxiguitar-app` → `futab`, `oxiguitar-cli` → `futab-cli`, `oxiguitar-x11` → `futab-x11`), except crate folder paths (`crates/oxiguitar-app/…`) and code comments. Then do the build and lint checks (not the tests unless I ask):
 
 ```bash
 cargo build
