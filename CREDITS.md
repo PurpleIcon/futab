@@ -1,21 +1,24 @@
 # Credits
 
-OxiGuitar stands on the work of many people. This file lists every project we port code from, learn from or depend on, with its authors and license. The app's About window shows the same list.
+FuTab's changes are Copyright (C) 2026 the FuTab contributors. Contributors keep the copyright on what they contribute.
 
-Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors. Contributors keep the copyright on what they contribute.
+FuTab stands on the work of many people. This file lists every project that code is ported from, learned from or depended on, with its authors and license. The app's About window shows the same list.
+
+FuTab is a fork of OxiGuitar.
+
+OxiGuitar is Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors.
 
 ## Special thanks
 
 To everyone who has contributed code, tests, testing, translations of ideas into issues, or files for our test corpus. Your name goes here with your first merged contribution.
 
-- Mateus Rocha de Paula ([@mateusrdp](https://github.com/mateusrdp)) — creator and maintainer
-
 ## Projects we port from or study
 
-Each file ported or adapted from one of these starts with an SPDX header, the original copyright line, and the note "Ported from <project> <path> at <commit>". Nothing has been ported yet; this list records where we will look.
+Each file ported or adapted from one of these starts with an SPDX header, the original copyright line, and the note "Ported from <project> <path> at <commit>". OxiGuitar is the exception: its files came into FuTab by the fork and by merges, and keep their own headers. Nothing has been ported from the others yet; this list records where we will look.
 
 | Project | Authors | License | What we take |
 | --- | --- | --- | --- |
+| [OxiGuitar](https://github.com/mateusrdp/oxiguitar) 0.19.1 | Mateus Rocha de Paula ([@mateusrdp](https://github.com/mateusrdp)) and the OxiGuitar contributors | GPL-3.0-or-later | The whole app: FuTab is forked from it and merges its changes |
 | [MuseScore Studio](https://github.com/musescore/MuseScore) 4.7 | Muse Group and contributors | GPL-3.0-only | Engraving and layout algorithms, .mscz logic, guitar features |
 | [TuxGuitar](https://github.com/helge17/tuxguitar) 2.0 | Julian Casadesus, helge17 and contributors | LGPL-2.1-only | Data model, Guitar Pro importers, effect-to-MIDI mapping |
 | [alphaTab](https://github.com/CoderLine/alphaTab) 1.x | Danielku15 / CoderLine and contributors | MPL-2.0 | Guitar Pro 3–8 readers and writer, GPIF knowledge, effect rendering |
@@ -53,7 +56,7 @@ Direct dependencies so far, all Rust (the desktop app also links the system's fo
 | [Slint](https://slint.dev) 1.17 | SixtyFPS GmbH and contributors | GPL-3.0-only (one of its three licences; the one we use) | The desktop window (ADR 0004). Because Slint is GPL-3.0-only, the distributed app is under GPL-3.0. Its dependencies include winit, femtovg and AccessKit; we build it without its system-tray support |
 | [rfd](https://github.com/PolyMeilex/rfd) 0.17 | Bartłomiej Maryńczak (PolyMeilex) and contributors | MIT | The system's Open and Save dialogs (the XDG desktop portal on Linux, no GTK) |
 
-Tools used only to test OxiGuitar, never part of what it ships:
+Tools used only to test FuTab, never part of what it ships:
 
 | Tool | Authors | License | Use |
 | --- | --- | --- | --- |
@@ -80,4 +83,4 @@ Checked for later milestones (licences confirmed 15 October 2026, see ROADMAP.md
 
 ## Trademarks
 
-Guitar Pro is a trademark of Arobas Music. MuseScore is a trademark of Muse Group. TuxGuitar, alphaTab and other names belong to their owners. OxiGuitar mirrors Guitar Pro's layout and shortcuts only: no code, icons, fonts, sounds or sample songs are copied from it.
+Guitar Pro is a trademark of Arobas Music. MuseScore is a trademark of Muse Group. TuxGuitar, alphaTab and other names belong to their owners. FuTab mirrors Guitar Pro's layout and shortcuts only: no code, icons, fonts, sounds or sample songs are copied from it.
