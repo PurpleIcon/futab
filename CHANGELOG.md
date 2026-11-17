@@ -16,9 +16,11 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 ### Changed
 
 - **Credits** (#21): CREDITS.md reads as FuTab's: FuTab's own copyright line, and OxiGuitar listed first among the projects FuTab comes from, with its authors and licence.
+- **merge-upstream skill** (#22): conflicts show the common ancestor and are settled line by line; a deletion upstream wins over a FuTab rename; OxiGuitar's version numbers never become FuTab's (a table maps them to FuTab releases); the shared folders beside the plugin folders take FuTab's names; upstream's `FUNDING.yml` is never taken.
 
 ### Fixed
 
+- **Version numbers in the manual and the plugin guide** (#22): versions from before the fork read as OxiGuitar's again (they had been renamed to FuTab 0.2 to 0.18, versions FuTab never had), and what a plugin needs reads FuTab 0.1.0 or later. The plugin template's copy step uses the folder `git clone` makes again.
 - **Desktop icon** (#16): FuTab's icon shows again when searching for the app on the desktop. The icon file opened with a long comment, so desktops didn't recognise it as an SVG image and showed a blank icon.
 
 ## [0.1.0] - 2026-11-16
