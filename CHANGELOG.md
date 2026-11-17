@@ -27,6 +27,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ### Fixed
 
+- **Installing, in the manual** (#23): the Installing, Linux and Windows pages no longer say FuTab has no packages or downloads: they point to FuTab's releases (.rpm, .deb, AppImage, Windows zip). The Linux page says to install FuTab first, then OxiGuitar's plugins, and that adding OxiGuitar's repository first brings the recommended plugins with FuTab.
 - **Version numbers in the manual and the plugin guide** (#22): versions from before the fork read as OxiGuitar's again (they had been renamed to FuTab 0.2 to 0.18, versions FuTab never had), and what a plugin needs reads FuTab 0.1.0 or later. The plugin template's copy step uses the folder `git clone` makes again.
 - **Desktop icon** (#16): FuTab's icon shows again when searching for the app on the desktop. The icon file opened with a long comment, so desktops didn't recognise it as an SVG image and showed a blank icon.
 

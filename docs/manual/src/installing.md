@@ -1,6 +1,6 @@
 # Installing
 
-FuTab doesn't publish releases or packages yet: for now, build it from source. When releases come, this page will list the downloads.
+Download FuTab from the [latest release](https://github.com/PurpleIcon/futab/releases/latest): [Linux](install-linux.md) (.rpm, .deb, AppImage) and [Windows](install-windows.md) (a zip). There is no macOS download yet: on a Mac, build it from source as below.
 
 ## Building from source
 
