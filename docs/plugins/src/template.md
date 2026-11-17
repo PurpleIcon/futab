@@ -14,12 +14,12 @@ Copy the folder, hidden `.github/` included, to wherever you keep your projects.
 
 ```sh
 git clone --depth 1 --branch v0.11.0 https://github.com/mateusrdp/oxiguitar
-cp -R futab/docs/plugins/template my-plugin
-rm -rf futab
+cp -R oxiguitar/docs/plugins/template my-plugin
+rm -rf oxiguitar
 cd my-plugin
 ```
 
-The template's `Cargo.toml` takes the SDK and the contract suite from FuTab's repository on GitHub, at the same tag, `v0.11.0` (Cargo downloads the repository the first time). `v0.11.0` has interface 1.4 ([Interface versions](versions.md)). The template asks for interface 1.1, so what you build loads in FuTab 0.2 and later; ask for 1.2 when you use its tools or the score version 2, and it needs 0.5; ask for 1.3 for a settings window, a section of the track dialog, footer links, the plugin's folders, instruments, effects or audio devices, and it needs 0.9; ask for 1.4 for links in a tab, exporters, `needs`, `replaces` or advice, and it needs 0.11. To build for a later FuTab, change both tags.
+The template's `Cargo.toml` takes the SDK and the contract suite from OxiGuitar's repository on GitHub, at the same tag, `v0.11.0` (Cargo downloads the repository the first time). `v0.11.0` has interface 1.4 ([Interface versions](versions.md)). The template asks for interface 1.1, so what you build loads in OxiGuitar 0.2 and later; ask for 1.2 when you use its tools or the score version 2, and it needs 0.5; ask for 1.3 for a settings window, a section of the track dialog, footer links, the plugin's folders, instruments, effects or audio devices, and it needs 0.9; ask for 1.4 for links in a tab, exporters, `needs`, `replaces` or advice, and it needs 0.11. To build against a later OxiGuitar SDK, change both tags.
 
 ## 2. Build and test it
 
