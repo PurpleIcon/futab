@@ -58,7 +58,7 @@ Install only the plugin packages, never the `oxiguitar` package itself, or you g
 
 ### After installing
 
-Open a song. FuTab plays each kind of track with the matching recorded set by itself (clean, overdriven and distorted guitars, nylon and steel strings, bass, drums); **Tools → Plugins…** lists the plugins it found and **Settings…** on MIDI changes the sets. OxiGuitar's [manual](https://mateusrdp.github.io/oxiguitar/) says more (FuTab works the same way; it has no manual of its own yet), and its [Better sounds](https://mateusrdp.github.io/oxiguitar/better-sounds.html) page lists the sets.
+Open a song. FuTab plays each kind of track with the matching recorded set by itself (clean, overdriven and distorted guitars, nylon and steel strings, bass, drums); **Tools → Plugins…** lists the plugins it found and **Plugins → MIDI Sound Sets…** changes the sets. OxiGuitar's [manual](https://mateusrdp.github.io/oxiguitar/) says more (FuTab works the same way; it has no manual of its own yet), and its [Better sounds](https://mateusrdp.github.io/oxiguitar/better-sounds.html) page lists the sets.
 
 ## How to get involved
 
