@@ -35,6 +35,11 @@ ignore = [
     # spin_on uses pin-utils, which is unmaintained (archived Oct 2026), not
     # vulnerable; via Slint 1.19's code generator, macros and renderers.
     { id = "RUSTSEC-2026-0441", reason = "pin-utils, unmaintained; via spin_on in Slint 1.19" },
+    # chrono is unmaintained (not a vulnerability; every version is
+    # affected, so no upgrade helps). It comes in through Slint 1.19's core
+    # (i-slint-core), not FuTab's own code. Revisit on the next Slint
+    # upgrade.
+    { id = "RUSTSEC-2026-0543", reason = "chrono, unmaintained; via i-slint-core in Slint 1.19" },
 ]
 
 [licenses]
