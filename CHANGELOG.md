@@ -6,10 +6,15 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ## [Unreleased]
 
+### Added
+
+- **review-skills and review-rules skills** (#28): the agent skills check that every skill is `.claude/skills/<skill-name>/SKILL.md` and every rule `.claude/rules/<rule-name>/RULE.md`, with kebab-case folder names (at most 64 characters) and YAML front matter whose `name` matches the folder and that has a `description`; they report what doesn't, and fix it once asked. `scripts/agents/check-layout.py` does the checking.
+
 ### Changed
 
+- **Agent rules in folders** (#28): the rules moved to `.claude/rules/general/RULE.md`, `.claude/rules/github/RULE.md` and `.claude/rules/tags/RULE.md`, each with front matter naming it.
 - **No more links to OxiGuitar's pull requests** (#28): FuTab is a fork, so GitHub reads a `#N` that FuTab doesn't have as OxiGuitar's, and posts "referenced this pull request" there. The agent rules now keep every `#` number in commits, PR titles and descriptions to FuTab's own, check them before each push, and never squash a pull request that carries upstream's commits (whose subjects end in upstream numbers).
-- **Release tags, in the agent rules** (#28): a new rule file, `.claude/rules/tags.md`, says how a release tag is made and pushed (annotated, on `main`'s merge commit, pushed alone, only on the maintainer's go-ahead) and what never to do with tags. The repository's new ruleset "Protect release tags" lets only organisation admins create, move or delete a `v*` tag.
+- **Release tags, in the agent rules** (#28): a new rule file, `.claude/rules/tags/RULE.md`, says how a release tag is made and pushed (annotated, on `main`'s merge commit, pushed alone, only on the maintainer's go-ahead) and what never to do with tags. The repository's new ruleset "Protect release tags" lets only organisation admins create, move or delete a `v*` tag.
 - **Pull requests that merge OxiGuitar** (#28): titled `Merge FROM upstream OxiGuitar PR N` (and `Restore history FROM upstream OxiGuitar PR N`), so they can't be read as merging FuTab into OxiGuitar, and carry no `#` before an upstream number. The agent says plainly, whenever one is ready to merge, that it takes "Create a merge commit", not "Squash and merge".
 - **Merging pull requests, in the agent rules** (#28): the rules say which merge method each pull request takes, that a squash merge keeps GitHub's default message (it carries the commits' sign-off), and that the agent checks the sign-off of a squash commit straight after merging it.
 

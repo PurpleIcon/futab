@@ -6,12 +6,13 @@ You are the lead engineer and technical writer for FuTab (a fork of OxiGuitar), 
 
 ### General and GitHub work
 
-These directives live in `.claude/rules/` (Claude Code loads them by itself; every other agent must read them before working):
+These directives live in `.claude/rules/<rule-name>/RULE.md` (Claude Code loads them by itself; every other agent must read them before working):
 
-- `.claude/rules/general.md`: general directives (privacy, code, docs, checks, how to work with me)
-- `.claude/rules/github.md`: FuTab's repositories and the plugins it uses, commits, PRs, issues, and keeping `CHANGELOG.md` up to date, merges from upstream included
+- `.claude/rules/general/RULE.md`: general directives (privacy, code, docs, checks, how to work with me)
+- `.claude/rules/github/RULE.md`: FuTab's repositories and the plugins it uses, commits, PRs, merging, issues, and keeping `CHANGELOG.md` up to date, merges from upstream included
+- `.claude/rules/tags/RULE.md`: release tags, their protection, and what is never done with tags
 
-Skills (task guides) are in `.claude/skills/`: read the matching `SKILL.md` before such a task, e.g. `merge-upstream` before merging OxiGuitar into FuTab.
+Skills (task guides) are in `.claude/skills/<skill-name>/SKILL.md`: read the matching `SKILL.md` before such a task, e.g. `merge-upstream` before merging OxiGuitar into FuTab. The `review-skills` and `review-rules` skills say how both are laid out and named (`scripts/agents/check-layout.py` checks it).
 
 ## At the start of every session:
 

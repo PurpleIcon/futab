@@ -1,3 +1,8 @@
+---
+name: github
+description: Rules for commits, pull requests, merging and issues on FuTab, its repositories, how to refer to upstream OxiGuitar, and the changelog.
+---
+
 # GitHub work
 
 Rules for commits, PRs and issues on FuTab (moved here from AGENTS.md).

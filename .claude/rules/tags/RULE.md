@@ -1,3 +1,8 @@
+---
+name: tags
+description: How FuTab's release tags are made and pushed, how they are protected, and what is never done with tags.
+---
+
 # Tags
 
 Rules for git tags on FuTab. A `v*` tag is a FuTab release: pushing one starts the Release packages workflow (`.github/workflows/release.yml`), which builds every package and makes the draft release.

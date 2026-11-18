@@ -115,7 +115,7 @@ What stays OxiGuitar's: never rename these, in a merge or anywhere else.
 - **OxiGuitar's plugin folders as a fallback** (`/usr/lib/oxiguitar/plugins` and the others, searched after FuTab's), the shared folders beside them (`/usr/lib/oxiguitar/<name>`), and `/usr/share/oxiguitar/soundfonts`.
 - **File formats:** the `.oxg` sidecar and anything else written to a user's files. Renaming those would break files people already have.
 - **Code comments and design records:** comments in the code (`//`, `///`, `//!`, `#`), `docs/design/`, `docs/adr/` and `docs/parity.md` (OxiGuitar's feature check against Guitar Pro, TuxGuitar and alphaTab, from OxiGuitar PR 298) keep OxiGuitar's name, and upstream's changes to them are taken as they are. They record OxiGuitar's design, decisions and checks; renaming them would only make every later merge conflict. FuTab's own design notes and decisions go in `docs/futab-design/` and `docs/futab-adr/`, never into these.
-- **Links to upstream as upstream:** the `upstream` remote, links to OxiGuitar's changelog, PRs and issues, the catch-up script. In anything that reaches GitHub (commit messages, PR text, the changelog), name upstream PRs as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`: see Referring to upstream in `.claude/rules/github.md`.
+- **Links to upstream as upstream:** the `upstream` remote, links to OxiGuitar's changelog, PRs and issues, the catch-up script. In anything that reaches GitHub (commit messages, PR text, the changelog), name upstream PRs as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`: see Referring to upstream in `.claude/rules/github/RULE.md`.
 
 When a name fits neither list, it's the clash you can't settle: list it with its file and line, and ask me.
 
@@ -199,7 +199,7 @@ What skipping means (say this to me when I ask to skip, for that PR in particula
 
 ## 4. Changelog
 
-Add the merge's entry under `## [Unreleased]` → `### Changed` in `CHANGELOG.md`, in the form `.claude/rules/github.md` gives ("Merged OxiGuitar x.y.z", or "Merged OxiGuitar up to OxiGuitar PR N" when the target isn't a release; one line per upstream PR in the user's words, `OxiGuitar PR N`). Leave out what FuTab dropped, and upstream's release and changelog commits.
+Add the merge's entry under `## [Unreleased]` → `### Changed` in `CHANGELOG.md`, in the form `.claude/rules/github/RULE.md` gives ("Merged OxiGuitar x.y.z", or "Merged OxiGuitar up to OxiGuitar PR N" when the target isn't a release; one line per upstream PR in the user's words, `OxiGuitar PR N`). Leave out what FuTab dropped, and upstream's release and changelog commits.
 
 ## 5. Report and hand over
 
@@ -216,9 +216,9 @@ Then stop. Commit only when I say so (`git commit -s`, the merge's own message i
 
 When I ask for the PR (push only when I say so):
 
-- **Title:** `Merge FROM upstream OxiGuitar PR N`, where `N` is the last upstream PR the merge brings in (the target's PR, or the last PR before it when the target is a release or other commit without one). For example: `Merge FROM upstream OxiGuitar PR 290`. The capital FROM keeps the direction plain: FuTab takes OxiGuitar's changes, nothing goes back to OxiGuitar. Never a title that could read as merging into upstream (the old `Merge upstream to oxiguitar #N` did), and **never a `#` before the number**: FuTab has no PR of that number, so GitHub links OxiGuitar's, and the merge commit (whose message carries the title) posts on upstream's PR (Referring to upstream in `.claude/rules/github.md`). Nothing else in the title: no repository prefix, no list of PRs, no release number.
+- **Title:** `Merge FROM upstream OxiGuitar PR N`, where `N` is the last upstream PR the merge brings in (the target's PR, or the last PR before it when the target is a release or other commit without one). For example: `Merge FROM upstream OxiGuitar PR 290`. The capital FROM keeps the direction plain: FuTab takes OxiGuitar's changes, nothing goes back to OxiGuitar. Never a title that could read as merging into upstream (the old `Merge upstream to oxiguitar #N` did), and **never a `#` before the number**: FuTab has no PR of that number, so GitHub links OxiGuitar's, and the merge commit (whose message carries the title) posts on upstream's PR (Referring to upstream in `.claude/rules/github/RULE.md`). Nothing else in the title: no repository prefix, no list of PRs, no release number.
 - **Description:** first, the warning to merge with "Create a merge commit", never squash or rebase, and why. Then the upstream PRs merged (as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`, with what each changes and its merge commit), the skipped ones with reasons, what upstream still has, every conflict and how it was settled, the names changed and kept, behaviour changes users will notice, the checks run, and test steps.
-- Branch, base and sign-off as in step 1 and `.claude/rules/github.md`.
+- Branch, base and sign-off as in step 1 and `.claude/rules/github/RULE.md`.
 
 ### Merging the pull request
 
