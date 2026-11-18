@@ -6,6 +6,10 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-18
+
+FuTab caught up with OxiGuitar 0.21.1: a Plugins menu and plugin interface 1.10, the mixer saved in the file, drum entry on the drum staff, and Save in the file's own format.
+
 ### Added
 
 - **build-test-rpm skill** (#17): the agent skill builds a test `.rpm` from the working copy (release build, licence report, package) and says how to install it with dnf, to test FuTab as a packaged app.
@@ -35,6 +39,8 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ### Fixed
 
+- **Flatpak** (#26): the Flatpak is no longer a preview. It opens and plays with OxiGuitar's plugins from OxiGuitar's Flatpak repository, now that FuTab has the plugin interface they need. The install page says how to add them, and where the Flatpak keeps its plugins, sound sets and amp models.
+- **Sound-set installer, in the manual** (#26): the manual says to run `install.sh` or `install.ps1` with FuTab's `soundfonts` folder (`--dir`, `-Dir`), since without it they fill OxiGuitar's folder, which FuTab doesn't search.
 - **Upstream history up to OxiGuitar 0.21.1** (#25): the merge of OxiGuitar up to 0.21.1 (#23) was squash-merged, which dropped upstream's commits from FuTab's history, so the catch-up report would have listed them as missing again and the next merge would have conflicted on them. A merge that changes no file links them back in.
 - **CI on macOS and the ci-success gate** (#24): pull requests no longer wait for GitHub's macOS machines, which were too scarce to get one: CI's macOS tests and plugin template run only when CI is started by hand, as the macOS package already did. `ci-success` now passes only when every job passed or was skipped; before, a job that never got a machine counted as passed.
 - **Installing, in the manual** (#23): the Installing, Linux and Windows pages no longer say FuTab has no packages or downloads: they point to FuTab's releases (.rpm, .deb, AppImage, Windows zip). The Linux page says to install FuTab first, then OxiGuitar's plugins, and that adding OxiGuitar's repository first brings the recommended plugins with FuTab.

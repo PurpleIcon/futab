@@ -7,7 +7,7 @@ This guide shows how to write one, in Rust, with the SDK (`oxiguitar-plugin`). T
 ## What you need
 
 - Rust 1.99 or later, from [rustup](https://rustup.rs), for the SDK of v0.11.0.
-- FuTab 0.1.0 or later (it has interface 1.7), to try your plugin in the app ([the user manual](https://purpleicon.github.io/futab/installing.html)).
+- FuTab 0.2.0 or later (it has interface 1.10), to try your plugin in the app ([the user manual](https://purpleicon.github.io/futab/installing.html)).
 - Nothing else: the SDK and the contract suite come through Cargo, and you write no `unsafe` code.
 
 ## The pages

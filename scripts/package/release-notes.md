@@ -11,8 +11,8 @@ One download for your system. FuTab is a fork of [OxiGuitar](https://github.com/
 | Any Linux (x86_64; `aarch64` for ARM) | `FuTab-@VERSION@-x86_64.AppImage`, for Wayland and X11 desktops alike |
 | Debian, Ubuntu (x86_64; `arm64` for ARM) | `futab_@VERSION@_amd64.deb` |
 | Fedora (x86_64; `aarch64` for ARM) | `futab-@VERSION@-1.x86_64.rpm` |
-| Any Linux, as a Flatpak (x86_64; `aarch64` for ARM), **preview** | `FuTab-@VERSION@-x86_64.flatpak` |
+| Any Linux, as a Flatpak (x86_64; `aarch64` for ARM) | `FuTab-@VERSION@-x86_64.flatpak` |
 
-**The Flatpak is a preview**: it runs, but opens and plays nothing yet. It takes OxiGuitar's plugins as Flatpak extensions, and OxiGuitar doesn't publish its Guitar Pro and audio-output plugins as Flatpaks yet (only MIDI, Equalizer and Wah).
+**The Flatpak** takes OxiGuitar's plugins from OxiGuitar's Flatpak repository, as Flatpak extensions: at least Guitar Pro, MIDI and PipeWire. It sees only its own folders, so it plays once a sound set is in its `soundfonts` folder. The [Linux install page](https://purpleicon.github.io/futab/install-linux.html#flatpak) explains how.
 
 The .deb and .rpm above are the Wayland build; a Linux desktop without Wayland takes the files named `futab-x11` instead. SHA256SUMS holds every file's checksum.
