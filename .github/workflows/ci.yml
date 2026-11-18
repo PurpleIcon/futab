@@ -130,8 +130,8 @@ jobs:
           - { name: Linux ARM64, os: ubuntu-24.04-arm, toolchain: stable }
           - { name: Windows x86_64, os: windows-2025, toolchain: stable }
           - { name: Windows ARM64, os: windows-11-arm, toolchain: stable }
-          - { name: macOS, os: macos-15, toolchain: stable }
-    steps:
+    # Shared with test-macos below (a YAML anchor).
+    steps: &test-steps
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -179,12 +179,27 @@ jobs:
           path: target/tmp/visual-diff/
           if-no-files-found: ignore
 
+  # The tests on macOS, only when CI is started by hand (Actions → CI → Run
+  # workflow): GitHub's macOS runners are too short of capacity to wait for
+  # on every pull request (Nov 2026; release.yml builds the .dmg the same
+  # way). Its steps are the test job's.
+  test-macos:
+    name: Test (${{ matrix.name }})
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - { name: macOS, os: macos-15, toolchain: stable }
+    steps: *test-steps
+
   # M2's last gate: the plugin developer guide builds a working plugin from
   # the template (docs/plugins/). A copy of docs/plugins/template/ outside
   # the repository, built against this checkout's SDK: fmt, clippy, its
   # tests and the contract suite (cargo test and oxiguitar-plugin-test), then
   # futab-cli opens the template's sample through the plugin file. On
-  # each of the three systems, as the guide's "Building for every system".
+  # each of the three systems, as the guide's "Building for every system";
+  # macOS only when CI is started by hand (template-macos below).
   template:
     name: Plugin template (${{ matrix.name }})
     # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
@@ -196,8 +211,8 @@ jobs:
         include:
           - { name: Linux, os: ubuntu-24.04 }
           - { name: Windows, os: windows-2025 }
-          - { name: macOS, os: macos-15 }
-    steps:
+    # Shared with template-macos below (a YAML anchor).
+    steps: &template-steps
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -232,6 +247,18 @@ jobs:
             ${{ runner.temp }}/template/example-plugin/dist/*.oxp
             ${{ runner.temp }}/template/example-plugin/samples/open-strings.extab
           retention-days: 14
+
+  # The plugin template on macOS, only when CI is started by hand, as
+  # test-macos. Its steps are the template job's.
+  template-macos:
+    name: Plugin template (${{ matrix.name }})
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - { name: macOS, os: macos-15 }
+    steps: *template-steps
 
   # M1's speed budget: a 300-bar, 8-track file opens in under a second, from
   # reading the file to the first tiles (crates/oxiguitar-app/src/speed.rs);
@@ -356,7 +383,7 @@ jobs:
   ci-success:
     name: ci-success
     if: always()
-    needs: [fmt, lint, test, template, speed, deny, no-network, release-script, dco]
+    needs: [fmt, lint, test, test-macos, template, template-macos, speed, deny, no-network, release-script, dco]
     runs-on: ubuntu-24.04
     steps:
       - name: Every job passed
@@ -364,8 +391,9 @@ jobs:
           RESULTS: ${{ toJSON(needs.*.result) }}
         run: |
           echo "$RESULTS"
-          # 'skipped' is fine: the DCO job runs on pull requests only, and
-          # a lean-ci pull request skips the heavy jobs.
-          if echo "$RESULTS" | grep -Eq '"(failure|cancelled)"'; then
-            exit 1
-          fi
+          # Only 'success' and 'skipped' pass: the DCO job runs on pull
+          # requests only, the macOS jobs only when started by hand, and a
+          # lean-ci pull request skips the heavy jobs. Anything else fails,
+          # including a job that never got a runner ('cancelled', or
+          # 'abandoned' for a job with several runs).
+          echo "$RESULTS" | jq -e 'all(.[]; . == "success" or . == "skipped")' > /dev/null
