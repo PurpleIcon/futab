@@ -84,6 +84,12 @@
   </branding>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.2.0" date="2026-11-18" type="development">
+      <description>
+        <p>FuTab caught up with OxiGuitar 0.21.1: a Plugins menu and plugin interface 1.10, the mixer saved in the file, drum entry on the drum staff, and Save in the file's own format.</p>
+      </description>
+      <url>https://github.com/PurpleIcon/futab/releases/tag/v0.2.0</url>
+    </release>
     <release version="0.1.0" date="2026-11-16" type="development">
       <description>
         <p>FuTab's first release, from OxiGuitar 0.19.1.</p>

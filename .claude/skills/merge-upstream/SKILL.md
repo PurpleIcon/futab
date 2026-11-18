@@ -105,6 +105,7 @@ What FuTab renamed: always FuTab's side in a merge.
 | OxiGuitar | First FuTab release that holds it |
 | --- | --- |
 | up to 0.19.1, and up to OxiGuitar PR 290 (mateusrdp/oxiguitar@4ae4593) | 0.1.0 |
+| 0.19.2 up to 0.21.1 (mateusrdp/oxiguitar@e72d200) | 0.2.0 |
 
 What stays OxiGuitar's: never rename these, in a merge or anywhere else.
 

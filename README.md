@@ -31,7 +31,7 @@ Download FuTab for your system from the [latest release](https://github.com/Purp
 | Any Linux | Make the AppImage executable (`chmod +x FuTab-VERSION-x86_64.AppImage`) and run it |
 | Windows 10 and 11 | Unzip `FuTab-VERSION-windows-x86_64.zip` anywhere and run `futab.exe`. It isn't signed: on SmartScreen's warning choose **More info → Run anyway** |
 | macOS | No download yet: build it from source (see [Building from source](#building-from-source)) |
-| Flatpak (preview) | `flatpak install --user ./FuTab-VERSION-x86_64.flatpak`. It runs, but opens and plays nothing yet: the Guitar Pro and audio-output plugins aren't published as Flatpaks |
+| Flatpak | `flatpak install --user ./FuTab-VERSION-x86_64.flatpak`, then OxiGuitar's plugins and a sound set as Flatpak's own (see [the manual](https://purpleicon.github.io/futab/install-linux.html#flatpak)) |
 
 On a Linux desktop without Wayland, take the `futab-x11` .deb or .rpm instead. FuTab installs beside OxiGuitar without sharing a file or a setting with it.
 
@@ -79,7 +79,7 @@ FuTab is a young project, and every bit of help counts, whether you play, code, 
 | Linux | the AppImage: distributions with glibc 2.35 or newer (Debian 12 and later, Ubuntu 22.04+, Fedora 36+); the .deb and .rpm: glibc 2.39 or newer (Debian trixie and sid, Ubuntu 24.04+, Fedora 40+) | x86\_64, ARM64 |
 | macOS | the current release | Apple Silicon and Intel (one universal app) |
 
-Each [release](https://github.com/PurpleIcon/futab/releases) offers a portable .exe for Windows (in a zip), an AppImage for any Linux, a .deb, an .rpm and a Flatpak (a preview). There is no .dmg for macOS yet: on a Mac, build it from source. None carries the plugins, which are OxiGuitar's and have releases, packages and updates of their own ([oxiguitar-guitarpro](https://github.com/mateusrdp/oxiguitar-guitarpro), [oxiguitar-midi](https://github.com/mateusrdp/oxiguitar-midi), [oxiguitar-nam](https://github.com/mateusrdp/oxiguitar-nam), [oxiguitar-wav](https://github.com/mateusrdp/oxiguitar-wav) and the audio outputs).
+Each [release](https://github.com/PurpleIcon/futab/releases) offers a portable .exe for Windows (in a zip), an AppImage for any Linux, a .deb, an .rpm and a Flatpak. There is no .dmg for macOS yet: on a Mac, build it from source. None carries the plugins, which are OxiGuitar's and have releases, packages and updates of their own ([oxiguitar-guitarpro](https://github.com/mateusrdp/oxiguitar-guitarpro), [oxiguitar-midi](https://github.com/mateusrdp/oxiguitar-midi), [oxiguitar-nam](https://github.com/mateusrdp/oxiguitar-nam), [oxiguitar-wav](https://github.com/mateusrdp/oxiguitar-wav) and the audio outputs).
 
 On Linux, the Wayland build is the default; a desktop with only an X server needs the X11 build (see [Building from source](#building-from-source)). The X11 build is deprecated and will be dropped.
 
