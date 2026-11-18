@@ -12,8 +12,8 @@
 //! a canvas dragged on faster than its plugin answers gets the latest
 //! position, and each canvas is drawn once, at its latest size.
 //!
-//! The same thread asks for plugins' settings windows and their sections
-//! of the track dialog (interface 1.3): standard widgets, no canvas.
+//! The same thread asks for plugins' sections of the track dialog
+//! (interface 1.3): standard widgets, no canvas.
 
 use std::collections::HashMap;
 use std::sync::mpsc::{Receiver, Sender, channel};
@@ -44,13 +44,15 @@ pub(crate) fn tab_of(shell_id: &str) -> Option<TabId> {
     })
 }
 
-/// The window's side for a manifest's area.
-pub(crate) fn side_of(area: Area) -> Side {
+/// The window's side for a manifest's area; none for a dialog, which is
+/// in no area.
+pub(crate) fn side_of(area: Area) -> Option<Side> {
     match area {
-        Area::Top => Side::Top,
-        Area::Bottom => Side::Bottom,
-        Area::Left => Side::Left,
-        Area::Right => Side::Right,
+        Area::Top => Some(Side::Top),
+        Area::Bottom => Some(Side::Bottom),
+        Area::Left => Some(Side::Left),
+        Area::Right => Some(Side::Right),
+        Area::Dialog => None,
     }
 }
 
@@ -59,7 +61,10 @@ pub(crate) fn side_of(area: Area) -> Side {
 /// manifests.
 pub(crate) fn add_to(shell: &mut Shell, plugins: &Plugins) {
     for tab in plugins.tabs() {
-        shell.area_mut(side_of(tab.spec.area)).tabs.push(Tab {
+        let Some(side) = side_of(tab.spec.area) else {
+            continue;
+        };
+        shell.area_mut(side).tabs.push(Tab {
             id: shell_id(&tab.id()),
             title: tab.spec.title.clone(),
         });
@@ -154,15 +159,12 @@ pub(crate) enum Request {
         widget: String,
         room: (u32, u32),
     },
+    /// The user closed the dialog `tab`, with OK or not: its plugin is
+    /// told, and what the dialog showed is forgotten.
+    Closed { tab: TabId, ok: bool },
     /// The interface became dark (`true`) or light: canvases are drawn
     /// again.
     Dark(bool),
-    /// The settings window of the plugin `plugin` (its id): what it shows,
-    /// after the user's `event` on one of its widgets if there is one.
-    Settings {
-        plugin: String,
-        event: Option<(String, TabEvent)>,
-    },
     /// The track dialog's section `section` of the plugin `plugin`, for
     /// `track` with its `settings` for that plugin: what it shows and the
     /// settings, after the user's `event` if there is one. `dialog` tells
@@ -198,13 +200,6 @@ pub(crate) enum Answer {
     },
     /// One canvas drawn again (a new size, or the theme changed).
     Canvas { tab: TabId, drawn: Drawn },
-    /// A settings window's contents, or why they can't be shown, and
-    /// whether the user's event changed the plugin's settings (#143).
-    Settings {
-        plugin: String,
-        content: Result<TabContent, String>,
-        changed: bool,
-    },
     /// A track section's contents and the track's settings for its plugin,
     /// or why they can't be shown.
     Section {
@@ -215,8 +210,8 @@ pub(crate) enum Answer {
     },
 }
 
-/// Why a settings window or a track section can't be shown: they hold
-/// standard widgets only, never a canvas.
+/// Why a track section can't be shown: it holds standard widgets only,
+/// never a canvas.
 fn without_canvas(content: &TabContent) -> Result<(), String> {
     let canvas = content
         .rows
@@ -228,26 +223,6 @@ fn without_canvas(content: &TabContent) -> Result<(), String> {
     } else {
         Ok(())
     }
-}
-
-/// The settings window of the plugin `id`, after `event`.
-fn settings_window(
-    plugins: &Plugins,
-    id: &str,
-    event: Option<(String, TabEvent)>,
-) -> Result<TabContent, String> {
-    let found = plugins
-        .with_settings_window()
-        .into_iter()
-        .find(|f| f.manifest.as_ref().is_some_and(|m| m.id == id))
-        .ok_or_else(|| format!("no usable plugin {id:?} has a settings window"))?;
-    let content = match event {
-        None => plugins.settings_window(found),
-        Some((widget, event)) => plugins.settings_event(found, &widget, event),
-    }
-    .map_err(|e| e.to_string())?;
-    without_canvas(&content)?;
-    Ok(content)
 }
 
 /// The track section `section` of the plugin `plugin`, after `event`.
@@ -390,6 +365,10 @@ fn run(rx: &Receiver<Request>, plugins: &Plugins, mut dark: bool, sink: &dyn Fn(
                         sink,
                     );
                 }
+                Request::Closed { tab, ok } => {
+                    plugins.tab_closed(&tab, ok);
+                    contents.remove(&tab);
+                }
                 Request::Size { tab, widget, room } => {
                     rooms.insert((tab.clone(), widget.clone()), room);
                     if let Some(drawn) = contents
@@ -414,18 +393,6 @@ fn run(rx: &Receiver<Request>, plugins: &Plugins, mut dark: bool, sink: &dyn Fn(
                     }
                 }
                 Request::Dark(_) => {}
-                Request::Settings { plugin, event } => {
-                    // A plugin keeps its settings under its id; what the
-                    // event changed there is what the window acts on.
-                    let before = plugins.settings().get(&plugin);
-                    let content = settings_window(plugins, &plugin, event);
-                    let changed = plugins.settings().get(&plugin) != before;
-                    sink(Answer::Settings {
-                        plugin,
-                        content,
-                        changed,
-                    });
-                }
                 Request::Section {
                     dialog,
                     track,
@@ -503,7 +470,8 @@ mod tests {
         assert_eq!(tab_of(&shell_id(&t)), Some(t));
         assert_eq!(tab_of("tracks"), None);
         assert_eq!(tab_of("plugin:nothing"), None);
-        assert_eq!(side_of(Area::Left), Side::Left);
+        assert_eq!(side_of(Area::Left), Some(Side::Left));
+        assert_eq!(side_of(Area::Dialog), None);
     }
 
     #[test]
@@ -704,37 +672,5 @@ mod tests {
         let light = draw(&content, "c", (20, 20), false, &mut raster, &fonts).unwrap();
         assert_eq!(&light.rgba[..4], [0x1a, 0x1a, 0x1a, 0xff]);
         assert!(draw(&content, "nothing", (20, 20), true, &mut raster, &fonts).is_none());
-    }
-
-    /// #143: the thread says when a settings-window event changed the
-    /// plugin's settings, and only then.
-    #[test]
-    fn the_thread_says_when_a_plugins_settings_changed() {
-        use std::time::Duration;
-        let host = crate::test_support::tab_host();
-        let (tx, rx) = channel();
-        let thread = TabThread::start(host.plugins.clone(), true, move |a| {
-            let _ = tx.send(a);
-        });
-        let ask = |event: Option<(&str, TabEvent)>| {
-            thread.send(Request::Settings {
-                plugin: "oxiguitar.test".into(),
-                event: event.map(|(w, e)| (w.to_owned(), e)),
-            });
-            loop {
-                if let Answer::Settings {
-                    content, changed, ..
-                } = rx.recv_timeout(Duration::from_secs(30)).unwrap()
-                {
-                    assert!(content.is_ok(), "{content:?}");
-                    return changed;
-                }
-            }
-        };
-        let name = |n: &str| Some(("name", TabEvent::Edited(n.into())));
-        assert!(!ask(None), "showing the window changes nothing");
-        assert!(ask(name("changed for #143")));
-        assert!(!ask(name("changed for #143")), "the same value again");
-        assert!(ask(name("changed back for #143")));
     }
 }

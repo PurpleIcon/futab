@@ -13,9 +13,9 @@
 import { Slider, ScrollView, Palette, ComboBox, Button, CheckBox, SpinBox, LineEdit, TextEdit } from "std-widgets.slint";
 import { PluginTab, PluginRow, PluginRows, PluginWidget, PluginSection } from "plugin_tab.slint";
 export { PluginLinks } from "plugin_tab.slint";
-import { BendDialog, ChordDialog, ExportDialog, ExportProgress, BarsDialog, GridPoint, TextDialog, TupletDialog, TransposeDialog, FitDialog, HarmonizeDialog } from "bar_dialog.slint";
+import { PluginDialog, BendDialog, ChordDialog, ExportDialog, ExportProgress, BarsDialog, GridPoint, TextDialog, TupletDialog, TransposeDialog, FitDialog, HarmonizeDialog } from "bar_dialog.slint";
 // The plugin manager's own window (Tools → Plugins).
-export { PluginManagerWindow, PluginSettingsWindow, ManagerRow } from "plugin_manager.slint";
+export { PluginManagerWindow, ManagerRow } from "plugin_manager.slint";
 import "../../../assets/fonts/noto-sans/NotoSans-Regular.ttf";
 import "../../../assets/fonts/noto-sans/NotoSans-Bold.ttf";
 
@@ -82,6 +82,8 @@ export struct TrackRow {
 export struct PaletteToolRow {
     // The tool's id (palette.rs), for the editor to act on.
     id: string,
+    // Its name, which the palette's search looks in.
+    name: string,
     icon: image,
     tip: string,
     enabled: bool,
@@ -98,6 +100,25 @@ export struct PaletteGroupRow {
 export struct ToolRow {
     title: string,
     enabled: bool,
+    // False for a plugin's tool that doesn't edit the score (interface
+    // 1.9): usable with no score open.
+    edits: bool,
+}
+
+// An entry a plugin adds to a menu (plugin interface 1.8): the tool's
+// palette id and its name.
+export struct PluginMenuItem {
+    id: string,
+    title: string,
+    // False for a tool that doesn't edit the score (interface 1.9): usable
+    // with no score open.
+    edits: bool,
+}
+
+// A menu of the plugins' own in the menu bar.
+export struct PluginMenu {
+    title: string,
+    items: [PluginMenuItem],
 }
 
 export struct ToolbarItemRow {
@@ -861,9 +882,9 @@ component TrackTab inherits Rectangle {
     // As wide as the panel, or wider when something in it can't be
     // narrower (a plugin's label never wraps): then it scrolls sideways.
     scroll := ScrollView {
-        viewport-width: max(self.visible-width, content.min-width);
+        content-width: max(self.visible-width, content.min-width);
         content := VerticalLayout {
-            width: scroll.viewport-width;
+            width: scroll.content-width;
             padding: 12px;
             spacing: 6px;
             alignment: start;
@@ -933,9 +954,9 @@ component BarTab inherits Rectangle {
     // As wide as the panel, or wider when something in it can't be
     // narrower (a plugin's label never wraps): then it scrolls sideways.
     scroll := ScrollView {
-        viewport-width: max(self.visible-width, content.min-width);
+        content-width: max(self.visible-width, content.min-width);
         content := VerticalLayout {
-            width: scroll.viewport-width;
+            width: scroll.content-width;
             padding: 12px;
             spacing: 6px;
             alignment: start;
@@ -1000,9 +1021,9 @@ component NoteTab inherits Rectangle {
     // As wide as the panel, or wider when something in it can't be
     // narrower (a plugin's label never wraps): then it scrolls sideways.
     scroll := ScrollView {
-        viewport-width: max(self.visible-width, content.min-width);
+        content-width: max(self.visible-width, content.min-width);
         content := VerticalLayout {
-            width: scroll.viewport-width;
+            width: scroll.content-width;
             padding: 12px;
             spacing: 6px;
             alignment: start;
@@ -1031,9 +1052,9 @@ component SongView inherits Rectangle {
     // As wide as the panel, or wider when something in it can't be
     // narrower (a plugin's label never wraps): then it scrolls sideways.
     scroll := ScrollView {
-        viewport-width: max(self.visible-width, content.min-width);
+        content-width: max(self.visible-width, content.min-width);
         content := VerticalLayout {
-            width: scroll.viewport-width;
+            width: scroll.content-width;
             padding: 12px;
             spacing: 6px;
             alignment: start;
@@ -1342,8 +1363,8 @@ export component AppWindow inherits Window {
     in property <string> redo-title: "Redo";
     // Some shown bar doesn't add up: Tools → Next Bar That Doesn't Add Up.
     in property <bool> bad-bars: false;
-    out property <length> view-x: -flick.viewport-x;
-    out property <length> view-y: -flick.viewport-y;
+    out property <length> view-x: -flick.content-x;
+    out property <length> view-y: -flick.content-y;
     out property <length> view-width: flick.visible-width;
     out property <length> view-height: flick.visible-height;
     // Where the page's viewport sits in the window, for the mouse wheel
@@ -1359,8 +1380,8 @@ export component AppWindow inherits Window {
     // the scroll position has (after a zoom around the pointer, say).
     out property <length> origin-x: round(max(24px, (flick.visible-width - root.content-width) / 2) / 1phx) * 1phx;
     out property <length> origin-y: round(24px / 1phx) * 1phx;
-    property <length> snap-x: round(flick.viewport-x / 1phx) * 1phx - flick.viewport-x;
-    property <length> snap-y: round(flick.viewport-y / 1phx) * 1phx - flick.viewport-y;
+    property <length> snap-x: round(flick.content-x / 1phx) * 1phx - flick.content-x;
+    property <length> snap-y: round(flick.content-y / 1phx) * 1phx - flick.content-y;
 
     // View settings.
     in-out property <int> layout: 0;
@@ -1490,6 +1511,8 @@ export component AppWindow inherits Window {
     in property <length> shortcut-right-column-width;
     in property <length> shortcut-popup-width;
     in property <[string]> about-lines;
+    // Help → About's credits link (links.rs opens the page in the browser).
+    callback open-credits();
 
     callback open-file();
     callback new-file();
@@ -1693,6 +1716,22 @@ export component AppWindow inherits Window {
     in property <string> left-plugin-message;
     in property <[PluginRow]> right-plugin-rows;
     in property <string> right-plugin-message;
+    // A plugin's dialog (a tab whose area is "dialog", interface 1.8):
+    // view number 4 of the plugin callbacks.
+    // The plugins' menu entries, by menu: after the core's own entries.
+    in property <[PluginMenuItem]> plugin-items-file;
+    in property <[PluginMenuItem]> plugin-items-edit;
+    in property <[PluginMenuItem]> plugin-items-view;
+    in property <[PluginMenuItem]> plugin-items-help;
+    in property <[PluginMenuItem]> plugin-items-page;
+    in property <[PluginMenuItem]> plugin-items-track;
+    in property <[PluginMenu]> plugin-menus;
+    callback plugin-tool-picked(string);
+    in property <bool> plugin-dialog-shown: false;
+    in property <string> plugin-dialog-title;
+    in property <[PluginRow]> dialog-plugin-rows;
+    in property <string> dialog-plugin-message;
+    callback plugin-dialog-done(bool);
     callback plugin-clicked(int, string);
     callback plugin-toggled(int, string, bool);
     callback plugin-slid(int, string, float);
@@ -1720,13 +1759,13 @@ export component AppWindow inherits Window {
 
     // Scroll the canvas by (dx, dy), within its bounds.
     public function scroll-by(dx: length, dy: length) {
-        flick.viewport-x = clamp(flick.viewport-x - dx, min(0px, flick.visible-width - flick.viewport-width), 0px);
-        flick.viewport-y = clamp(flick.viewport-y - dy, min(0px, flick.visible-height - flick.viewport-height), 0px);
+        flick.content-x = clamp(flick.content-x - dx, min(0px, flick.visible-width - flick.content-width), 0px);
+        flick.content-y = clamp(flick.content-y - dy, min(0px, flick.visible-height - flick.content-height), 0px);
     }
     // Put canvas pixel (x, y) at the top left of the view.
     public function scroll-to(x: length, y: length) {
-        flick.viewport-x = clamp(-x, min(0px, flick.visible-width - flick.viewport-width), 0px);
-        flick.viewport-y = clamp(-y, min(0px, flick.visible-height - flick.viewport-height), 0px);
+        flick.content-x = clamp(-x, min(0px, flick.visible-width - flick.content-width), 0px);
+        flick.content-y = clamp(-y, min(0px, flick.visible-height - flick.content-height), 0px);
     }
 
     MenuBar {
@@ -1747,6 +1786,8 @@ export component AppWindow inherits Window {
                 MenuItem { title: "A4"; checkable: true; checked <=> root.paper-0; activated => { root.pick-paper(0); root.settings-changed(); } }
                 MenuItem { title: "Letter"; checkable: true; checked <=> root.paper-1; activated => { root.pick-paper(1); root.settings-changed(); } }
             }
+            if root.plugin-items-file.length > 0 : MenuSeparator { }
+            for it in root.plugin-items-file : MenuItem { title: it.title; enabled: root.has-score || !it.edits; activated => { root.plugin-tool-picked(it.id); } }
             MenuSeparator { }
             MenuItem { title: "Quit"; shortcut: @keys(Control + Q); activated => { root.quit(); } }
         }
@@ -1799,6 +1840,8 @@ export component AppWindow inherits Window {
             MenuItem { title: "Delete Track…"; enabled: root.has-score && root.tracks.length > 1; activated => { root.edit-command("delete-track"); } }
             MenuItem { title: "Transpose Selection…"; enabled: root.has-score; activated => { root.edit-command("transpose-selection"); } }
             MenuItem { title: "Find Fingering for Selection"; enabled: root.has-score; activated => { root.edit-command("fingering-selection"); } }
+            if root.plugin-items-edit.length > 0 : MenuSeparator { }
+            for it in root.plugin-items-edit : MenuItem { title: it.title; enabled: root.has-score || !it.edits; activated => { root.plugin-tool-picked(it.id); } }
         }
         Menu {
             title: "View";
@@ -1826,12 +1869,14 @@ export component AppWindow inherits Window {
                 MenuItem { title: "Left"; checkable: true; checked <=> root.left-shown; shortcut: @keys(F7); activated => { root.panels-changed(); } }
                 MenuItem { title: "Right"; checkable: true; checked <=> root.right-shown; activated => { root.panels-changed(); } }
             }
+            if root.plugin-items-view.length > 0 : MenuSeparator { }
+            for it in root.plugin-items-view : MenuItem { title: it.title; enabled: root.has-score || !it.edits; activated => { root.plugin-tool-picked(it.id); } }
         }
         Menu {
             title: "Tools";
             for tool[i] in root.tools : MenuItem {
                 title: tool.title;
-                enabled: root.has-score && tool.enabled;
+                enabled: (root.has-score || !tool.edits) && tool.enabled;
                 activated => { root.tool-picked(i); }
             }
             MenuSeparator {}
@@ -1844,10 +1889,16 @@ export component AppWindow inherits Window {
             MenuSeparator {}
             MenuItem { title: "Plugins…"; activated => { root.open-plugin-manager(); } }
         }
+        for m in root.plugin-menus : Menu {
+            title: m.title;
+            for it in m.items : MenuItem { title: it.title; enabled: root.has-score || !it.edits; activated => { root.plugin-tool-picked(it.id); } }
+        }
         Menu {
             title: "Help";
             MenuItem { title: "Keyboard and Mouse"; shortcut: @keys(F1); activated => { shortcuts-popup.show(); } }
             MenuItem { title: "About FuTab"; activated => { about-popup.show(); } }
+            if root.plugin-items-help.length > 0 : MenuSeparator { }
+            for it in root.plugin-items-help : MenuItem { title: it.title; enabled: root.has-score || !it.edits; activated => { root.plugin-tool-picked(it.id); } }
         }
     }
 
@@ -1871,6 +1922,15 @@ export component AppWindow inherits Window {
         lines: root.about-lines;
         // A click on the button must reach it; a click outside closes.
         close-policy: PopupClosePolicy.close-on-click-outside;
+        // Every project OxiGuitar builds on is in CREDITS.md, not here
+        // (Mateus, 16 Nov 2026).
+        FooterLink {
+            text: "Credits";
+            clicked => {
+                root.open-credits();
+                about-popup.close();
+            }
+        }
     }
 
     forward-focus: keys;
@@ -1925,7 +1985,7 @@ export component AppWindow inherits Window {
             } else if (event.text == Key.Home) {
                 root.scroll-to(0, 0);
             } else if (event.text == Key.End) {
-                root.scroll-to(flick.viewport-width, flick.viewport-height);
+                root.scroll-to(flick.content-width, flick.content-height);
             } else {
                 return reject;
             }
@@ -1933,7 +1993,8 @@ export component AppWindow inherits Window {
         }
 
         VerticalLayout {
-            // The toolbar: the core's sections, then plugins' sections.
+            // The toolbar: the core's sections, then the one the plugins'
+            // buttons share.
             if root.toolbar-shown : Rectangle {
                 height: 36px;
                 background: Palette.alternate-background;
@@ -2210,10 +2271,10 @@ export component AppWindow inherits Window {
                         height: 1px;
                     }
                     flick := ScrollView {
-                        viewport-width: max(self.visible-width, root.content-width + 48px);
-                        viewport-height: max(self.visible-height, root.content-height + 48px);
-                        changed viewport-x => { root.canvas-changed(); }
-                        changed viewport-y => { root.canvas-changed(); }
+                        content-width: max(self.visible-width, root.content-width + 48px);
+                        content-height: max(self.visible-height, root.content-height + 48px);
+                        changed content-x => { root.canvas-changed(); }
+                        changed content-y => { root.canvas-changed(); }
                         changed visible-width => { root.canvas-changed(); }
                         changed visible-height => { root.canvas-changed(); }
                         for t in root.old-tiles : Image {
@@ -2235,8 +2296,8 @@ export component AppWindow inherits Window {
                         TouchArea {
                             x: 0;
                             y: 0;
-                            width: flick.viewport-width;
-                            height: flick.viewport-height;
+                            width: flick.content-width;
+                            height: flick.content-height;
                             pointer-event(e) => {
                                 if (e.kind == PointerEventKind.down && e.button == PointerEventButton.left) {
                                     keys.focus();
@@ -2264,8 +2325,8 @@ export component AppWindow inherits Window {
                             enabled: false;
                             x: 0;
                             y: 0;
-                            width: flick.viewport-width;
-                            height: flick.viewport-height;
+                            width: flick.content-width;
+                            height: flick.content-height;
                             Menu {
                                 MenuItem { title: "Transpose…"; activated => { root.page-menu("transpose"); } }
                                 MenuItem { title: "Find Fingering"; activated => { root.page-menu("fingering"); } }
@@ -2279,6 +2340,8 @@ export component AppWindow inherits Window {
                                 if root.design-mode : MenuItem { title: "One Bar More on This System"; activated => { root.page-menu("design-more"); } }
                                 if root.design-mode : MenuItem { title: "One Bar Less on This System"; activated => { root.page-menu("design-less"); } }
                                 if root.design-mode : MenuItem { title: "Automatic Layout from Here"; activated => { root.page-menu("design-auto"); } }
+                                if root.plugin-items-page.length > 0 : MenuSeparator { }
+                                for it in root.plugin-items-page : MenuItem { title: it.title; activated => { root.plugin-tool-picked(it.id); } }
                             }
                         }
                         // The selection and the caret, over the tiles: moving
@@ -2391,7 +2454,7 @@ export component AppWindow inherits Window {
                     }
 
                     if !root.has-score : Text {
-                        text: "File → Open (Ctrl + O) to open a Guitar Pro file";
+                        text: "File → Open (Ctrl + O) to open a score";
                         font-size: 14px;
                         color: Look.on-canvas;
                         horizontal-alignment: center;
@@ -2572,6 +2635,8 @@ export component AppWindow inherits Window {
                                         MenuItem { title: "Move Down"; enabled: i < root.tracks.length - 1; activated => { root.track-menu(i, "down"); } }
                                         MenuSeparator { }
                                         MenuItem { title: "Delete…"; enabled: root.tracks.length > 1; activated => { root.track-menu(i, "delete"); } }
+                                        if root.plugin-items-track.length > 0 : MenuSeparator { }
+                                        for it in root.plugin-items-track : MenuItem { title: it.title; activated => { root.plugin-tool-picked(it.id); } }
                                     }
                                 }
                             }
@@ -2751,6 +2816,22 @@ export component AppWindow inherits Window {
         in-time-of <=> root.tuplet-in-time-of;
         usual(n) => { return root.tuplet-usual(n); }
         done(ok) => { root.tuplet-dialog-done(ok); }
+    }
+
+    if root.plugin-dialog-shown : PluginDialog {
+        width: root.width;
+        height: root.height;
+        heading: root.plugin-dialog-title;
+        rows: root.dialog-plugin-rows;
+        message: root.dialog-plugin-message;
+        clicked(id) => { root.plugin-clicked(4, id); }
+        toggled(id, on) => { root.plugin-toggled(4, id, on); }
+        slid(id, v) => { root.plugin-slid(4, id, v); }
+        edited(id, text) => { root.plugin-edited(4, id, text); }
+        chosen(id, i) => { root.plugin-chosen(4, id, i); }
+        pointer(id, k, x, y, b) => { root.plugin-pointer(4, id, k, x, y, b); }
+        canvas-room(id, w, h) => { root.plugin-canvas-room(4, id, w / 1px, h / 1px); }
+        done(ok) => { root.plugin-dialog-done(ok); }
     }
 
     if root.bend-dialog-shown : BendDialog {

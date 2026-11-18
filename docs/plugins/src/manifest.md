@@ -30,12 +30,13 @@ The template's:
 | `services` | no | The services it implements ([Services](services.md)) |
 | `instruments` | no | The instruments it offers the player; used from interface 1.3 ([Instruments](instruments.md)) |
 | `effects` | no | The effects it offers a track, after its instrument; interface 1.3 ([Instruments](instruments.md)) |
-| `tabs` | no | Its tabs; interface 1.1 ([Tabs](tabs.md)) |
+| `tabs` | no | Its tabs, and from interface 1.8 its dialogs; interface 1.1 ([Tabs](tabs.md)) |
 | `events` | no | The kinds of event it wants: `"score"`, `"selection"`, `"playback"`; interface 1.1 ([Events](events.md)) |
-| `tools` | no | Its entries in the Tools menu; interface 1.2 ([Tools](tools.md)) |
-| `settings_window` | no | `true` for a settings window, opened from the plugin manager; interface 1.3 ([Settings](settings.md)) |
+| `draws` | no | It draws on the page where it keeps data; interface 1.8 ([Drawing on the page](drawing.md)) |
+| `performs` | no | It plays each track's notes its own way; interface 1.8 ([Playing the notes your own way](playing.md)) |
+| `tools` | no | Its entries in the Tools menu, and from interface 1.8 in any menu and on the palette; interface 1.2 ([Tools](tools.md)) |
 | `track_sections` | no | Its sections of the Track tab; interface 1.3 ([Track sections](track-sections.md)) |
-| `folders` | no | The shared folders it reads, `"soundfonts"` and `"nam"`, which FuTab creates at start; interface 1.3 ([Settings](settings.md)) |
+| `folders` | no | The folders it shares with the user, by name, beside `plugins` in FuTab's folders; FuTab creates the user's at start, and the plugin asks where each is by its name (interface 1.8) ([Settings](settings.md#shared-folders)) |
 | `exporters` | no | Its entries in File → Export; interface 1.4 ([Exporters](exporters.md)) |
 | `needs` | no | The plugins it can't work without, each `{"id": …, "version": …}` with the lowest version that will do; interface 1.4 (below) |
 | `replaces` | no | The ids of plugins it succeeds; interface 1.4 (below) |
@@ -82,6 +83,8 @@ Every list given must hold the running system's value; an empty or missing list 
 
 A plugin whose conditions don't hold is listed in Tools → Plugins with the reason, and never loaded. A plugin file is already built for one system and processor, so you need `os` and `arch` only for a file that would load but can't work (a universal macOS file that works on Apple Silicon only, say). `display` matters for plugins that talk to the windowing system. Services have conditions of their own, beside the plugin's.
 
+**Choose when building, not by looking around.** A plugin may look at the environment while it runs (an environment variable naming the session, say) and pick what to do from it, or carry code that never runs on the system it was built for. It shouldn't. FuTab doesn't check for it, but its own code and OxiGuitar's official plugins never do it: what differs between systems is chosen when building (Cargo features, `cfg`, one file for each system), and the conditions above keep each file to where it works. Code that is meant to run everywhere but that a library's bug stops somewhere is fine.
+
 `cpu` lets you ship a faster build beside a plain one. Build the plugin twice, with the same id and version: once plainly, and once with `-C target-cpu=x86-64-v3` and `"cpu": ["avx2", "fma"]` in its manifest. On a processor without those features that file can't be used and the plain one is; where both can be used, the one needing more features is. A feature name FuTab doesn't know counts as missing, so a build is never loaded on a guess.
 
 ## Rules the checks enforce
@@ -92,7 +95,9 @@ FuTab refuses a manifest that breaks these, and Tools → Plugins names the firs
 - names and tab titles aren't empty;
 - a format reads or writes, and one that reads has at least one signature;
 - extensions are lowercase and without the dot (`"gp5"`, not `".GP5"`);
-- tabs and events need interface 1.1.
+- tabs and events need interface 1.1;
+- `draws`, `performs`, a toolbar button, a folder of the plugin's own name (1 to 24 lowercase letters, digits and single hyphens; not `plugins`, `data` or `cache`),
+- a palette button, a menu, a dialog, `follows_score` and `order` need interface 1.8, and a palette button has a symbol or a text of at most 5 characters.
 
 `cargo test` also checks what only the code can tell:
 

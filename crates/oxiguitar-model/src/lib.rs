@@ -24,6 +24,7 @@
 //! `docs/adr/0002-score-model.md` for the reasoning.
 
 mod bar;
+pub mod drums;
 mod duration;
 pub mod lyrics;
 mod note;
@@ -48,4 +49,4 @@ pub use score::{
     Color, Direction, Fermata, FermataKind, KeyMode, KeySignature, Marker, MasterBar, Score,
     ScoreInfo, TempoChange, TimeSignature, TripletFeel,
 };
-pub use track::{ChordDiagram, Instrument, LyricLine, Mix, Staff, Track};
+pub use track::{ChordDiagram, Instrument, Kept, LyricLine, Mix, Staff, Track};
