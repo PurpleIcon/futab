@@ -8,6 +8,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ### Changed
 
+- **Pull requests that merge OxiGuitar** (#28): titled `Merge FROM upstream oxiguitar #N` (and `Restore history FROM upstream oxiguitar #N`), so they can't be read as merging FuTab into OxiGuitar. The agent says plainly, whenever one is ready to merge, that it takes "Create a merge commit", not "Squash and merge".
 - **Merging pull requests, in the agent rules** (#28): the rules say which merge method each pull request takes, that a squash merge keeps GitHub's default message (it carries the commits' sign-off), and that the agent checks the sign-off of a squash commit straight after merging it.
 
 ### Fixed

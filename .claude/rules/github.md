@@ -17,6 +17,7 @@ Every commit that reaches `develop` must be signed off, or the sign-off check fa
 - Merge method: **squash** for FuTab's own PRs; **create a merge commit** for merges from upstream (the merge-upstream skill) and for `develop` into `main` (releases).
 - When you merge (only when I ask): `gh pr merge N --squash` or `gh pr merge N --merge`, never with `--subject` or `--body`, so GitHub writes its default message. Never `--rebase`.
 - Straight after a squash merge, check its commit on `develop`: `git fetch origin develop`, then `scripts/check-dco.sh origin/develop^ origin/develop` must show `ok` or `skip`, never `FAIL`. If it fails, tell me at once.
+- A PR that carries upstream merge commits (a merge from upstream, a history restore, or `develop` into `main` when it holds one) must land as a merge commit, never squashed: a squash drops upstream's history (#7, #23). There is no way to set the method on a PR itself, so whenever such a PR is ready to merge, say it plainly, in bold, in your message: **"Merge #N with Create a merge commit, not Squash and merge: it carries upstream's history."**
 - When a PR is ready for me to merge on GitHub, tell me the method in one line: "Squash and merge, and keep the message GitHub fills in" (it lists the commits and their `Signed-off-by` lines), or "Create a merge commit". After switching method in GitHub's merge box, the message may still be the other method's: check it before confirming.
 
 ## Repositories

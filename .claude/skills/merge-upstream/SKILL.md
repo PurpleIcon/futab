@@ -216,7 +216,7 @@ Then stop. Commit only when I say so (`git commit -s`, the merge's own message i
 
 When I ask for the PR (push only when I say so):
 
-- **Title:** `Merge upstream to oxiguitar #N`, where `#N` is the last upstream PR the merge brings in (the target's PR, or the last PR before it when the target is a release or other commit without one). For example: `Merge upstream to oxiguitar #290`. Nothing else in the title: no repository prefix, no list of PRs, no release number.
+- **Title:** `Merge FROM upstream oxiguitar #N`, where `#N` is the last upstream PR the merge brings in (the target's PR, or the last PR before it when the target is a release or other commit without one). For example: `Merge FROM upstream oxiguitar #290`. The capital FROM keeps the direction plain: FuTab takes OxiGuitar's changes, nothing goes back to OxiGuitar. Never a title that could read as merging into upstream (the old `Merge upstream to oxiguitar #N` did). Nothing else in the title: no repository prefix, no list of PRs, no release number.
 - **Description:** first, the warning to merge with "Create a merge commit", never squash or rebase, and why. Then the upstream PRs merged (as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`, with what each changes and its merge commit), the skipped ones with reasons, what upstream still has, every conflict and how it was settled, the names changed and kept, behaviour changes users will notice, the checks run, and test steps.
 - Branch, base and sign-off as in step 1 and `.claude/rules/github.md`.
 
@@ -237,7 +237,7 @@ A merge PR must land as a merge commit. The merge button's choice is easy to get
    gh pr merge <n> --merge
    ```
 
-   If the branch rules block it only for want of a review (I can't approve my own PRs), add `--admin` once I've said to merge: that's how I merge them. Never `--squash` or `--rebase`, whatever the repository's default.
+   If the branch rules block it only for want of a review (I can't approve my own PRs), add `--admin` once I've said to merge: that's how I merge them. Never `--squash` or `--rebase`, whatever the repository's default. If the admin merge is refused (the session's permission check may block it), don't work around it: ask me to merge it on GitHub, saying plainly: **"Merge #N with Create a merge commit, not Squash and merge: it carries upstream's history."**
 3. Check the result: the commit `develop` now points at has **two** parents (`git log -1 --format=%p origin/develop` after `git fetch origin develop`), and the catch-up report against `origin/develop` (`--ours origin/develop`) no longer lists the merged PRs. If either is wrong, go to "If a merge PR was squashed".
 
 ### If a merge PR was squashed
@@ -260,7 +260,7 @@ You can tell: the PR's commit on `develop` has one parent, and the catch-up repo
    with a message saying which PR was squashed and that the merge changes no file, naming the target as `OxiGuitar PR N`.
 3. Check: `git diff origin/develop HEAD` is empty, and the catch-up report on the branch shows the target as the last common commit.
 4. Add a changelog entry under `### Fixed` ("Upstream history up to OxiGuitar PR N", why it was missing, and that the merge changes no file) as a commit of its own.
-5. With my go-ahead, push and open the PR titled `Restore upstream history up to oxiguitar #N`, its description opening with the merge-commit warning, and merge it as above, with `--merge`.
+5. With my go-ahead, push and open the PR titled `Restore history FROM upstream oxiguitar #N`, its description opening with the merge-commit warning, and merge it as above, with `--merge`.
 
 ## 6. Update the catch-up report
 
