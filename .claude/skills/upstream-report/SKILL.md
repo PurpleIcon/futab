@@ -1,6 +1,6 @@
 ---
 name: upstream-report
-description: Update the upstream catch-up report, `oxiguitar-catchup.md`, by running `scripts/upstream/catchup.py`, and summarise what upstream OxiGuitar (mateusrdp/oxiguitar) has that FuTab hasn't merged yet. Use whenever the task is to see, check, list or refresh what's new upstream, what FuTab is behind on, or which files a merge from upstream would conflict in, without merging anything.
+description: Updates the upstream catch-up report, `oxiguitar-catchup.md`, by running `scripts/upstream/catchup.py`, and summarises what upstream OxiGuitar (mateusrdp/oxiguitar) has that FuTab hasn't merged yet. Use whenever the task is to see, check, list or refresh what's new upstream, what FuTab is behind on, or which files a merge from upstream would conflict in, without merging anything.
 argument-hint: "[--ours REF] [--theirs REF] [--no-fetch]"
 ---
 
@@ -8,7 +8,7 @@ argument-hint: "[--ours REF] [--theirs REF] [--no-fetch]"
 
 `scripts/upstream/catchup.py` compares FuTab with upstream OxiGuitar by git ancestry (`ours..theirs`) and writes `oxiguitar-catchup.md` at the repository's root: the upstream releases and commits FuTab hasn't merged, each with its pull request, and the files a merge would conflict in. It merges nothing and changes no file in the repository; the only things it touches are the `upstream` remote (added if missing, then fetched) and `refs/upstream-tags/` (upstream's tags, kept apart from FuTab's).
 
-This skill only reports. To merge, use `merge-upstream` (`.claude/skills/merge-upstream/SKILL.md`), which runs this report before and after a merge.
+This skill only reports. To merge, use the `merge-upstream` skill, which runs this report before and after a merge.
 
 ## 1. Run it
 

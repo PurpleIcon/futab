@@ -1,6 +1,6 @@
 ---
 name: merge-upstream
-description: Merge upstream OxiGuitar (mateusrdp/oxiguitar, the `upstream` remote) into FuTab while keeping FuTab's names, all of it or up to a given upstream PR, optionally skipping PRs. Use whenever the task is to catch up with, sync from, pull in or merge OxiGuitar or upstream changes or PRs, or to resolve conflicts from such a merge.
+description: Merges upstream OxiGuitar (mateusrdp/oxiguitar, the `upstream` remote) into FuTab while keeping FuTab's names, all of it or up to a given upstream PR, optionally skipping PRs. Use whenever the task is to catch up with, sync from, pull in or merge OxiGuitar or upstream changes or PRs, or to resolve conflicts from such a merge.
 argument-hint: "[#N | #A-#B] [skip #X[,#Y]]"
 ---
 
@@ -18,8 +18,8 @@ Arguments: `$ARGUMENTS`
 | --- | --- |
 | (none) | all of `upstream/develop` |
 | `#N` | upstream up to and including PR #N |
-| `#A-#B` | the PRs from #A to #B, **in the order upstream merged them** (not by number: #270 was merged after #286) |
-| `... skip #X` or `skip #X,#Y` | the same, then reverts #X (and #Y) in commits of their own after the merge: see "Skipping a PR" |
+| `#A-#B` | the PRs from #A to #B, **in the order upstream merged them** (not by number: OxiGuitar PR 270 was merged after PR 286) |
+| `... skip #X` or `skip #X,#Y` | the same, then reverts #X (and #Y) in commits of their own after the merge: see [skipping.md](skipping.md) |
 
 Git merges a commit together with everything before it, so a merge can only stop at a point in upstream's history; it can't pick PRs out of the middle. So:
 
@@ -64,7 +64,7 @@ Go conflict by conflict (`git diff --name-only --diff-filter=U`). Settle each hu
 Files:
 
 - `CHANGELOG.md`: always keep ours, conflict or not: `git checkout HEAD -- CHANGELOG.md`. Not `--ours`, which does nothing when there's no conflict: upstream's entries, and even its release heading (`## [0.20.1]` above FuTab's entries, from OxiGuitar PR 306), can merge in cleanly. Check after every merge, before adding the merge's own entry (step 4): `git diff --cached --name-only HEAD -- CHANGELOG.md` must print nothing. FuTab's changelog lists FuTab's changes only.
-- `ROADMAP.md` is FuTab's own roadmap: never merge anything from upstream into it, conflict or not. Keep ours (`git checkout --ours ROADMAP.md`). A file only upstream changed merges without a conflict, so check after every merge: `git diff --cached --name-only HEAD -- ROADMAP.md` must print nothing. Upstream's mentions of `ROADMAP.md` elsewhere (its milestones M1, M2…, "see ROADMAP.md") mean OxiGuitar's roadmap: in FuTab's files write them as "OxiGuitar's roadmap" (plain text, no link), as in `CREDITS.md`; comments, `docs/design/`, `docs/adr/` and `docs/parity.md` keep them as they are. Step 3 checks for them.
+- `ROADMAP.md` is FuTab's own roadmap: never merge anything from upstream into it, conflict or not. Keep ours, conflict or not: `git checkout HEAD -- ROADMAP.md` (not `--ours`, which does nothing when there's no conflict). Check after every merge: `git diff --cached --name-only HEAD -- ROADMAP.md` must print nothing. Upstream's mentions of `ROADMAP.md` elsewhere (its milestones M1, M2…, "see ROADMAP.md") mean OxiGuitar's roadmap: in FuTab's files write them as "OxiGuitar's roadmap" (plain text, no link), as in `CREDITS.md`; comments, `docs/design/`, `docs/adr/` and `docs/parity.md` keep them as they are. Step 3 checks for them.
 - `CREDITS.md` is FuTab's:
   - **The opening is static**, everything from `# Credits` to the end of `## Special thanks` (FuTab's copyright, FuTab's intro, "FuTab is a fork of OxiGuitar", OxiGuitar's copyright, the thanks). Keep ours exactly; take none of upstream's changes there, not even a wording change.
   - **The sections after Special thanks** (the projects, the crates, fonts and assets) merge as usual: upstream's changes, with FuTab's names. FuTab's own rows (the OxiGuitar row, the FuTab icon) stay. No row names a version (since OxiGuitar PR 295: "MuseScore Studio", not "MuseScore Studio 4.7"; the licence report from `Cargo.lock` has the exact ones), FuTab's OxiGuitar row included: "OxiGuitar", not "OxiGuitar 0.19.1".
@@ -78,10 +78,10 @@ Files:
 - A file FuTab deleted on purpose (`scripts/new-repo.sh`, `scripts/split-history.sh`, the PayPal button and QR code, the placeholder icon): keep it deleted. If upstream changed it, tell me in one line.
 - `README.md` sections FuTab removed: upstream's Status, its feature showcase (the screenshots, "Hear it", paragraphs such as OxiGuitar PR 301's "Drums") and its own privacy wording stay removed; drop upstream's additions there, and any new file only they use (`git rm` it, as `docs/readme/drums.png`). FuTab's README keeps its own structure; its install sections follow the install-docs rule above.
 - A file upstream added: keep it. If its name or contents carry OxiGuitar names that the table renames, rename them.
-- `.github/FUNDING.yml`: never take upstream's (it points at OxiGuitar's donations). If FuTab has its own, keep ours (`git checkout --ours .github/FUNDING.yml`). If FuTab has none, take it out of the merge (`git rm -f .github/FUNDING.yml`). A file only upstream added or changed merges without a conflict, so check this after every merge, conflicts or not (`git diff --cached --name-only HEAD -- .github/FUNDING.yml` must print nothing). This is settled in the merge, not by skipping the PR that brought it.
+- `.github/FUNDING.yml`: never take upstream's (it points at OxiGuitar's donations). If FuTab has its own, keep ours, conflict or not (`git checkout HEAD -- .github/FUNDING.yml`; not `--ours`, as for `CHANGELOG.md`). If FuTab has none, take it out of the merge (`git rm -f .github/FUNDING.yml`). A file only upstream added or changed merges without a conflict, so check this after every merge, conflicts or not (`git diff --cached --name-only HEAD -- .github/FUNDING.yml` must print nothing). This is settled in the merge, not by skipping the PR that brought it.
 - Version numbers (`Cargo.toml`, `Cargo.lock`, `spikes/*/Cargo.lock`, `debian/changelog`, the test plugins' `manifest.json`, metainfo `<release>`): FuTab has its own version (0.1.0 was its first release; OxiGuitar's are 0.19 and up). Upstream's release commits ("Release x.y.z", no PR) change only these and its changelog, and conflict in every merge that crosses one. Keep FuTab's version, FuTab's `debian/changelog` entries and FuTab's metainfo `<release>` entries only (never add upstream's), and take only upstream's dependency changes in the `Cargo.lock` files (a spike's lists the core's crates at the app's version too). If `Cargo.lock` doesn't settle cleanly, take theirs and then run `cargo build` so Cargo writes FuTab's own entries back; for a spike's, take theirs and run `cargo metadata --manifest-path spikes/<name>/Cargo.toml --format-version 1 > /dev/null`, which rewrites its lock without building. If upstream's release is a good point for a FuTab release too, say so; don't bump anything yourself.
 
-## The name table
+### The name table
 
 What FuTab renamed: always FuTab's side in a merge.
 
@@ -109,17 +109,17 @@ What FuTab renamed: always FuTab's side in a merge.
 
 What stays OxiGuitar's: never rename these, in a merge or anywhere else.
 
-- **Credit and copyright:** SPDX headers (`Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors`), `authors` in manifests, OxiGuitar's copyright line and row in CREDITS.md (the file itself is FuTab's: see step 2), the About box's credit to OxiGuitar, "a fork of OxiGuitar".
+- **Credit and copyright:** SPDX headers (`Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors`), `authors` in manifests, OxiGuitar's copyright line and row in CREDITS.md (the file itself is FuTab's: see `CREDITS.md` in the files above), the About box's credit to OxiGuitar, "a fork of OxiGuitar".
 - **Code names:** crate folders (`crates/oxiguitar-*`), the library crates and their Rust names (`oxiguitar_plugin`, `oxiguitar_host`, ...), the `OXIGUITAR_*` environment variables (`OXIGUITAR_HOME`, ...).
 - **Plugins** (OxiGuitar's, used as they are): plugin repo and package names (`oxiguitar-guitarpro`, `oxiguitar-midi`, ...), plugin ids (`oxiguitar.midi`, ...), the core's advice id `oxiguitar` (`advice::CORE`), `oxiguitar-set.json`, `.oxp` files, and the plugin SDK's git source `https://github.com/mateusrdp/oxiguitar` in plugin `Cargo.toml`s.
 - **OxiGuitar's plugin folders as a fallback** (`/usr/lib/oxiguitar/plugins` and the others, searched after FuTab's), the shared folders beside them (`/usr/lib/oxiguitar/<name>`), and `/usr/share/oxiguitar/soundfonts`.
 - **File formats:** the `.oxg` sidecar and anything else written to a user's files. Renaming those would break files people already have.
 - **Code comments and design records:** comments in the code (`//`, `///`, `//!`, `#`), `docs/design/`, `docs/adr/` and `docs/parity.md` (OxiGuitar's feature check against Guitar Pro, TuxGuitar and alphaTab, from OxiGuitar PR 298) keep OxiGuitar's name, and upstream's changes to them are taken as they are. They record OxiGuitar's design, decisions and checks; renaming them would only make every later merge conflict. FuTab's own design notes and decisions go in `docs/futab-design/` and `docs/futab-adr/`, never into these.
-- **Links to upstream as upstream:** the `upstream` remote, links to OxiGuitar's changelog, PRs and issues, the catch-up script. In anything that reaches GitHub (commit messages, PR text, the changelog), name upstream PRs as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`: see Referring to upstream in `.claude/rules/github.md`.
+- **Links to upstream as upstream:** the `upstream` remote, links to OxiGuitar's changelog, PRs and issues, the catch-up script. In anything that reaches GitHub (commit messages, PR text, the changelog), name upstream PRs as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`: see Referring to upstream in `.claude/rules/github/RULE.md`.
 
 When a name fits neither list, it's the clash you can't settle: list it with its file and line, and ask me.
 
-## Web addresses
+### Web addresses
 
 Never merge a link to OxiGuitar (`github.com/mateusrdp/...`, or any other site of OxiGuitar's) as it is, and never rename one to FuTab's on your own: each needs a decision. The links decided so far, in code, docs, scripts and workflows:
 
@@ -174,32 +174,9 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-## Skipping a PR
-
-A PR can be skipped, but **only by merging it and reverting it**, never by leaving it out. Leaving it out would mean cherry-picking around it, which loses the ancestry the catch-up report and every later merge depend on.
-
-The revert is a commit of its own, after the merge commit and in the same branch and PR, so the history says plainly what FuTab turned down. Git can't revert while a merge is uncommitted, so ask me to approve both together. Once I say commit:
-
-```bash
-git commit -s
-```
-
-```bash
-git revert -s --no-edit <sha of #X>
-```
-
-Then reword the revert's message to `Skip OxiGuitar's <title> (OxiGuitar PR X)`, with the reason in its body. Settle any conflicts as in step 2, check names and build again (step 3), and name every skipped PR, with its reason, in the report and the PR description. Upstream's release commits and FuTab's own version are never handled by skipping: step 2's rules for version numbers cover them.
-
-What skipping means (say this to me when I ask to skip, for that PR in particular):
-
-- **Upstream counts it as merged.** The catch-up report won't list it again, and git won't offer it again. Getting it later takes a deliberate `git revert` of the revert, not another merge.
-- **Later upstream PRs may build on it** (for example #289 builds on #270's Harmonize). Before skipping, check whether later missing PRs touch the same files or code (`git diff --stat <sha>^ <sha>`, compared with what later commits change). If they do, they'll conflict or not build once it's skipped. Say which ones, and skip them all or none.
-- **The cost grows with every merge.** Each later upstream change to the code the revert removed conflicts again in every future merge. Skipping suits self-contained changes FuTab doesn't want (OxiGuitar-only links or branding; `FUNDING.yml` has its own rule in step 2); for a feature FuTab doesn't want, hiding it behind a setting or a plugin is often cheaper over time than reverting it.
-- **The changelog leaves it out**, and the PR description says why.
-
 ## 4. Changelog
 
-Add the merge's entry under `## [Unreleased]` → `### Changed` in `CHANGELOG.md`, in the form `.claude/rules/github.md` gives ("Merged OxiGuitar x.y.z", or "Merged OxiGuitar up to OxiGuitar PR N" when the target isn't a release; one line per upstream PR in the user's words, `OxiGuitar PR N`). Leave out what FuTab dropped, and upstream's release and changelog commits.
+Add the merge's entry under `## [Unreleased]` → `### Changed` in `CHANGELOG.md`, in the form `.claude/rules/github/RULE.md` gives ("Merged OxiGuitar x.y.z", or "Merged OxiGuitar up to OxiGuitar PR N" when the target isn't a release; one line per upstream PR in the user's words, `OxiGuitar PR N`). Leave out what FuTab dropped, and upstream's release and changelog commits.
 
 ## 5. Report and hand over
 
@@ -212,55 +189,7 @@ Tell me, short:
 
 Then stop. Commit only when I say so (`git commit -s`, the merge's own message is fine). In the PR, say that it **must be merged with "Create a merge commit", never squash or rebase**: squashing throws away upstream's ancestry, so the next merge would conflict all over again and the catch-up report would list everything again.
 
-### The pull request
-
-When I ask for the PR (push only when I say so):
-
-- **Title:** `Merge upstream to oxiguitar #N`, where `#N` is the last upstream PR the merge brings in (the target's PR, or the last PR before it when the target is a release or other commit without one). For example: `Merge upstream to oxiguitar #290`. Nothing else in the title: no repository prefix, no list of PRs, no release number.
-- **Description:** first, the warning to merge with "Create a merge commit", never squash or rebase, and why. Then the upstream PRs merged (as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`, with what each changes and its merge commit), the skipped ones with reasons, what upstream still has, every conflict and how it was settled, the names changed and kept, behaviour changes users will notice, the checks run, and test steps.
-- Branch, base and sign-off as in step 1 and `.claude/rules/github.md`.
-
-### Merging the pull request
-
-A merge PR must land as a merge commit. The merge button's choice is easy to get wrong (PR #7 was squashed by mistake), so when I ask you to merge it, do it yourself:
-
-1. Check every check on the PR's head has passed, and say which haven't if any:
-
-   ```bash
-   gh pr view <n> --json headRefOid,statusCheckRollup
-   ```
-
-   Nothing tells you when CI finishes, and you don't poll it: if checks are still running, say so and wait for me to tell you it's green.
-2. Merge it with a merge commit:
-
-   ```bash
-   gh pr merge <n> --merge
-   ```
-
-   If the branch rules block it only for want of a review (I can't approve my own PRs), add `--admin` once I've said to merge: that's how I merge them. Never `--squash` or `--rebase`, whatever the repository's default.
-3. Check the result: the commit `develop` now points at has **two** parents (`git log -1 --format=%p origin/develop` after `git fetch origin develop`), and the catch-up report against `origin/develop` (`--ours origin/develop`) no longer lists the merged PRs. If either is wrong, go to "If a merge PR was squashed".
-
-### If a merge PR was squashed
-
-You can tell: the PR's commit on `develop` has one parent, and the catch-up report against `develop` lists the PRs it merged as missing again. The code is all there, only upstream's history is gone, but the next merge from upstream would conflict on all of it again. Restore the history with a merge that changes no file:
-
-1. Check that `develop` really has the merged content: the squash commit's tree must equal the merge branch's last commit's tree.
-
-   ```bash
-   test "$(git rev-parse <squash commit>^{tree})" = "$(git rev-parse <merge branch tip>^{tree})" && echo same
-   ```
-
-   If they differ, stop and tell me what differs: `-s ours` would record upstream's commits as merged while some of their changes are missing.
-2. On a branch from up-to-date `origin/develop` named `fix/oxiguitar-history-pr<N>`, record upstream's target commit as merged, keeping `develop`'s files:
-
-   ```bash
-   git merge -s ours --no-ff --signoff <upstream target commit>
-   ```
-
-   with a message saying which PR was squashed and that the merge changes no file, naming the target as `OxiGuitar PR N`.
-3. Check: `git diff origin/develop HEAD` is empty, and the catch-up report on the branch shows the target as the last common commit.
-4. Add a changelog entry under `### Fixed` ("Upstream history up to OxiGuitar PR N", why it was missing, and that the merge changes no file) as a commit of its own.
-5. With my go-ahead, push and open the PR titled `Restore upstream history up to oxiguitar #N`, its description opening with the merge-commit warning, and merge it as above, with `--merge`.
+When I ask for the PR, or ask you to merge it, read [pull-request.md](pull-request.md) and follow it.
 
 ## 6. Update the catch-up report
 
@@ -278,7 +207,13 @@ Check it against what was merged:
 
 Then tell me in one line what upstream still has that FuTab doesn't (count, and the next PR or two). If a merged PR is still listed, something broke the ancestry (a cherry-pick, a rebase, or a merge of the wrong commit): stop and tell me.
 
-When the report says what, and why it can lag behind, is in the `upstream-report` skill (`.claude/skills/upstream-report/SKILL.md`).
+When the report says what, and why it can lag behind, is in the `upstream-report` skill.
+
+## Read only when needed
+
+- [skipping.md](skipping.md): **Skipping a PR**, when the arguments have `skip #X`.
+- [pull-request.md](pull-request.md): the merge's PR, its title and description, and merging it with a merge commit.
+- [squashed-merge.md](squashed-merge.md): **If a merge PR was squashed**, restoring upstream's history when a merge PR landed as a squash commit.
 
 ## Keeping this skill current
 

@@ -6,6 +6,24 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ## [Unreleased]
 
+### Added
+
+- **review-skills and review-rules skills** (#28): the agent skills review FuTab's skills and rules. `scripts/agents/check-layout.py` checks the layout (`.claude/skills/<skill-name>/SKILL.md` and `.claude/rules/<rule-name>/RULE.md`, kebab-case folder names, YAML front matter whose `name` matches the folder and that has a `description`); the skills also check descriptions, the files each one points at, how much it loads into a session, that rules and skills don't contradict each other, and that AGENTS.md lists every rule. They report findings by severity, and fix them once asked.
+
+### Changed
+
+- **Agent rules in folders** (#28): the rules moved to `.claude/rules/general/RULE.md`, `.claude/rules/github/RULE.md` and `.claude/rules/tags/RULE.md`, each with front matter naming it.
+- **No more links to OxiGuitar's pull requests** (#28): FuTab is a fork, so GitHub reads a `#N` that FuTab doesn't have as OxiGuitar's, and posts "referenced this pull request" there. The agent rules now keep every `#` number in commits, PR titles and descriptions to FuTab's own, check them before each push, and never squash a pull request that carries upstream's commits (whose subjects end in upstream numbers).
+- **Release tags, in the agent rules** (#28): a new rule file, `.claude/rules/tags/RULE.md`, says how a release tag is made and pushed (annotated, on `main`'s merge commit, pushed alone, only on the maintainer's go-ahead) and what never to do with tags. The repository's new ruleset "Protect release tags" lets only organisation admins create, move or delete a `v*` tag.
+- **Pull requests that merge OxiGuitar** (#28): titled `Merge FROM upstream OxiGuitar PR N` (and `Restore history FROM upstream OxiGuitar PR N`), so they can't be read as merging FuTab into OxiGuitar, and carry no `#` before an upstream number. The agent says plainly, whenever one is ready to merge, that it takes "Create a merge commit", not "Squash and merge".
+- **merge-upstream, upstream-report and build-test-rpm skills tidied** (#28): merge-upstream keeps `ROADMAP.md` and `.github/FUNDING.yml` with `git checkout HEAD --` (as `CHANGELOG.md`), since `--ours` does nothing when a file merged cleanly; skipping a PR, the merge's pull request and restoring a squashed merge's history moved to files of their own beside the skill, read only when needed; the skills name each other instead of linking each other's files, and their descriptions are in the third person.
+- **Push questions, in the agent rules** (#28): when the agent asks whether to push, it offers three answers: Not yet, Yes, push (full CI) and Lean push (sets the pull request's `lean-ci` label before pushing).
+- **Merging pull requests, in the agent rules** (#28): the rules say which merge method each pull request takes, that a squash merge keeps GitHub's default message (it carries the commits' sign-off), and that the agent checks the sign-off of a squash commit straight after merging it.
+
+### Fixed
+
+- **CI's macOS job names** (#28): on pull requests, the skipped macOS jobs are listed as Test (macOS) and Plugin template (macOS), no longer as `Test (${{ matrix.name }})` and `Plugin template (${{ matrix.name }})`.
+
 ## [0.2.0] - 2026-11-18
 
 FuTab caught up with OxiGuitar 0.21.1: a Plugins menu and plugin interface 1.10, the mixer saved in the file, drum entry on the drum staff, and Save in the file's own format.

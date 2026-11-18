@@ -1,6 +1,6 @@
 ---
 name: build-test-rpm
-description: Build a test .rpm of FuTab from the working copy (committed or not), for the user to install with dnf and test as a packaged app (desktop entry, icons, file types). Use whenever the task is to build, make or package a test or local rpm, or to test a change "from the rpm" or "as installed".
+description: Builds a test .rpm of FuTab from the working copy (committed or not), for the user to install with dnf and test as a packaged app (desktop entry, icons, file types). Use whenever the task is to build, make or package a test or local rpm, or to test a change "from the rpm" or "as installed".
 ---
 
 # Build a test .rpm

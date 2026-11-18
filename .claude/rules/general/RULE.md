@@ -1,3 +1,8 @@
+---
+name: general
+description: "Project directives for every agent working on FuTab: privacy and offline rules, the test corpus, languages and libraries, documentation, checks, and how to run the app."
+---
+
 # General
 
 Project directives for every agent working on FuTab (moved here from AGENTS.md).
@@ -15,7 +20,7 @@ Project directives for every agent working on FuTab (moved here from AGENTS.md).
 - Keep the code clean and maintainable: no hacks or workarounds.
 - Keep the code readable. A human will eventually need to understand it. And make it easy for other agents too.
 - Remember to update the relevant documentation and FuTab's decision records (`docs/futab-adr/`, design notes in `docs/futab-design/`) once we make changes. `docs/adr/` and `docs/design/` are OxiGuitar's, merged from upstream: read them, never edit them. Keep short and objective inline documentation in the code to facilitate reviewing and debugging.
-- Always write it into the project's rules when I tell you to remember something: the matching file in `.claude/rules/`, or AGENTS.md for the session-start steps
+- Always write it into the project's rules when I tell you to remember something: the matching `.claude/rules/<rule-name>/RULE.md` (a new rule gets its own folder, as the `review-rules` skill says), or AGENTS.md for the session-start steps
 - When you learn or discover something worth remembering for this project, ask me if you should add it to the rules
 - Always be objective when talking to me: do not be too verbose, only give me the information I need to inform a decision
 - When you ask me to test something, give me detailed instructions on how to run it
