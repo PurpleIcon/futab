@@ -12,7 +12,7 @@ These directives live in `.claude/rules/<rule-name>/RULE.md` (Claude Code loads 
 - `.claude/rules/github/RULE.md`: FuTab's repositories and the plugins it uses, commits, PRs, merging, issues, and keeping `CHANGELOG.md` up to date, merges from upstream included
 - `.claude/rules/tags/RULE.md`: release tags, their protection, and what is never done with tags
 
-Skills (task guides) are in `.claude/skills/<skill-name>/SKILL.md`: read the matching `SKILL.md` before such a task, e.g. `merge-upstream` before merging OxiGuitar into FuTab. The `review-skills` and `review-rules` skills say how both are laid out and named (`scripts/agents/check-layout.py` checks it).
+Skills (task guides) are in `.claude/skills/<skill-name>/SKILL.md`: read the matching `SKILL.md` before such a task, e.g. `merge-upstream` before merging OxiGuitar into FuTab, and `release` for a release, from the release PR to the published release. The `review-skills` and `review-rules` skills say how both are laid out and named (`scripts/agents/check-layout.py` checks it).
 
 ## At the start of every session:
 

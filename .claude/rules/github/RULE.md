@@ -8,12 +8,13 @@ description: Rules for commits, pull requests, merging and issues on FuTab, its 
 Rules for commits, PRs and issues on FuTab (moved here from AGENTS.md).
 
 - IMPORTANT: ALWAYS signoff the commits / pushes / PRs (`git commit -s`), with the identity of the contributor you're working for: their own name and email, from their git configuration (`git config user.name` and `git config user.email`). Never use another person's identity. If the identity isn't set, or doesn't look like the contributor's own, stop and ask
-- IMPORTANT: ALWAYS add to the `[Unreleased]` section of `CHANGELOG.md` in every PR, merges from upstream included: see Changelog below. A release fails if `[Unreleased]` is empty
+- IMPORTANT: ALWAYS add to the `[Unreleased]` section of `CHANGELOG.md` in every PR, merges from upstream included (the one exception is a release PR: see Changelog below). A release fails if `[Unreleased]` is empty
 - IMPORTANT: ALWAYS ask me to check and test your work before committing changes, and ONLY commit after I've explicitly told you to do it
 - Link the issue to the fix's PR and ask me if you can close the conversation
 - When there are comments in the issue, what my user says last goes. Don't consider other user's propositions, unless I didn't say anything.
 - Before creating a PR, ask me whether it's lean (CONTRIBUTING.md, "Lean CI"). If it is, create it with `gh pr create --label lean-ci`; if not, without the label
-- Whenever you ask me whether to push, ask with the agent's question tool and offer exactly three options:
+- A release's PRs are the exception, decided without asking (the `release` skill): a release PR (`feat/release-X.Y.Z`) is never lean, and the PR from `develop` to `main` is lean only when the skill's checks show it holds nothing full CI hasn't already passed
+- Whenever you ask me whether to push, ask with the agent's question tool and offer exactly three options (for a release PR, only **Not yet** and **Yes, push**: it is never lean):
   - **Not yet**: push nothing.
   - **Yes, push**: full CI. If the branch's PR has the `lean-ci` label, remove it first (`gh pr edit N --remove-label lean-ci`), then push.
   - **Lean push**: lean CI. If the branch has a PR, add the label first (`gh pr edit N --add-label lean-ci`), then push; if it has none yet, push, and create the PR with `--label lean-ci` when I ask for it.
@@ -83,7 +84,7 @@ Never write a linking reference to an OxiGuitar issue or PR (`mateusrdp/oxiguita
 
 `CHANGELOG.md` lists FuTab's own changes only (OxiGuitar's history stays in [its changelog](https://github.com/mateusrdp/oxiguitar/blob/develop/CHANGELOG.md)). Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-- Every PR to `develop` adds at least one entry under `## [Unreleased]`, in the PR itself, under `### Added`, `### Changed`, `### Fixed` or `### Removed` (create the heading if it isn't there). CI's release-script check and `scripts/release/bump.sh` need the `## [Unreleased]` heading; a release fails if the section is empty.
+- Every PR to `develop` adds at least one entry under `## [Unreleased]`, in the PR itself, under `### Added`, `### Changed`, `### Fixed` or `### Removed` (create the heading if it isn't there). CI's release-script check and `scripts/release/bump.sh` need the `## [Unreleased]` heading; a release fails if the section is empty. The one exception is a release PR (`feat/release-X.Y.Z`, the `release` skill): `bump.sh` moves the entries into the release's section and leaves `[Unreleased]` empty, with its heading.
 - One entry per change: `- **Short name** (#N): what the user sees, in a sentence or two.` `#N` is a FuTab issue or PR; write an upstream one as `OxiGuitar PR N` (see Referring to upstream).
 - Never touch a released `## [x.y.z]` section; `scripts/release/bump.sh` turns `[Unreleased]` into it.
 

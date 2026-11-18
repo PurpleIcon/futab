@@ -30,7 +30,7 @@ Rules for git tags on FuTab. A `v*` tag is a FuTab release: pushing one starts t
   git push origin refs/tags/vX.Y.Z
   ```
 
-- Then check the Release packages run started for it (`gh run list --repo PurpleIcon/futab --workflow "Release packages" --limit 1`), and tell me its link. The run makes a **draft** release: I check and publish it.
+- Then check the Release packages run started for it (`gh run list --repo PurpleIcon/futab --workflow "Release packages" --limit 1`), and tell me its link. The run makes a **draft** release, which isn't the end: the `release` skill (`.claude/skills/release/SKILL.md`) goes on from here. It watches the run, checks the draft, publishes it on my yes and checks the Publish run.
 
 ## Never
 

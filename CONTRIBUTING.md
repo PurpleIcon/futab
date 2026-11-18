@@ -125,7 +125,7 @@ After changing the writer or the reference songs, run `scripts/guitar-pro-check.
 
 Every format is its own plugin, and every plugin has a repository of its own (#165); the core recognises no format itself (docs/design/plugins.md). `github.com/mateusrdp/oxiguitar-guitarpro` shows the shape, and `docs/plugins/template/` is a starting point.
 
-FuTab keeps OxiGuitar's plugin interface, so a plugin works in both. A new plugin can be offered to OxiGuitar, or live under [PurpleIcon](https://github.com/PurpleIcon) as `futab-NAME`; ask in an issue first. FuTab doesn't publish plugins or packages yet, so the release steps below (step 7) apply once it does.
+FuTab keeps OxiGuitar's plugin interface, so a plugin works in both. A new plugin can be offered to OxiGuitar, or live under [PurpleIcon](https://github.com/PurpleIcon) as `futab-NAME`; ask in an issue first. FuTab doesn't publish plugins yet, so the release steps below (step 7) apply once it does.
 
 1. Write down what you learn about the format in `docs/formats/<format>.md`.
 2. Write the reader in the plugin's repository. It recognises the format from its contents (FMT-6), never from the extension, fills the score model, and records anything it cannot represent in the import log (FMT-2).

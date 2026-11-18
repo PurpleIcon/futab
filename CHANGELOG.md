@@ -8,6 +8,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ### Added
 
+- **release skill**: the agent skill takes a FuTab release from the release PR to the published release, or picks one up where it stopped: `scripts/release/bump.sh`, `develop` into `main`, the tag on the maintainer's go-ahead, the Release packages run, a check of the draft, publishing it on the maintainer's yes, and the Publish run. The tags rule now points to it, so a release no longer ends at its draft. The github rule now says a release PR is never lean CI and adds no `[Unreleased]` entry, and the PR from `develop` to `main` is lean when it holds nothing full CI hasn't already passed.
 - **review-skills and review-rules skills** (#28): the agent skills review FuTab's skills and rules. `scripts/agents/check-layout.py` checks the layout (`.claude/skills/<skill-name>/SKILL.md` and `.claude/rules/<rule-name>/RULE.md`, kebab-case folder names, YAML front matter whose `name` matches the folder and that has a `description`); the skills also check descriptions, the files each one points at, how much it loads into a session, that rules and skills don't contradict each other, and that AGENTS.md lists every rule. They report findings by severity, and fix them once asked.
 
 ### Changed
