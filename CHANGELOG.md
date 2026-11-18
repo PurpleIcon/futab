@@ -20,6 +20,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ### Fixed
 
+- **CI on macOS and the ci-success gate** (#24): pull requests no longer wait for GitHub's macOS machines, which were too scarce to get one: CI's macOS tests and plugin template run only when CI is started by hand, as the macOS package already did. `ci-success` now passes only when every job passed or was skipped; before, a job that never got a machine counted as passed.
 - **Version numbers in the manual and the plugin guide** (#22): versions from before the fork read as OxiGuitar's again (they had been renamed to FuTab 0.2 to 0.18, versions FuTab never had), and what a plugin needs reads FuTab 0.1.0 or later. The plugin template's copy step uses the folder `git clone` makes again.
 - **Desktop icon** (#16): FuTab's icon shows again when searching for the app on the desktop. The icon file opened with a long comment, so desktops didn't recognise it as an SVG image and showed a blank icon.
 
