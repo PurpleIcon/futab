@@ -88,6 +88,8 @@ The plugin manager only lists plugins and switches them on and off. It never dow
 
 ## Safe mode
 
+Plugins run inside FuTab, so a plugin with a bad bug can make FuTab crash. When it does, FuTab writes a report naming the plugin. The next time it starts, it says which plugin crashed and where the report is (the `crash` folder of FuTab's user folder, `~/.local/share/futab/crash` on Linux), with a link to the plugin's page. Send the report to the plugin's author with what you were doing. The same lines are also printed to the terminal, if FuTab was started from one. A crash with no plugin running is FuTab's own: the report goes to FuTab's issues.
+
 If a plugin misbehaves so badly that FuTab won't start properly, start it in **safe mode**:
 
 ```sh

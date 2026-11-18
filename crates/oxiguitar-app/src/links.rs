@@ -2,10 +2,16 @@
 // Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors
 
 //! Opening a web address in the system's browser, only when the user clicks
-//! a link (the player's link to better sounds, M4). FuTab itself never
-//! connects anywhere: the browser does, as a program of its own.
+//! a link (Help → About's credits link; the player's link to better sounds,
+//! M4). FuTab itself never connects anywhere: the browser does, as a program
+//! of its own.
 
 use std::process::{Command, Stdio};
+
+/// Every project OxiGuitar builds on, with its authors and licence
+/// (Mateus, 16 Nov 2026: Help → About links to CREDITS.md and lists none
+/// itself). The packages also install the file beside the program.
+pub(crate) const CREDITS: &str = "https://github.com/PurpleIcon/futab/blob/main/CREDITS.md";
 
 /// The system's command that opens an address in the default browser.
 fn opener(url: &str) -> Command {
@@ -60,5 +66,12 @@ mod tests {
         assert!(open("file:///etc/passwd").is_err());
         assert!(open("/usr/bin/true").is_err());
         assert!(open("http://example.org").is_err());
+    }
+
+    #[test]
+    fn the_credits_are_the_repositorys_credits_file_over_https() {
+        assert!(oxiguitar_host::is_https(CREDITS));
+        assert!(CREDITS.starts_with("https://github.com/PurpleIcon/futab/"));
+        assert!(CREDITS.ends_with("/CREDITS.md"));
     }
 }

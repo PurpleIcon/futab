@@ -27,9 +27,13 @@
 
 #![windows_subsystem = "windows"]
 
-// The windowing backend comes from one of these features (Cargo.toml).
+// The windowing backend comes from one of these features (Cargo.toml), and
+// only one: each build knows its display system when it is built, and never
+// looks at the session to choose (ADR 0011).
 #[cfg(not(any(feature = "wayland", feature = "x11")))]
 compile_error!("build futab with the `wayland` feature (the default) or `x11`");
+#[cfg(all(feature = "wayland", feature = "x11"))]
+compile_error!("build futab with one of the `wayland` and `x11` features, not both");
 
 mod advice;
 mod audio_export;
@@ -40,8 +44,10 @@ mod chord_form;
 mod chord_prefs;
 mod cursor;
 mod document;
+mod drawings;
 mod editing;
 mod effect_form;
+mod engraving;
 mod footer;
 mod icons;
 mod inspector;
@@ -89,7 +95,7 @@ use slint::{
 };
 
 use crate::canvas::{Sheets, TILE};
-use crate::document::{FULLEST, OpenScore, SaveFormat, Settings, ToolEntry, TrackInfo};
+use crate::document::{OpenScore, SaveFormat, Settings, ToolEntry, TrackInfo};
 use crate::footer::{Footer, level_code};
 use crate::plugin_tabs::TabThread;
 use crate::prefs::ViewPrefs;
@@ -105,7 +111,7 @@ mod ui {
 use ui::{
     AdviceLink, AppWindow, AreaState, BoxItem, FooterRow, GridPoint, InspectorField,
     InspectorVoice, ManagerRow, PaletteGroupRow, PaletteToolRow, PluginLinks, PluginManagerWindow,
-    PluginRow, PluginSection, PluginSettingsWindow, PluginWidget, ShortcutLine, SongField,
+    PluginMenu, PluginMenuItem, PluginRow, PluginSection, PluginWidget, ShortcutLine, SongField,
     TileItem, ToolRow, ToolbarItemRow, ToolbarSectionRow, TrackRow,
 };
 
@@ -130,6 +136,8 @@ const PX_PER_PT: f32 = 96.0 / 72.0;
 const CANVAS_PAD: f32 = 48.0;
 
 struct App {
+    /// The plugins' tools' keys (interface 1.8): keys, plugin and tool.
+    plugin_keys: Vec<(oxiguitar_host::api::manifest::Shortcut, String, String)>,
     ui: Weak<AppWindow>,
     worker: Worker,
     settings: Settings,
@@ -143,6 +151,9 @@ struct App {
     /// The palette's icons, measured on a thread of their own at start so
     /// the window never waits for them; `None` until they are.
     palette_icons: Option<Arc<icons::IconSet>>,
+    /// The palette as shown: the core's groups with the plugins' tools
+    /// (interface 1.8).
+    palette_shown: Arc<Vec<palette::ShownGroup>>,
     /// Which palette groups are collapsed.
     palette: palette::Palette,
     /// The scale the icons were drawn for.
@@ -193,14 +204,14 @@ struct App {
     /// canvases; what it last answered for each tab; what each area shows.
     tab_thread: Option<TabThread>,
     plugin_tabs: HashMap<TabId, PluginTabState>,
-    plugin_views: [PluginView; 4],
+    plugin_views: [PluginView; 5],
+    /// The plugin dialog that is open (a tab whose area is `dialog`,
+    /// interface 1.8).
+    plugin_dialog: Option<TabId>,
     /// Every plugin file found, for the plugin manager, and its window
     /// once opened (hidden, not dropped, when closed).
     plugins: oxiguitar_host::Plugins,
     manager: Option<PluginManagerWindow>,
-    /// A plugin's settings window (interface 1.3): the window, once made,
-    /// and the plugin it shows.
-    settings_window: Option<(PluginSettingsWindow, String)>,
     /// The plugins' sections of the Track tab, and how many times
     /// the dialog has opened (so late answers for an earlier opening are
     /// dropped).
@@ -285,9 +296,9 @@ struct App {
 /// What the question over the window asks.
 #[derive(Clone, Debug, PartialEq)]
 enum Asked {
-    /// Write the file despite what it loses, or under another name? With
-    /// `elsewhere`, the buttons are Save, Save As… and Cancel.
-    Save { elsewhere: bool },
+    /// Write the file despite what it loses? With `can_keep`, the buttons
+    /// are Keep Them in the .oxg File, Save Without Them and Cancel.
+    Save { can_keep: bool },
     /// Save the changes before going on to this?
     Unsaved(Then),
     /// Apply this edit, which leaves notes out?
@@ -340,8 +351,8 @@ thread_local! {
     /// The app, for events arriving from the worker thread.
     static APP: RefCell<Option<Shared>> = const { RefCell::new(None) };
     /// The plugins' tools for the Tools menu, after the core's: (plugin id,
-    /// tool id, menu entry).
-    static PLUGIN_TOOLS: RefCell<Vec<(String, String, String)>> = const { RefCell::new(Vec::new()) };
+    /// tool id, menu entry, whether it edits the score).
+    static PLUGIN_TOOLS: RefCell<Vec<(String, String, String, bool)>> = const { RefCell::new(Vec::new()) };
 }
 
 /// What the window does for plugins: shows their footer messages, shows
@@ -398,6 +409,41 @@ impl oxiguitar_host::Core for WindowCore {
         });
     }
 
+    fn engraving(&self) -> Option<oxiguitar_host::api::message::Engraving> {
+        self.open.engraving()
+    }
+
+    fn selection(&self) -> Option<oxiguitar_host::api::event::Selection2> {
+        self.open.selection()
+    }
+
+    fn open_dialog(&self, tab: &TabId, title: &str) -> Result<(), String> {
+        // Asked from any thread: whether one is open is known here, and
+        // the window shows it when its turn comes.
+        if DIALOG_OPEN.swap(true, std::sync::atomic::Ordering::SeqCst) {
+            return Err("another dialog is open".to_owned());
+        }
+        let (tab, title) = (tab.clone(), title.to_owned());
+        let queued =
+            slint::invoke_from_event_loop(move || match APP.with(|a| a.borrow().clone()) {
+                Some(app) => open_plugin_dialog(&app, tab, &title),
+                None => DIALOG_OPEN.store(false, std::sync::atomic::Ordering::SeqCst),
+            });
+        queued.map_err(|_| {
+            DIALOG_OPEN.store(false, std::sync::atomic::Ordering::SeqCst);
+            "the window is closing".to_owned()
+        })
+    }
+
+    fn show_tab(&self, tab: &TabId) {
+        let tab = tab.clone();
+        let _ = slint::invoke_from_event_loop(move || {
+            if let Some(app) = APP.with(|a| a.borrow().clone()) {
+                plugin_tab_wanted(&app, &tab);
+            }
+        });
+    }
+
     fn score(&self) -> Option<oxiguitar_host::api::score::Score> {
         self.open.wire()
     }
@@ -414,6 +460,15 @@ impl oxiguitar_host::Core for WindowCore {
         score: oxiguitar_host::api::score2::Score2,
     ) -> Result<(), String> {
         self.open.apply(plugin, revision, name, score)
+    }
+
+    fn settings_changed(&self, id: &str) {
+        let id = id.to_owned();
+        let _ = slint::invoke_from_event_loop(move || {
+            if let Some(app) = APP.with(|a| a.borrow().clone()) {
+                playing::settings_changed(&app, &id);
+            }
+        });
     }
 
     fn withdrawn(&self, id: &str) {
@@ -444,26 +499,22 @@ fn plugin_withdrawn(app: &Shared, id: &str) {
 }
 
 /// The display system this build draws with, as plugins' conditions name
-/// it. Each Linux build has its own (docs/design/plugins.md); a build with
-/// both features, for development, follows the host's rule.
-fn display_system() -> &'static str {
-    let linux = cfg!(not(any(target_os = "windows", target_vendor = "apple")));
-    match (linux, cfg!(feature = "wayland"), cfg!(feature = "x11")) {
-        (true, true, false) => "wayland",
-        (true, false, true) => "x11",
-        _ => oxiguitar_host::display_system(),
-    }
-}
+/// it: fixed when building (ADR 0011). Each Linux build has its own
+/// (docs/design/plugins.md).
+pub(crate) const DISPLAY_SYSTEM: &str = if cfg!(target_os = "windows") {
+    "windows"
+} else if cfg!(target_vendor = "apple") {
+    "macos"
+} else if cfg!(feature = "wayland") {
+    "wayland"
+} else {
+    "x11"
+};
 
 /// What to tell someone whose session this build can't draw in: the
 /// Wayland build without a Wayland compositor, the X11 build without an X
-/// server. `None` for builds that try both, and outside Linux.
+/// server. `None` outside Linux.
 fn wrong_build_hint(display: &str) -> Option<&'static str> {
-    if !cfg!(not(any(target_os = "windows", target_vendor = "apple")))
-        || (cfg!(feature = "wayland") && cfg!(feature = "x11"))
-    {
-        return None;
-    }
     match display {
         "wayland" => Some(
             "This is FuTab's Wayland build, and it found no Wayland session (is WAYLAND_DISPLAY set?). On an X11 desktop, install the X11 build instead (the package futab-x11), or use the AppImage, which holds both builds.",
@@ -482,7 +533,7 @@ fn main() -> Result<(), slint::PlatformError> {
         .backend_name("winit".into())
         .select()
     {
-        if let Some(hint) = wrong_build_hint(display_system()) {
+        if let Some(hint) = wrong_build_hint(DISPLAY_SYSTEM) {
             eprintln!("{hint}");
         }
         return Err(e);
@@ -508,17 +559,32 @@ fn main() -> Result<(), slint::PlatformError> {
         open: open_score.clone(),
     });
     let startup = if args.safe_mode {
-        oxiguitar_host::start_in_safe_mode(oxiguitar_host::Folders::here(), display_system(), core)
+        oxiguitar_host::start_in_safe_mode(oxiguitar_host::Folders::here(), DISPLAY_SYSTEM, core)
     } else {
-        oxiguitar_host::start(oxiguitar_host::Folders::here(), display_system(), core)
+        oxiguitar_host::start(oxiguitar_host::Folders::here(), DISPLAY_SYSTEM, core)
     };
     let open_extensions = startup.plugins.read_extensions();
     let save_formats = SaveFormat::writable(&startup.plugins);
     let mut shell = Shell::default();
     plugin_tabs::add_to(&mut shell, &startup.plugins);
-    // Only when a plugin has tabs, a settings window or track sections.
+    let (toolbar_tools, toolbar_icons) = plugin_toolbar_tools(&startup.plugins);
+    let (plugin_keys, key_lines, key_clashes) = {
+        let (tools, clashes) = startup.plugins.shortcut_tools();
+        let lines: Vec<(String, String)> = tools
+            .iter()
+            .map(|(k, t)| (k.label(), t.spec.name.clone()))
+            .collect();
+        let keys: Vec<(oxiguitar_host::api::manifest::Shortcut, String, String)> = tools
+            .into_iter()
+            .filter_map(|(k, t)| {
+                Some((k, t.plugin.manifest.as_ref()?.id.clone(), t.spec.id.clone()))
+            })
+            .collect();
+        (keys, lines, clashes)
+    };
+    shell.set_plugin_tools(&toolbar_tools);
+    // Only when a plugin has tabs or track sections.
     let uses_tab_thread = !startup.plugins.tabs().is_empty()
-        || !startup.plugins.with_settings_window().is_empty()
         || oxiguitar_host::api::class::InstrumentClass::ALL
             .iter()
             .any(|&c| !startup.plugins.track_sections(c).is_empty());
@@ -555,6 +621,7 @@ fn main() -> Result<(), slint::PlatformError> {
         mixer: Mixer::default(),
         toggles: icons::IconSet::new(&icons::toggles(), icons::Fill::TOGGLES),
         palette_icons: None,
+        palette_shown: Arc::new(palette::shown(&plugin_palette_tools(&startup.plugins))),
         palette: palette::Palette::default(),
         icons_scale: 0.0,
         engraving: 0,
@@ -575,7 +642,8 @@ fn main() -> Result<(), slint::PlatformError> {
         folder: None,
         open_extensions,
         shell,
-        icons: HashMap::new(),
+        icons: toolbar_icons,
+        plugin_keys: plugin_keys.clone(),
         footer: Footer::default(),
         stored: oxiguitar_host::SharedSettings::default(),
         prefs: ViewPrefs::default(),
@@ -584,9 +652,9 @@ fn main() -> Result<(), slint::PlatformError> {
         tab_thread,
         plugin_tabs: HashMap::new(),
         plugin_views: Default::default(),
+        plugin_dialog: None,
         plugins: startup.plugins.clone(),
         manager: None,
-        settings_window: None,
         sections: None,
         dialogs_opened: 0,
         editing: editing::Editing::default(),
@@ -627,7 +695,7 @@ fn main() -> Result<(), slint::PlatformError> {
         export_cancel: None,
     }));
     APP.with(|a| *a.borrow_mut() = Some(app.clone()));
-    measure_palette();
+    measure_palette(app.borrow().palette_shown.clone());
 
     let shortcuts = ShortcutData {
         navigation: vec![
@@ -691,6 +759,7 @@ fn main() -> Result<(), slint::PlatformError> {
             ("Shift + U".into(), "pick stroke up".into()),
             ("Ctrl + Alt + W".into(), "wide vibrato".into()),
         ],
+        plugins: key_lines,
     };
     let (left, left_w, center, center_w, right, right_w) = shortcuts_to_columns(&shortcuts);
     ui.set_shortcut_left_column(left);
@@ -710,21 +779,44 @@ fn main() -> Result<(), slint::PlatformError> {
         ),
         "FuTab is a fork of OxiGuitar, by Mateus Rocha de Paula and the OxiGuitar contributors: https://github.com/mateusrdp/oxiguitar".to_owned(),
         "Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors. Licensed under the GNU GPL, version 3 or later.".to_owned(),
-        "Music font: Bravura (Steinberg, SIL OFL 1.1). Text font: Noto Sans (SIL OFL 1.1). GUI: Slint (GPL-3.0).".to_owned(),
         "FuTab never connects to the internet on its own and sends nothing anywhere.".to_owned(),
     ];
     about.extend(about_folders(&startup.inventory.folders, args.safe_mode));
     ui.set_about_lines(lines(&about.iter().map(String::as_str).collect::<Vec<_>>()));
-    PLUGIN_TOOLS.with(|t| {
-        *t.borrow_mut() = startup
-            .plugins
-            .tools()
-            .iter()
-            .filter_map(|t| {
-                let plugin = t.plugin.manifest.as_ref()?.id.clone();
-                Some((plugin, t.spec.id.clone(), t.spec.name.clone()))
-            })
-            .collect();
+    // The plugins' menu entries (interface 1.8): the Tools menu's after
+    // the core's tools, the others in the menus their manifests name.
+    let mut menus = PluginMenus::default();
+    let mut tools_menu = Vec::new();
+    for (menu, t) in startup.plugins.menu_tools() {
+        let Some(plugin) = t.plugin.manifest.as_ref().map(|m| m.id.clone()) else {
+            continue;
+        };
+        if menu == "tools" {
+            tools_menu.push((plugin, t.spec.id.clone(), t.spec.name.clone(), t.spec.edits));
+            continue;
+        }
+        let item = PluginMenuItem {
+            id: palette::plugin_tool_id(&plugin, &t.spec.id).into(),
+            title: t.spec.name.as_str().into(),
+            edits: t.spec.edits,
+        };
+        // Without a menu of its own choosing, the one the plugins share.
+        let own = t
+            .spec
+            .menu
+            .as_deref()
+            .map_or(oxiguitar_host::api::manifest::PLUGINS_PLACE, str::trim);
+        menus.add(&menu, own, item);
+    }
+    PLUGIN_TOOLS.with(|t| *t.borrow_mut() = tools_menu);
+    menus.show(&ui);
+    let a = app.clone();
+    ui.on_plugin_tool_picked(move |id| {
+        if let Some((plugin, tool)) = palette::plugin_tool_of(id.as_str()) {
+            a.borrow()
+                .worker
+                .send(Request::PluginTool(plugin.to_owned(), tool.to_owned()));
+        }
     });
     set_tools(&ui, &tool_rows(&default_tools()));
 
@@ -738,6 +830,9 @@ fn main() -> Result<(), slint::PlatformError> {
     {
         let mut s = app.borrow_mut();
         s.footer.extend(startup.notices);
+        for clash in &key_clashes {
+            s.footer.push(Level::Warning, clash.clone());
+        }
         // What the core can't do, as advice for the window's first moments
         // (the host left out what the user silenced, and all of it in safe
         // mode).
@@ -1120,7 +1215,23 @@ fn main() -> Result<(), slint::PlatformError> {
                 send_typed(&a, t);
                 true
             }
-            None => false,
+            // Last, plugins' tools' keys (interface 1.8): OxiGuitar's own
+            // keys come first.
+            None => {
+                let tool = a
+                    .borrow()
+                    .plugin_keys
+                    .iter()
+                    .find(|(k, _, _)| k.is(name.as_str(), shift, ctrl, alt))
+                    .map(|(_, plugin, tool)| (plugin.clone(), tool.clone()));
+                match tool {
+                    Some((plugin, tool)) => {
+                        a.borrow().worker.send(Request::PluginTool(plugin, tool));
+                        true
+                    }
+                    None => false,
+                }
+            }
         }
     });
     let a = app.clone();
@@ -1141,22 +1252,22 @@ fn main() -> Result<(), slint::PlatformError> {
     let a = app.clone();
     ui.on_mixer_volume(move |i, v| {
         let m = a.borrow_mut().mixer.set_volume(i as usize, v);
-        sync_mix(&a, i as usize, m);
+        mixer_moved(&a, i as usize, m);
     });
     let a = app.clone();
     ui.on_mixer_pan(move |i, v| {
         let m = a.borrow_mut().mixer.set_pan(i as usize, v);
-        sync_mix(&a, i as usize, m);
+        mixer_moved(&a, i as usize, m);
     });
     let a = app.clone();
     ui.on_mixer_mute(move |i| {
         let m = a.borrow_mut().mixer.toggle_mute(i as usize);
-        sync_mix(&a, i as usize, m);
+        mixer_moved(&a, i as usize, m);
     });
     let a = app.clone();
     ui.on_mixer_solo(move |i| {
         let m = a.borrow_mut().mixer.toggle_solo(i as usize);
-        sync_mix(&a, i as usize, m);
+        mixer_moved(&a, i as usize, m);
     });
     let a = app.clone();
     ui.on_player_action(move |name| playing::action(&a, name.as_str()));
@@ -1211,6 +1322,13 @@ fn main() -> Result<(), slint::PlatformError> {
             }
             _ => {}
         }
+        // A plugin's tool (interface 1.8) runs as from the Tools menu.
+        if let Some((plugin, tool)) = palette::plugin_tool_of(id.as_str()) {
+            a.borrow()
+                .worker
+                .send(Request::PluginTool(plugin.to_owned(), tool.to_owned()));
+            return;
+        }
         if let Some(d) = palette::dialog_of(id.as_str()) {
             open_edit_dialog(&a, d);
             return;
@@ -1240,7 +1358,7 @@ fn main() -> Result<(), slint::PlatformError> {
         let request = match i.checked_sub(ours) {
             None => Request::ApplyTool(i),
             Some(j) => match PLUGIN_TOOLS.with(|t| t.borrow().get(j).cloned()) {
-                Some((plugin, tool, _)) => Request::PluginTool(plugin, tool),
+                Some((plugin, tool, _, _)) => Request::PluginTool(plugin, tool),
                 None => return,
             },
         };
@@ -1290,6 +1408,12 @@ fn main() -> Result<(), slint::PlatformError> {
     let a = app.clone();
     ui.on_open_link(move |url| {
         if let Err(e) = links::open(&url) {
+            message(&a, Level::Error, e);
+        }
+    });
+    let a = app.clone();
+    ui.on_open_credits(move || {
+        if let Err(e) = links::open(links::CREDITS) {
             message(&a, Level::Error, e);
         }
     });
@@ -1358,6 +1482,8 @@ struct ShortcutData {
     editing: Vec<(String, String)>,
     note_entry: Vec<(String, String)>,
     effects: Vec<(String, String)>,
+    /// Plugins' tools' keys (interface 1.8).
+    plugins: Vec<(String, String)>,
 }
 
 fn shortcuts_to_columns(
@@ -1378,6 +1504,7 @@ fn shortcuts_to_columns(
         &data.editing,
         &data.note_entry,
         &data.effects,
+        &data.plugins,
     ] {
         for (key, desc) in entries.iter() {
             all.push(ShortcutLine {
@@ -1446,10 +1573,12 @@ fn tool_rows(tools: &[ToolEntry]) -> Vec<ToolRow> {
             None => ToolRow {
                 title: t.name.as_str().into(),
                 enabled: true,
+                edits: true,
             },
             Some(why) => ToolRow {
                 title: format!("{} ({})", t.name, reason_phrase(why)).into(),
                 enabled: false,
+                edits: true,
             },
         })
         .collect()
@@ -1466,13 +1595,76 @@ fn reason_phrase(why: &str) -> String {
     }
 }
 
+/// The entries plugins add to menus other than Tools (interface 1.8).
+#[derive(Default)]
+struct PluginMenus {
+    file: Vec<PluginMenuItem>,
+    edit: Vec<PluginMenuItem>,
+    view: Vec<PluginMenuItem>,
+    help: Vec<PluginMenuItem>,
+    page: Vec<PluginMenuItem>,
+    track: Vec<PluginMenuItem>,
+    /// Menus of the plugins' own, by the name the first tool gave each.
+    own: Vec<(String, Vec<PluginMenuItem>)>,
+}
+
+impl PluginMenus {
+    /// Adds `item` to the menu `key` names (lower case), or to the
+    /// plugins' own menu called `name`, as its manifest wrote it.
+    fn add(&mut self, key: &str, name: &str, item: PluginMenuItem) {
+        let list = match key {
+            "file" => &mut self.file,
+            "edit" => &mut self.edit,
+            "view" => &mut self.view,
+            "help" => &mut self.help,
+            "page" => &mut self.page,
+            "track" => &mut self.track,
+            _ => {
+                let at = match self
+                    .own
+                    .iter()
+                    .position(|(title, _)| title.to_lowercase() == key)
+                {
+                    Some(at) => at,
+                    None => {
+                        self.own.push((name.to_owned(), Vec::new()));
+                        self.own.len() - 1
+                    }
+                };
+                &mut self.own[at].1
+            }
+        };
+        list.push(item);
+    }
+
+    fn show(self, ui: &AppWindow) {
+        let model = |items: Vec<PluginMenuItem>| ModelRc::new(VecModel::from(items));
+        ui.set_plugin_items_file(model(self.file));
+        ui.set_plugin_items_edit(model(self.edit));
+        ui.set_plugin_items_view(model(self.view));
+        ui.set_plugin_items_help(model(self.help));
+        ui.set_plugin_items_page(model(self.page));
+        ui.set_plugin_items_track(model(self.track));
+        ui.set_plugin_menus(ModelRc::new(VecModel::from(
+            self.own
+                .into_iter()
+                .map(|(title, items)| PluginMenu {
+                    title: title.into(),
+                    items: model(items),
+                })
+                .collect::<Vec<_>>(),
+        )));
+    }
+}
+
 /// The Tools menu: the core's tools, then the plugins' (interface 1.2).
 fn set_tools(ui: &AppWindow, rows: &[ToolRow]) {
     let mut rows = rows.to_vec();
     PLUGIN_TOOLS.with(|t| {
-        rows.extend(t.borrow().iter().map(|(_, _, name)| ToolRow {
+        rows.extend(t.borrow().iter().map(|(_, _, name, edits)| ToolRow {
             title: name.as_str().into(),
             enabled: true,
+            edits: *edits,
         }));
     });
     ui.set_tools(ModelRc::new(VecModel::from(rows)));
@@ -1636,6 +1828,44 @@ fn plugin_tab_on_screen(s: &App, side: Side) -> Option<TabId> {
     plugin_tabs::tab_of(area.active_id())
 }
 
+/// Where a plugin's tab shows: one of the window's areas, or the plugin
+/// dialog over the window (interface 1.8).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum View {
+    Area(Side),
+    Dialog,
+}
+
+impl View {
+    const ALL: [View; 5] = [
+        View::Area(Side::Top),
+        View::Area(Side::Bottom),
+        View::Area(Side::Left),
+        View::Area(Side::Right),
+        View::Dialog,
+    ];
+
+    /// The view for the window's number: an area's, or 4 for the dialog.
+    fn from_index(i: i32) -> Option<View> {
+        View::ALL.get(usize::try_from(i).ok()?).copied()
+    }
+
+    fn index(self) -> usize {
+        match self {
+            View::Area(side) => side.index(),
+            View::Dialog => 4,
+        }
+    }
+}
+
+/// The plugin tab `view` shows now.
+fn plugin_tab_at(s: &App, view: View) -> Option<TabId> {
+    match view {
+        View::Area(side) => plugin_tab_on_screen(s, side),
+        View::Dialog => s.plugin_dialog.clone(),
+    }
+}
+
 /// Shows area `side`'s plugin tab, asking its plugin for the contents when
 /// there are none yet or the plugin asked for a redraw while it was hidden.
 fn show_plugin_tab(app: &Shared, side: Side) {
@@ -1655,14 +1885,14 @@ fn show_plugin_tab(app: &Shared, side: Side) {
             thread.send(plugin_tabs::Request::Content(tab.clone()));
         }
     }
-    refresh_plugin_view(app, side, &tab);
+    refresh_plugin_view(app, View::Area(side), &tab);
 }
 
 /// The plugin asked for its tab to be shown again.
 fn plugin_tab_changed(app: &Shared, tab: TabId) {
-    let on_screen = Side::ALL
+    let on_screen = View::ALL
         .iter()
-        .any(|&side| plugin_tab_on_screen(&app.borrow(), side).as_ref() == Some(&tab));
+        .any(|&view| plugin_tab_at(&app.borrow(), view).as_ref() == Some(&tab));
     let mut s = app.borrow_mut();
     if on_screen {
         if let Some(thread) = &s.tab_thread {
@@ -1671,6 +1901,73 @@ fn plugin_tab_changed(app: &Shared, tab: TabId) {
     } else {
         s.plugin_tabs.entry(tab).or_default().stale = true;
     }
+}
+
+/// Whether a plugin dialog is open: asked from the plugins' threads.
+static DIALOG_OPEN: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Opens a plugin's dialog (a tab whose area is `dialog`, interface 1.8)
+/// over the window and asks the plugin what it shows.
+fn open_plugin_dialog(app: &Shared, tab: TabId, title: &str) {
+    let Some(ui) = app.borrow().ui.upgrade() else {
+        DIALOG_OPEN.store(false, std::sync::atomic::Ordering::SeqCst);
+        return;
+    };
+    {
+        let mut s = app.borrow_mut();
+        // What an earlier opening showed is not what this one shows.
+        s.plugin_tabs.remove(&tab);
+        s.plugin_dialog = Some(tab.clone());
+        if let Some(thread) = &s.tab_thread {
+            thread.send(plugin_tabs::Request::Content(tab.clone()));
+        }
+    }
+    ui.set_plugin_dialog_title(title.into());
+    refresh_plugin_view(app, View::Dialog, &tab);
+    ui.set_plugin_dialog_shown(true);
+}
+
+/// The user closed the plugin dialog, with OK or not: its plugin is told.
+fn plugin_dialog_done(app: &Shared, ok: bool) {
+    let Some(ui) = app.borrow().ui.upgrade() else {
+        return;
+    };
+    ui.set_plugin_dialog_shown(false);
+    ui.invoke_focus_page();
+    let mut s = app.borrow_mut();
+    let view = &mut s.plugin_views[View::Dialog.index()];
+    view.tab = None;
+    view.content = None;
+    if let Some(tab) = s.plugin_dialog.take() {
+        s.plugin_tabs.remove(&tab);
+        if let Some(thread) = &s.tab_thread {
+            thread.send(plugin_tabs::Request::Closed { tab, ok });
+        }
+    }
+    DIALOG_OPEN.store(false, std::sync::atomic::Ordering::SeqCst);
+}
+
+/// A plugin asks for its tab at the front of its area (interface 1.8): the
+/// area opens if it was closed.
+fn plugin_tab_wanted(app: &Shared, tab: &TabId) {
+    let Some(ui) = app.borrow().ui.upgrade() else {
+        return;
+    };
+    let id = plugin_tabs::shell_id(tab);
+    let Some(side) = Side::ALL
+        .iter()
+        .copied()
+        .find(|&side| app.borrow_mut().shell.area_mut(side).open(&id))
+    else {
+        return;
+    };
+    match side {
+        Side::Top => ui.set_top_shown(true),
+        Side::Bottom => ui.set_bottom_shown(true),
+        Side::Left => ui.set_left_shown(true),
+        Side::Right => ui.set_right_shown(true),
+    }
+    sync_areas(app);
 }
 
 /// What the tab thread answered.
@@ -1712,17 +2009,6 @@ fn plugin_answer(app: &Shared, answer: plugin_tabs::Answer) {
                 .insert(drawn.widget.clone(), drawn_image(&drawn));
             tab
         }
-        plugin_tabs::Answer::Settings {
-            plugin,
-            content,
-            changed,
-        } => {
-            settings_window_answer(app, &plugin, content);
-            if changed {
-                playing::settings_changed(app, &plugin);
-            }
-            return;
-        }
         plugin_tabs::Answer::Section {
             dialog,
             plugin,
@@ -1741,9 +2027,9 @@ fn plugin_answer(app: &Shared, answer: plugin_tabs::Answer) {
             return;
         }
     };
-    for side in Side::ALL {
-        if plugin_tab_on_screen(&app.borrow(), side).as_ref() == Some(&tab) {
-            refresh_plugin_view(app, side, &tab);
+    for view in View::ALL {
+        if plugin_tab_at(&app.borrow(), view).as_ref() == Some(&tab) {
+            refresh_plugin_view(app, view, &tab);
         }
     }
 }
@@ -1878,11 +2164,12 @@ fn row_shape(
         .collect()
 }
 
-/// Puts tab `tab`'s contents in area `side`. Rows of the same shape as
-/// before are changed in place (a row holding a canvas widget by widget,
-/// so a drag on it carries on); other rows are made anew, so every widget
-/// shows exactly what the plugin says.
-fn refresh_plugin_view(app: &Shared, side: Side, tab: &TabId) {
+/// Puts tab `tab`'s contents in area `side`. Contents of the same shape as
+/// before are changed in place, widget by widget, so a drag on a canvas
+/// carries on and an open list stays open; each widget follows its data
+/// (plugin_tab.slint's `says`), so it shows exactly what the plugin says.
+/// Contents of another shape are made anew.
+fn refresh_plugin_view(app: &Shared, side: View, tab: &TabId) {
     let Some(ui) = app.borrow().ui.upgrade() else {
         return;
     };
@@ -1927,28 +2214,17 @@ fn refresh_plugin_view(app: &Shared, side: Side, tab: &TabId) {
                     .all(|(a, b)| row_shape(a) == row_shape(b))
         });
     if same_shape {
-        let old = view.content.take().unwrap_or_default();
-        for (i, (before, now)) in old.rows.iter().zip(&content.rows).enumerate() {
-            let has_canvas = now.widgets.iter().any(|w| matches!(w, Widget::Canvas(_)));
-            if has_canvas {
-                // Widget by widget: the canvas's image may be new even when
-                // its contents aren't.
-                let model = &view.row_models[i];
-                for (j, w) in widgets(now).into_iter().enumerate() {
-                    if model.row_data(j).as_ref() != Some(&w) {
-                        model.set_row_data(j, w);
-                    }
+        // Widget by widget, in the models the window already shows: only
+        // what changed is set, so a list the user has open stays open and
+        // keeps the keyboard (oxiguitar-midi#19), and a canvas's image may
+        // be new even when its contents aren't. The shapes are the same, so
+        // each row keeps its stretch.
+        for (i, now) in content.rows.iter().enumerate() {
+            let model = &view.row_models[i];
+            for (j, w) in widgets(now).into_iter().enumerate() {
+                if model.row_data(j).as_ref() != Some(&w) {
+                    model.set_row_data(j, w);
                 }
-            } else if before != now {
-                let model = Rc::new(VecModel::from(widgets(now)));
-                view.rows.set_row_data(
-                    i,
-                    PluginRow {
-                        widgets: ModelRc::from(model.clone()),
-                        stretch: stretch(now),
-                    },
-                );
-                view.row_models[i] = model;
             }
         }
     } else {
@@ -1974,10 +2250,18 @@ fn refresh_plugin_view(app: &Shared, side: Side, tab: &TabId) {
     view.content = Some(content.clone());
 }
 
-/// Area `side`'s plugin tab: its rows, or a message instead.
-fn set_plugin_area(ui: &AppWindow, side: Side, rows: Option<ModelRc<PluginRow>>, message: &str) {
+/// View `side`'s plugin tab: its rows, or a message instead.
+fn set_plugin_area(ui: &AppWindow, side: View, rows: Option<ModelRc<PluginRow>>, message: &str) {
     let rows = rows.unwrap_or_default();
     let message = SharedString::from(message);
+    let side = match side {
+        View::Area(side) => side,
+        View::Dialog => {
+            ui.set_dialog_plugin_rows(rows);
+            ui.set_dialog_plugin_message(message);
+            return;
+        }
+    };
     match side {
         Side::Top => {
             ui.set_top_plugin_rows(rows);
@@ -2002,7 +2286,7 @@ fn set_plugin_area(ui: &AppWindow, side: Side, rows: Option<ModelRc<PluginRow>>,
 /// area number) shows.
 fn plugin_event(app: &Shared, area: i32, widget: &str, event: TabEvent) {
     let s = app.borrow();
-    let Some(tab) = Side::from_index(area).and_then(|side| plugin_tab_on_screen(&s, side)) else {
+    let Some(tab) = View::from_index(area).and_then(|view| plugin_tab_at(&s, view)) else {
         return;
     };
     if let Some(thread) = &s.tab_thread {
@@ -2022,7 +2306,7 @@ fn canvas_room(app: &Shared, area: i32, widget: &str, width: f32, height: f32) {
     };
     let scale = ui.window().scale_factor();
     let mut s = app.borrow_mut();
-    let Some(tab) = Side::from_index(area).and_then(|side| plugin_tab_on_screen(&s, side)) else {
+    let Some(tab) = View::from_index(area).and_then(|view| plugin_tab_at(&s, view)) else {
         return;
     };
     s.plugin_tabs
@@ -2103,6 +2387,8 @@ fn install_plugin_tab_callbacks(ui: &AppWindow, app: &Shared) {
     });
     let a = app.clone();
     ui.on_plugin_canvas_room(move |area, id, w, h| canvas_room(&a, area, &id, w, h));
+    let a = app.clone();
+    ui.on_plugin_dialog_done(move |ok| plugin_dialog_done(&a, ok));
 }
 
 /// The command line: `futab [--safe-mode] [FILE]`.
@@ -2165,12 +2451,6 @@ fn open_plugin_manager(app: &Shared) {
             install_plugin_links(&w.global::<PluginLinks<'_>>(), app);
             let a = app.clone();
             w.on_toggled(move |i, on| manager_toggled(&a, i, on));
-            let a = app.clone();
-            w.on_settings_clicked(move |i| {
-                if let Some(id) = app_rows_settings(&a, i) {
-                    open_settings_window(&a, id);
-                }
-            });
             let weak = w.as_weak();
             w.on_close_clicked(move || {
                 if let Some(w) = weak.upgrade() {
@@ -2218,7 +2498,6 @@ fn sync_manager(app: &Shared) {
             state: r.state.into(),
             can_toggle: r.id.is_some(),
             enabled: r.enabled,
-            has_settings: r.settings.is_some(),
         })
         .collect();
     window.set_rows(ModelRc::new(VecModel::from(rows)));
@@ -2290,7 +2569,14 @@ fn toolbar_activated(app: &Shared, id: &str) {
         item::EXPORT_PDF => export_dialog(app),
         item::UNDO => app.borrow().worker.send(Request::Undo),
         item::REDO => app.borrow().worker.send(Request::Redo),
-        _ => {}
+        // A plugin's button in the Plugins section runs its tool.
+        _ => {
+            if let Some((plugin, tool)) = palette::plugin_tool_of(id) {
+                app.borrow()
+                    .worker
+                    .send(Request::PluginTool(plugin.to_owned(), tool.to_owned()));
+            }
+        }
     }
 }
 
@@ -2324,6 +2610,12 @@ fn handle(app: &Shared, event: Event) {
                 s.mixer = Mixer::new(tracks.iter().map(|t| t.mix).collect());
                 let first = s.tracks.shown().first().copied().unwrap_or(0);
                 s.editing.opened(score, first);
+                // Plugins hear where the caret starts, as they do when it
+                // moves.
+                s.worker.send(Request::Selection(
+                    s.editing.for_plugins(),
+                    s.editing.for_plugins2(),
+                ));
                 ui.set_lyric_shown(false);
                 s.bad = bad;
                 s.settings.tracks = s.tracks.shown();
@@ -2366,14 +2658,14 @@ fn handle(app: &Shared, event: Event) {
         Event::AskSave {
             heading,
             lines,
-            elsewhere,
+            can_keep,
         } => {
-            let buttons: &[&str] = if elsewhere {
-                &["Save", "Save As…", "Cancel"]
+            let buttons: &[&str] = if can_keep {
+                &["Keep Them in the .oxg File", "Save Without Them", "Cancel"]
             } else {
                 &["Save", "Cancel"]
             };
-            ask(app, Asked::Save { elsewhere }, &heading, &lines, buttons);
+            ask(app, Asked::Save { can_keep }, &heading, &lines, buttons);
         }
         Event::Saved {
             name,
@@ -2402,10 +2694,18 @@ fn handle(app: &Shared, event: Event) {
             caret,
             tracks,
             note_edit,
+            mixer,
         } => {
+            if mixer {
+                // The window's own mixer moves: the rows and the sound
+                // have them already, and nothing else changed.
+                app.borrow_mut().editing.changed(score);
+                sync_edit_state(app, &edit);
+                return;
+            }
             let play = {
                 let mut s = app.borrow_mut();
-                s.editing.changed(score);
+                s.editing.changed(score.clone());
                 if let Some(c) = caret {
                     s.editing.edited(c);
                 }
@@ -2414,6 +2714,8 @@ fn handle(app: &Shared, event: Event) {
             };
             if let Some((tracks, was)) = tracks {
                 track_list_changed(app, &tracks, &was);
+            } else {
+                mixer_from_score(app, &score);
             }
             sync_sections(app);
             sync_edit_state(app, &edit);
@@ -2447,7 +2749,7 @@ fn handle(app: &Shared, event: Event) {
                 let mut s = app.borrow_mut();
                 s.engraving = engraving;
                 s.sheets = Sheets {
-                    lists: Vec::new(),
+                    lists: Arc::default(),
                     rects: sheets,
                 };
                 s.editing.engraved(hits);
@@ -2491,6 +2793,10 @@ fn handle(app: &Shared, event: Event) {
         }
         Event::Tools(tools) => set_tools(&ui, &tool_rows(&tools)),
         Event::Message(level, text) => message(app, level, text),
+        Event::Report(text) => {
+            app.borrow_mut().footer.push_report(text);
+            sync_footer(app);
+        }
     }
 }
 
@@ -2555,6 +2861,29 @@ fn page_pressed(app: &Shared, x: f32, y: f32, shift: bool) {
     if moved {
         caret_moved(app);
     }
+    // On what a plugin drew: the plugin is told, after the caret moved.
+    if !shift {
+        drawing_clicked(app, x, y, false);
+    }
+}
+
+/// Tells a plugin the user clicked what it drew at (`x`, `y`) of the page
+/// view, if anything (interface 1.8). Returns whether there was a drawing.
+fn drawing_clicked(app: &Shared, x: f32, y: f32, double: bool) -> bool {
+    let Some((sheet, sx, sy)) = on_sheet(app, x, y) else {
+        return false;
+    };
+    let Some(spot) = app.borrow().editing.hits().drawn_at(sheet, sx, sy) else {
+        return false;
+    };
+    app.borrow().worker.send(Request::DrawingClicked {
+        tag: spot.tag,
+        at: spot.at,
+        x: spot.x,
+        y: spot.y,
+        double,
+    });
+    true
 }
 
 /// A drag-start on the page: anchors the drag at the current caret bar.
@@ -2581,6 +2910,9 @@ fn page_menu_pressed(app: &Shared, x: f32, y: f32) {
 /// bar and the Bar tab shows (Mateus, 20 Oct 2026; the dialog became the
 /// tab in issue #177).
 fn page_double_clicked(app: &Shared, x: f32, y: f32) {
+    if drawing_clicked(app, x, y, true) {
+        return;
+    }
     let on_time = on_sheet(app, x, y)
         .is_some_and(|(i, sx, sy)| app.borrow_mut().editing.time_signature_at(i, sx, sy));
     if on_time {
@@ -2802,9 +3134,6 @@ fn settings_changed(app: &Shared) {
     if let Some(m) = &s.manager {
         m.set_dark_interface(dark);
     }
-    if let Some((w, _)) = &s.settings_window {
-        w.set_dark_interface(dark);
-    }
     // Dark Page only needs new tiles; everything else a new engraving.
     s.paint += 1;
     retire_tiles(&mut s, 1.0);
@@ -2815,6 +3144,43 @@ fn settings_changed(app: &Shared) {
 }
 
 /// A track's mixer changed: show it in its row, and let the sound follow.
+/// A track's mixer control moved: heard at once, and kept in the score as
+/// one more change, so saving writes it (each format as far as it holds
+/// volume, pan, mute and solo) and Undo takes it back.
+fn mixer_moved(app: &Shared, i: usize, mix: oxiguitar_model::Mix) {
+    sync_mix(app, i, mix);
+    let s = app.borrow();
+    if let Some(caret) = s.editing.caret() {
+        s.worker.send(Request::Edit {
+            command: oxiguitar_edit::Command::Mix { track: i, mix },
+            caret,
+            selection: None,
+        });
+    }
+}
+
+/// The score's mixer, after a change that wasn't the window's own moves
+/// (Undo and Redo, a plugin's change): the rows and the sound follow it.
+fn mixer_from_score(app: &Shared, score: &oxiguitar_model::Score) {
+    let changed: Vec<_> = {
+        let s = app.borrow();
+        score
+            .tracks
+            .iter()
+            .enumerate()
+            .filter(|(i, t)| s.mixer.get(*i) != t.mix)
+            .map(|(i, t)| (i, t.mix))
+            .collect()
+    };
+    if changed.is_empty() {
+        return;
+    }
+    app.borrow_mut().mixer = Mixer::new(score.tracks.iter().map(|t| t.mix).collect());
+    for (i, mix) in changed {
+        sync_mix(app, i, mix);
+    }
+}
+
 fn sync_mix(app: &Shared, i: usize, mix: oxiguitar_model::Mix) {
     app.borrow_mut().player.set_mix(i, mix);
     let Some(ui) = app.borrow().ui.upgrade() else {
@@ -2875,14 +3241,78 @@ fn refresh_icons(app: &Shared, ui: &AppWindow) {
     set_palette(app, ui, true);
 }
 
+/// The buttons the installed plugins add to the toolbar's Plugins section
+/// (interface 1.8): each one's id and name, and its icon under that id.
+/// Drawn once, larger than shown, so any scale stays sharp.
+fn plugin_toolbar_tools(
+    plugins: &oxiguitar_host::Plugins,
+) -> (Vec<(String, String)>, HashMap<String, Image>) {
+    let mut tools = Vec::new();
+    let mut faces = Vec::new();
+    for t in plugins.toolbar_tools() {
+        let (Some(face), Some(manifest)) = (&t.spec.toolbar, &t.plugin.manifest) else {
+            continue;
+        };
+        tools.push((
+            palette::plugin_tool_id(&manifest.id, &t.spec.id),
+            t.spec.name.clone(),
+        ));
+        faces.push(palette::plugin_face(
+            face.symbol_char(),
+            face.text.as_deref().unwrap_or_default(),
+        ));
+    }
+    let icons = if faces.is_empty() {
+        HashMap::new()
+    } else {
+        icons::IconSet::new(&faces, icons::Fill::TOGGLES)
+            .draw(54)
+            .iter()
+            .zip(&tools)
+            .map(|(icon, (id, _))| (id.clone(), image_of(icon)))
+            .collect()
+    };
+    (tools, icons)
+}
+
+/// The tools the installed plugins add to the palette (interface 1.8).
+fn plugin_palette_tools(plugins: &oxiguitar_host::Plugins) -> Vec<palette::PluginTool> {
+    plugins
+        .palette_tools()
+        .iter()
+        .filter_map(|t| {
+            let at = t.spec.palette.as_ref()?;
+            // The tooltip names its keys too, when it has some.
+            let keys = t
+                .spec
+                .shortcut
+                .as_deref()
+                .and_then(oxiguitar_host::api::manifest::Shortcut::parse);
+            Some(palette::PluginTool {
+                plugin: t.plugin.manifest.as_ref()?.id.clone(),
+                tool: t.spec.id.clone(),
+                name: match keys {
+                    Some(k) => format!("{} ({})", t.spec.name, k.label()),
+                    None => t.spec.name.clone(),
+                },
+                section: at.section.clone(),
+                symbol: at.symbol_char(),
+                text: at.text.clone().unwrap_or_default(),
+            })
+        })
+        .collect()
+}
+
 /// Measures the palette's icons on a thread of their own, so the window
 /// never waits for them, and shows the palette once they are ready.
-fn measure_palette() {
+fn measure_palette(shown: Arc<Vec<palette::ShownGroup>>) {
     let spawned = std::thread::Builder::new()
         .name("palette icons".to_owned())
-        .spawn(|| {
-            let faces: Vec<(icons::Face, icons::Fit)> =
-                palette::tools().map(|(_, t)| (t.face, t.fit)).collect();
+        .spawn(move || {
+            let faces: Vec<(icons::Face, icons::Fit)> = shown
+                .iter()
+                .flat_map(|g| g.tools.iter().map(|t| (t.face, t.fit)))
+                .collect();
             let set = Arc::new(icons::IconSet::new(&faces, icons::Fill::PALETTE));
             let _ = slint::invoke_from_event_loop(move || {
                 let Some(app) = APP.with(|a| a.borrow().clone()) else {
@@ -2914,7 +3344,8 @@ fn set_palette(app: &Shared, ui: &AppWindow, redraw: bool) {
         return;
     };
     let model = ui.get_palette_groups();
-    let fresh = redraw || model.row_count() != palette::GROUPS.len();
+    let shown = s.palette_shown.clone();
+    let fresh = redraw || model.row_count() != shown.len();
     let images: Vec<Image> = if fresh {
         let px = (PALETTE_BUTTON * ui.window().scale_factor())
             .round()
@@ -2924,7 +3355,7 @@ fn set_palette(app: &Shared, ui: &AppWindow, redraw: bool) {
         Vec::new()
     };
     let mut images = images.into_iter();
-    let groups: Vec<PaletteGroupRow> = palette::GROUPS
+    let groups: Vec<PaletteGroupRow> = shown
         .iter()
         .enumerate()
         .map(|(g, group)| {
@@ -2933,9 +3364,10 @@ fn set_palette(app: &Shared, ui: &AppWindow, redraw: bool) {
                     .tools
                     .iter()
                     .map(|t| PaletteToolRow {
-                        id: t.id.into(),
+                        id: t.id.as_str().into(),
+                        name: t.name.as_str().into(),
                         icon: images.next().unwrap_or_default(),
-                        tip: palette::tool_tip(t.id, t.name).into(),
+                        tip: palette::tool_tip(&t.id, &t.name).into(),
                         enabled: false,
                         checked: false,
                     })
@@ -2945,7 +3377,7 @@ fn set_palette(app: &Shared, ui: &AppWindow, redraw: bool) {
                 model.row_data(g).map(|r| r.tools).unwrap_or_default()
             };
             PaletteGroupRow {
-                title: group.title.into(),
+                title: group.title.as_str().into(),
                 collapsed: s.palette.collapsed(g),
                 tools,
             }
@@ -3759,13 +4191,13 @@ fn sync_found(ui: &AppWindow) {
     }
     let groups = ui.get_palette_groups();
     let mut found = Vec::new();
-    for (g, group) in palette::GROUPS.iter().enumerate() {
+    for g in 0..groups.row_count() {
         let Some(row) = groups.row_data(g) else {
             continue;
         };
-        for (i, t) in group.tools.iter().enumerate() {
-            if palette::matches(t.name, &query)
-                && let Some(tool) = row.tools.row_data(i)
+        for i in 0..row.tools.row_count() {
+            if let Some(tool) = row.tools.row_data(i)
+                && palette::matches(tool.name.as_str(), &query)
             {
                 found.push(tool);
             }
@@ -4259,121 +4691,6 @@ fn track_section_event(app: &Shared, index: i32, widget: &str, event: TabEvent) 
     }
 }
 
-/// The plugin id of the manager's row `index`, when it has a settings
-/// window.
-fn app_rows_settings(app: &Shared, index: i32) -> Option<String> {
-    let s = app.borrow();
-    usize::try_from(index)
-        .ok()
-        .and_then(|i| {
-            manager::rows(&s.plugins, &manager::disabled(&s.stored))
-                .into_iter()
-                .nth(i)
-        })
-        .and_then(|r| r.settings)
-}
-
-/// Opens the settings window of the plugin `id` (interface 1.3), made the
-/// first time; it shows one plugin at a time.
-fn open_settings_window(app: &Shared, id: String) {
-    let existing = app
-        .borrow()
-        .settings_window
-        .as_ref()
-        .map(|(w, _)| w.clone_strong());
-    let window = match existing {
-        Some(w) => w,
-        None => {
-            let Ok(w) = PluginSettingsWindow::new() else {
-                message(
-                    app,
-                    Level::Error,
-                    "The plugin's settings window couldn't be opened.",
-                );
-                return;
-            };
-            install_plugin_links(&w.global::<PluginLinks<'_>>(), app);
-            let a = app.clone();
-            w.on_clicked(move |widget| settings_event(&a, &widget, TabEvent::Clicked));
-            let a = app.clone();
-            w.on_toggled(move |widget, on| settings_event(&a, &widget, TabEvent::Toggled(on)));
-            let a = app.clone();
-            w.on_slid(move |widget, v| settings_event(&a, &widget, TabEvent::Slid(v)));
-            let a = app.clone();
-            w.on_edited(move |widget, t| {
-                settings_event(&a, &widget, TabEvent::Edited(t.to_string()));
-            });
-            let a = app.clone();
-            w.on_chosen(move |widget, n| {
-                settings_event(&a, &widget, TabEvent::Chosen(u32::try_from(n).unwrap_or(0)));
-            });
-            let weak = w.as_weak();
-            w.on_close_clicked(move || {
-                if let Some(w) = weak.upgrade() {
-                    let _ = w.hide();
-                }
-            });
-            w
-        }
-    };
-    let name = {
-        let s = app.borrow();
-        s.plugins
-            .found()
-            .iter()
-            .find(|f| f.manifest.as_ref().is_some_and(|m| m.id == id))
-            .map(oxiguitar_host::Found::name)
-            .unwrap_or_else(|| id.clone())
-    };
-    window.set_window_title(format!("{name} Settings").into());
-    window.set_dark_interface(app.borrow().dark_interface);
-    window.set_rows(ModelRc::default());
-    window.set_message("…".into());
-    {
-        let mut s = app.borrow_mut();
-        if let Some(thread) = &s.tab_thread {
-            thread.send(plugin_tabs::Request::Settings {
-                plugin: id.clone(),
-                event: None,
-            });
-        }
-        s.settings_window = Some((window.clone_strong(), id));
-    }
-    let _ = window.show();
-}
-
-/// A widget of the settings window was used.
-fn settings_event(app: &Shared, widget: &str, event: TabEvent) {
-    let s = app.borrow();
-    if let (Some((_, plugin)), Some(thread)) = (&s.settings_window, &s.tab_thread) {
-        thread.send(plugin_tabs::Request::Settings {
-            plugin: plugin.clone(),
-            event: Some((widget.to_owned(), event)),
-        });
-    }
-}
-
-/// The tab thread answered for a settings window.
-fn settings_window_answer(app: &Shared, plugin: &str, content: Result<TabContent, String>) {
-    let s = app.borrow();
-    let Some((window, shown)) = &s.settings_window else {
-        return;
-    };
-    if shown != plugin {
-        return;
-    }
-    match content {
-        Ok(content) => {
-            window.set_rows(plain_rows(&content));
-            window.set_message(SharedString::new());
-        }
-        Err(why) => {
-            window.set_rows(ModelRc::default());
-            window.set_message(why.into());
-        }
-    }
-}
-
 /// Opens Transpose… for the caret's track, the selection or every track.
 fn open_transpose(app: &Shared, scope: oxiguitar_edit::Scope) {
     let Some(ui) = app.borrow().ui.upgrade() else {
@@ -4786,12 +5103,14 @@ fn question_answered(app: &Shared, i: i32) {
         return;
     };
     match (asked, i) {
-        (Asked::Save { .. }, 0) => app.borrow().worker.send(Request::ConfirmSave),
-        (Asked::Save { elsewhere: true }, 1) => {
-            // What waits on the save keeps waiting, for the file chosen.
-            app.borrow().worker.send(Request::CancelSave);
-            save_as_dialog(app);
-        }
+        (Asked::Save { can_keep }, 0) => app
+            .borrow()
+            .worker
+            .send(Request::ConfirmSave { keep: can_keep }),
+        (Asked::Save { can_keep: true }, 1) => app
+            .borrow()
+            .worker
+            .send(Request::ConfirmSave { keep: false }),
         (Asked::Save { .. }, _) => {
             let mut s = app.borrow_mut();
             s.after_save = None;
@@ -4808,8 +5127,8 @@ fn question_answered(app: &Shared, i: i32) {
     }
 }
 
-/// File → Save: the file the score came from, in its own format unless
-/// that loses part of the score (the worker asks then).
+/// File → Save: the file the score came from, in its own format (the
+/// worker asks first when that loses part of the score).
 fn save(app: &Shared) {
     // A new score has no file yet: Save asks for a name, as Save As.
     if app.borrow().untitled {
@@ -4820,7 +5139,7 @@ fn save(app: &Shared) {
 }
 
 /// File → Save As…: any name, in a format the plugins write, chosen by the
-/// name's extension (Guitar Pro 7–8's .gp when it has none).
+/// name's extension (the first listed when it has none).
 fn save_as_dialog(app: &Shared) {
     if let Some(problem) = no_dialogs() {
         app.borrow_mut().after_save = None;
@@ -4854,9 +5173,15 @@ fn save_as_dialog(app: &Shared) {
         );
         return;
     }
-    // The fullest format first, as the default.
+    // The score's own format first, as the default: the one its file's
+    // extension names.
+    let own = app.borrow().doc_name.as_deref().and_then(|n| {
+        std::path::Path::new(n)
+            .extension()
+            .map(|e| e.to_string_lossy().to_lowercase())
+    });
     let mut formats = formats;
-    formats.sort_by_key(|f| f.id != FULLEST);
+    formats.sort_by_key(|f| !own.as_ref().is_some_and(|e| f.extensions.contains(e)));
     let pick = move || {
         let first = formats.first().and_then(|f| f.extensions.first()).cloned();
         let mut dialog = rfd::FileDialog::new()
@@ -5131,7 +5456,7 @@ fn run_dialog(pick: impl FnOnce() + Send + 'static) {
 ///
 /// **Drops don't work on Wayland** (ADR 0006; CONTRIBUTING.md, "Known
 /// platform gaps"). winit 0.30 sends `DroppedFile` on Windows, macOS and
-/// X11 only: its Wayland backend has no drag and drop, and Slint 1.18
+/// X11 only: its Wayland backend has no drag and drop, and Slint 1.19
 /// passes no operating-system drops on. Listening ourselves would need our
 /// own `wl_data_device` on winit's connection, through an `unsafe` raw
 /// pointer and with no way to wake on its events but polling, which we
@@ -5403,23 +5728,23 @@ mod tests {
     }
 
     #[test]
-    fn each_linux_build_names_its_own_display_system() {
-        let linux = cfg!(not(any(target_os = "windows", target_vendor = "apple")));
-        let one = cfg!(feature = "wayland") != cfg!(feature = "x11");
-        if linux && one {
-            let own = if cfg!(feature = "wayland") {
-                "wayland"
-            } else {
-                "x11"
-            };
-            assert_eq!(display_system(), own);
-            assert!(wrong_build_hint(own).unwrap().contains(&format!(
+    fn each_build_names_its_own_display_system() {
+        let own = if cfg!(target_os = "windows") {
+            "windows"
+        } else if cfg!(target_vendor = "apple") {
+            "macos"
+        } else if cfg!(feature = "wayland") {
+            "wayland"
+        } else {
+            "x11"
+        };
+        assert_eq!(DISPLAY_SYSTEM, own);
+        match own {
+            "wayland" | "x11" => assert!(wrong_build_hint(own).unwrap().contains(&format!(
                 "FuTab's {} build",
                 if own == "x11" { "X11" } else { "Wayland" }
-            )));
-        } else {
-            assert_eq!(display_system(), oxiguitar_host::display_system());
-            assert!(wrong_build_hint("wayland").is_none());
+            ))),
+            _ => assert!(wrong_build_hint(own).is_none()),
         }
     }
 

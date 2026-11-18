@@ -44,21 +44,21 @@ sudo install -d -m 0755 /etc/apt/keyrings
 sudo curl -fsSL https://mateusrdp.github.io/oxiguitar-packages/oxiguitar.gpg -o /etc/apt/keyrings/oxiguitar.gpg
 sudo curl -fsSL https://mateusrdp.github.io/oxiguitar-packages/oxiguitar.sources -o /etc/apt/sources.list.d/oxiguitar.sources
 sudo apt update
-sudo apt install oxiguitar-guitarpro oxiguitar-midi oxiguitar-pipewire oxiguitar-wav oxiguitar-nam oxiguitar-eq
+sudo apt install oxiguitar-guitarpro oxiguitar-midi oxiguitar-pipewire oxiguitar-wav oxiguitar-nam oxiguitar-eq oxiguitar-wah
 ```
 
 On Fedora and relatives:
 
 ```sh
 sudo curl -fsSL https://mateusrdp.github.io/oxiguitar-packages/oxiguitar.repo -o /etc/yum.repos.d/oxiguitar.repo
-sudo dnf install oxiguitar-guitarpro oxiguitar-midi oxiguitar-pipewire oxiguitar-wav oxiguitar-nam oxiguitar-eq
+sudo dnf install oxiguitar-guitarpro oxiguitar-midi oxiguitar-pipewire oxiguitar-wav oxiguitar-nam oxiguitar-eq oxiguitar-wah
 ```
 
 Install only the plugin packages, never the `oxiguitar` package itself, or you get OxiGuitar alongside FuTab. The plugins and their repository are OxiGuitar's, signed with its maintainer's key; report problems you meet through FuTab [here](https://github.com/PurpleIcon/futab/issues) first. On Windows and macOS, and on Linux without those repositories, download each plugin's zip for your system from its own repository's latest release (for example [Guitar Pro](https://github.com/mateusrdp/oxiguitar-guitarpro/releases/latest)) and put its `.oxp` file in FuTab's plugin folder: `%APPDATA%\FuTab\plugins\` on Windows (or a `plugins` folder beside `futab.exe`), `~/Library/Application Support/FuTab/plugins/` on macOS, `~/.local/share/futab/plugins/` on Linux. OxiGuitar's Windows and macOS plugin installers put plugins in OxiGuitar's own folder, which FuTab doesn't look in.
 
 ### After installing
 
-Open a song. FuTab plays each kind of track with the matching recorded set by itself (clean, overdriven and distorted guitars, nylon and steel strings, bass, drums); **Tools → Plugins…** lists the plugins it found and **Settings…** on MIDI changes the sets. OxiGuitar's [manual](https://mateusrdp.github.io/oxiguitar/) says more (FuTab works the same way; it has no manual of its own yet), and its [Better sounds](https://mateusrdp.github.io/oxiguitar/better-sounds.html) page lists the sets.
+Open a song. FuTab plays each kind of track with the matching recorded set by itself (clean, overdriven and distorted guitars, nylon and steel strings, bass, drums); **Tools → Plugins…** lists the plugins it found and **Plugins → MIDI Sound Sets…** changes the sets. OxiGuitar's [manual](https://mateusrdp.github.io/oxiguitar/) says more (FuTab works the same way; it has no manual of its own yet), and its [Better sounds](https://mateusrdp.github.io/oxiguitar/better-sounds.html) page lists the sets.
 
 ## How to get involved
 

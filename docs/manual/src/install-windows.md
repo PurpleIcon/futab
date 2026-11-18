@@ -1,6 +1,6 @@
 # Installing on Windows
 
-FuTab has no Windows download yet: build it from source ([Installing](installing.md)). This page is about plugins.
+Download `FuTab-VERSION-windows-x86_64.zip` (or `arm64`) from the [latest release](https://github.com/PurpleIcon/futab/releases/latest), unzip it anywhere and run `futab.exe`. It isn't signed: on SmartScreen's warning choose **More info → Run anyway**. Then install the plugins, below. To build it yourself instead, see [Installing](installing.md).
 
 Plugins are files ending in `.oxp`. FuTab looks for them in the `plugins` folder beside `futab.exe`, in `C:\Program Files\FuTab\plugins` and `C:\Program Files\OxiGuitar\plugins`, and in your own folder, `%APPDATA%\FuTab\plugins`. **Help → About** lists every folder it searches, and **Tools → Plugins…** every plugin it found. [The official plugins](official-plugins.md) says what each does.
 

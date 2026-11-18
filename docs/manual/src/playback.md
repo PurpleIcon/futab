@@ -40,12 +40,15 @@ Every effect of the score is heard as written, the notation of Guitar Pro 8's pa
 - An **arpeggio** rolls the chord over the first half of its beat (at most a quarter note).
 - A **rasgueado** strikes the chord once for each finger of its pattern across the beat, short-short-long for an anapaest pattern; an index finger's second stroke (i i) comes back up.
 - A **golpe** is a muted knock (the lowest string for the thumb, the highest for a finger), a **dead slap** every string muted.
-- Ottava lines, slurs and slash notation change how the music is written, not how it sounds; wah and pick scrapes are shown only, as in Guitar Pro.
+- Ottava lines, slurs and slash notation change how the music is written, not how it sounds; pick scrapes are shown only, as in Guitar Pro.
+- A **wah-wah** mark rocks a wah pedal across its beat, with the **Wah-wah** plugin installed ([Official plugins](official-plugins.md)): an open mark from the heel to the toe ("wah"), a closed one back, each over the beat's first half, unless you drew the mark a curve of its own ([Wah-wah](editing.md#wah-wah)). The pedal is off on beats without a mark. It is a Cry Baby unless the track's **Wah-wah** section (the Track tab) says otherwise: there you switch a track's pedal off, or set where its sweep starts (**Heel**, 450 Hz) and how far it goes (**Sweep**, 2.3 octaves). The wah comes before the amp unless you move it. Without the plugin the marks are shown only.
 - A bar with a **repeat sign** plays the bar (or two bars) it repeats.
 
 ## The mixer
 
-Each track's row at the bottom has a **mute** button (the loudspeaker crossed out), a **solo** button (headphones: when any track is soloed, only soloed tracks are heard), a **volume** slider and a **pan** knob (drag it, or use the arrow keys; a double click centres it). They start as the file sets them and change the sound as you move them. **Level**, in the Player tab, is the volume of everything together. None of this is saved into the file; it lasts until you close FuTab.
+Each track's row at the bottom has a **mute** button (the loudspeaker crossed out), a **solo** button (headphones: when any track is soloed, only soloed tracks are heard), a **volume** slider and a **pan** knob (drag it, or use the arrow keys; a double click centres it). They start as the file sets them and change the sound as you move them, even while the song plays. **Level**, in the Player tab, is the volume of everything together.
+
+The mixer is part of the song: **saving writes it into the file**, and **Edit → Undo** takes a move back (a whole drag of a slider or the knob is one step; Undo waits until the song is paused, as all editing does). Mute and solo are saved as they are, as Guitar Pro and TuxGuitar save them, so a track muted when you save opens muted. Each format keeps as much as it holds: Guitar Pro 7-8 (`.gp`) and TuxGuitar files keep all four; a Guitar Pro 5 file keeps volume and pan to sixteen steps and keeps mute and solo; a MusicXML or MIDI file keeps volume and pan, but neither has a place for mute or solo. **Level** is FuTab's own and isn't saved.
 
 However loud a song is, FuTab never lets the sound go past just under full scale, so it doesn't distort when many tracks play at once.
 
@@ -57,7 +60,7 @@ A track with chord diagrams over its music (Chord…, or A) can play them too: t
 
 Select a track (click its name) and open the **Track** tab on the right: under the track's name, instrument and strings, the plugins add sections that change how that one track sounds. They are kept beside the score, in `FILE.oxg`, so the song sounds the same the next time; the score itself doesn't change.
 
-- **Sound** (the MIDI plugin): **Automatic** plays the set the settings window picks for the track's kind of instrument (clean, overdriven or distorted guitars, basses and so on); or the track plays like another kind, or with a set of its own ([Better sounds](better-sounds.md#one-tracks-own-sound)).
+- **Sound** (the MIDI plugin): **Automatic** plays the set **Plugins → MIDI Sound Sets…** picks for the track's kind of instrument (clean, overdriven or distorted guitars, basses and so on); or the track plays like another kind, or with a set of its own ([Better sounds](better-sounds.md#one-tracks-own-sound)).
 - **Amp (NAM)**, for guitars and basses: an amp model and a cabinet ([Amp models (NAM)](amp-models.md)).
 - **Equalizer**, for every track: **Off** (the default), **Basic** (three bands: Bass, a shelf at 120 Hz; Middle, at 700 Hz; Treble, a shelf at 3.2 kHz) or **Graphic** (ten bands, one octave apart, from 31 Hz to 16 kHz). Each band goes from −12 to +12 dB in half-decibel steps; **Flat** sets them all back to 0. Basic and Graphic each keep their bands, so switching between them loses nothing. It works with or without an amp, adds no delay, and comes as a plugin of its own, `oxiguitar-eq` ([The official plugins](official-plugins.md)).
 
