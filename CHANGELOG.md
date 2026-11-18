@@ -8,7 +8,7 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ### Added
 
-- **review-skills and review-rules skills** (#28): the agent skills check that every skill is `.claude/skills/<skill-name>/SKILL.md` and every rule `.claude/rules/<rule-name>/RULE.md`, with kebab-case folder names (at most 64 characters) and YAML front matter whose `name` matches the folder and that has a `description`; they report what doesn't, and fix it once asked. `scripts/agents/check-layout.py` does the checking.
+- **review-skills and review-rules skills** (#28): the agent skills review FuTab's skills and rules. `scripts/agents/check-layout.py` checks the layout (`.claude/skills/<skill-name>/SKILL.md` and `.claude/rules/<rule-name>/RULE.md`, kebab-case folder names, YAML front matter whose `name` matches the folder and that has a `description`); the skills also check descriptions, the files each one points at, how much it loads into a session, that rules and skills don't contradict each other, and that AGENTS.md lists every rule. They report findings by severity, and fix them once asked.
 
 ### Changed
 
