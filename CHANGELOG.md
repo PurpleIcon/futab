@@ -6,6 +6,10 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ## [Unreleased]
 
+### Fixed
+
+- **CI's macOS job names** (#28): on pull requests, the skipped macOS jobs are listed as Test (macOS) and Plugin template (macOS), no longer as `Test (${{ matrix.name }})` and `Plugin template (${{ matrix.name }})`.
+
 ## [0.2.0] - 2026-11-18
 
 FuTab caught up with OxiGuitar 0.21.1: a Plugins menu and plugin interface 1.10, the mixer saved in the file, drum entry on the drum staff, and Save in the file's own format.

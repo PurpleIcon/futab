@@ -184,7 +184,7 @@ jobs:
   # on every pull request (Nov 2026; release.yml builds the .dmg the same
   # way). Its steps are the test job's.
   test-macos:
-    name: Test (${{ matrix.name }})
+    name: Test (macOS)
     if: github.event_name == 'workflow_dispatch'
     runs-on: ${{ matrix.os }}
     strategy:
@@ -251,7 +251,7 @@ jobs:
   # The plugin template on macOS, only when CI is started by hand, as
   # test-macos. Its steps are the template job's.
   template-macos:
-    name: Plugin template (${{ matrix.name }})
+    name: Plugin template (macOS)
     if: github.event_name == 'workflow_dispatch'
     runs-on: ${{ matrix.os }}
     strategy:
