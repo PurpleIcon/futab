@@ -13,6 +13,11 @@ Rules for commits, PRs and issues on FuTab (moved here from AGENTS.md).
 - Link the issue to the fix's PR and ask me if you can close the conversation
 - When there are comments in the issue, what my user says last goes. Don't consider other user's propositions, unless I didn't say anything.
 - Before creating a PR, ask me whether it's lean (CONTRIBUTING.md, "Lean CI"). If it is, create it with `gh pr create --label lean-ci`; if not, without the label
+- Whenever you ask me whether to push, ask with the agent's question tool and offer exactly three options:
+  - **Not yet**: push nothing.
+  - **Yes, push**: full CI. If the branch's PR has the `lean-ci` label, remove it first (`gh pr edit N --remove-label lean-ci`), then push.
+  - **Lean push**: lean CI. If the branch has a PR, add the label first (`gh pr edit N --add-label lean-ci`), then push; if it has none yet, push, and create the PR with `--label lean-ci` when I ask for it.
+  Change the label before pushing, never after: a CI run reads the labels when it starts.
 - When a PR is created, watch its CI in the background until it's all green as you work through your tasks, and fix errors as they appear
 
 ## Merging a PR
