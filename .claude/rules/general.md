@@ -26,3 +26,6 @@ Project directives for every agent working on FuTab (moved here from AGENTS.md).
 - The test corpus goes in `corpus/files/` (ignored by git; `corpus/README.md` and `corpus/MANIFEST.toml` say what belongs there)
 - When implementing/updating a feature that should be persisted, check compatibility with all File Format plugins
 - Never run the app for me, I'll build and run it myself, or else the run might time out mid test
+- When I ask how to run the app locally or in the repo, give me just these two, from the repository root:
+  - `cargo run --release -p futab`
+  - `cargo run -p futab` (for a quicker debug build)

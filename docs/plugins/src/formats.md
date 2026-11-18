@@ -121,7 +121,7 @@ A writer returns the whole file, and in `losses` everything the format can't hol
 {{#include ../template/src/format.rs:write}}
 ```
 
-Writers are declared and called through the plugin host today, and the contract suite checks them; the window's Save and Export menus use them from the editor's release (FuTab 0.5).
+Writers are declared and called through the plugin host today, and the contract suite checks them; the window's Save and Export menus use them from the editor's release (OxiGuitar 0.5).
 
 ## One format per plugin
 

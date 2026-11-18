@@ -38,12 +38,14 @@ Git merges a commit together with everything before it, so a merge can only stop
 ## 1. Before merging
 
 1. Check the work tree is clean (`git status`) and that you're on a branch made from up-to-date `origin/develop`, named `feat/merge-oxiguitar-<version>` when the target is an upstream release, else `feat/merge-oxiguitar-pr<N>` for one PR or `feat/merge-oxiguitar-pr<A>-<B>` for a range.
-2. Run `python3 -I scripts/upstream/catchup.py` and read `oxiguitar-catchup.md`: the upstream PRs coming in, the releases, and the files that will conflict. Tell me what's coming, in a few lines, before you start.
+2. Update the catch-up report as the `upstream-report` skill says (`python3 -I scripts/upstream/catchup.py`) and read `oxiguitar-catchup.md`: the upstream PRs coming in, the releases, and the files that will conflict. Tell me what's coming, in a few lines, before you start.
 3. Merge without committing, so the checks in step 3 below also cover lines that merged cleanly:
 
    ```bash
-   git merge --no-ff --no-commit <target>
+   git -c merge.conflictStyle=zdiff3 merge --no-ff --no-commit <target>
    ```
+
+   `zdiff3` shows the common ancestor in each conflict (the `|||||||` part), so you can see which side changed which line.
 
    `<target>` is `upstream/develop` when merging everything, else the commit from step 0.
 
@@ -53,19 +55,31 @@ Git merges a commit together with everything before it, so a merge can only stop
 
 ## 2. Resolving conflicts
 
-Go conflict by conflict (`git diff --name-only --diff-filter=U`). For each hunk, decide which kind it is:
+Go conflict by conflict (`git diff --name-only --diff-filter=U`). Settle each hunk line by line against the ancestor: a hunk often holds lines only one side changed, and a line only one side changed keeps that side's change. For example, upstream adds a table row next to a line where FuTab wrote "OxiGuitar recommends" for upstream's "we recommend": keep the new row and FuTab's line. The kinds below are for lines both sides changed. For each, decide which kind it is:
 
 - **Name only:** ours and theirs differ only in a name from the table below. Keep ours.
-- **Behaviour, with names in it:** upstream changed code, text or config, and the text it touched has FuTab's names on our side. Take upstream's version, then put every name back to FuTab's using the table. Check the result line by line against both sides: nothing of upstream's change dropped, no OxiGuitar name brought back.
+- **Behaviour, with names in it:** upstream changed code, text or config, and the text it touched has FuTab's names on our side. Take upstream's version, then put every name back to FuTab's using the table. Check the result line by line against both sides: nothing of upstream's change dropped, no OxiGuitar name brought back. If upstream deleted or rewrote lines that FuTab changed only for the name, take upstream's side: a deletion stays deleted, with no FuTab name to put back.
 - **Both changed behaviour:** FuTab changed the same lines for a reason of its own (for example the hidden MIDI advice in `crates/oxiguitar-host/src/advice.rs`). Keep both if they combine; if they don't, stop and ask me, quoting both sides.
 
 Files:
 
-- `CHANGELOG.md`: always keep ours (`git checkout --ours CHANGELOG.md`). FuTab's changelog lists FuTab's changes only; the merge gets its own entry (step 4).
-- A file FuTab renamed (desktop entry, metainfo, mime XML, man pages, `debian/*.manpages`, `scripts/package/oxiguitar-start`, icons): upstream's changes go into **FuTab's** file. If git reports modify/delete or leaves upstream's old-named file behind, apply upstream's change to FuTab's file and `git rm` the old name.
+- `CHANGELOG.md`: always keep ours, conflict or not: `git checkout HEAD -- CHANGELOG.md`. Not `--ours`, which does nothing when there's no conflict: upstream's entries, and even its release heading (`## [0.20.1]` above FuTab's entries, from OxiGuitar PR 306), can merge in cleanly. Check after every merge, before adding the merge's own entry (step 4): `git diff --cached --name-only HEAD -- CHANGELOG.md` must print nothing. FuTab's changelog lists FuTab's changes only.
+- `ROADMAP.md` is FuTab's own roadmap: never merge anything from upstream into it, conflict or not. Keep ours (`git checkout --ours ROADMAP.md`). A file only upstream changed merges without a conflict, so check after every merge: `git diff --cached --name-only HEAD -- ROADMAP.md` must print nothing. Upstream's mentions of `ROADMAP.md` elsewhere (its milestones M1, M2…, "see ROADMAP.md") mean OxiGuitar's roadmap: in FuTab's files write them as "OxiGuitar's roadmap" (plain text, no link), as in `CREDITS.md`; comments, `docs/design/`, `docs/adr/` and `docs/parity.md` keep them as they are. Step 3 checks for them.
+- `CREDITS.md` is FuTab's:
+  - **The opening is static**, everything from `# Credits` to the end of `## Special thanks` (FuTab's copyright, FuTab's intro, "FuTab is a fork of OxiGuitar", OxiGuitar's copyright, the thanks). Keep ours exactly; take none of upstream's changes there, not even a wording change.
+  - **The sections after Special thanks** (the projects, the crates, fonts and assets) merge as usual: upstream's changes, with FuTab's names. FuTab's own rows (the OxiGuitar row, the FuTab icon) stay. No row names a version (since OxiGuitar PR 295: "MuseScore Studio", not "MuseScore Studio 4.7"; the licence report from `Cargo.lock` has the exact ones), FuTab's OxiGuitar row included: "OxiGuitar", not "OxiGuitar 0.19.1".
+  - **Trademarks:** keep FuTab's sentence, "FuTab mirrors Guitar Pro's layout and shortcuts only: …". Take upstream's other changes to the section.
+- Install instructions (`README.md`'s install sections, `docs/manual/src/installing.md` and `docs/manual/src/install-*.md`) are FuTab's: FuTab's own package, then only OxiGuitar's plugin packages. From upstream take only which plugins there are: a plugin package added or removed goes into FuTab's commands and lists, with its one-line description (for example OxiGuitar PR 296 added `oxiguitar-wah` to FuTab's `apt install` and `dnf install` lines and to `install-linux.md`'s list). Never take upstream's instructions for the `oxiguitar` package itself, or its download sections FuTab removed (AppImage, Windows, macOS). Whatever upstream changes there, keep FuTab's:
+  - **The order:** install FuTab first, then OxiGuitar's plugins (`install-linux.md`'s "1. Install FuTab" and "2. Install the plugins").
+  - **FuTab's downloads:** the links to FuTab's latest release (`PurpleIcon/futab/releases/latest`), the tables of FuTab's files (`futab-VERSION-1.x86_64.rpm`, `futab_VERSION_amd64.deb`, `FuTab-VERSION-x86_64.AppImage`, `FuTab-VERSION-windows-x86_64.zip`), the `futab-x11` note, and "FuTab installs beside OxiGuitar without sharing a file or a setting with it".
+  - **What FuTab's packages do:** they recommend the Guitar Pro, MIDI, ALSA and PipeWire plugins, so adding OxiGuitar's repository first installs them with FuTab. If upstream changes which plugins `scripts/package/linux.sh` recommends, change this sentence to match.
+  - **What FuTab has and hasn't released:** Linux and Windows downloads; macOS builds from source until FuTab publishes a macOS download. Never bring back "no packages yet" or "no download yet" for a system FuTab releases for.
+- A file FuTab renamed (desktop entry, metainfo, mime XML, man pages, `debian/*.manpages`, `scripts/package/oxiguitar-start`, icons): upstream's changes go into **FuTab's** file. If git reports modify/delete or leaves upstream's old-named file behind, apply upstream's change to FuTab's file and `git rm` the old name. An upstream change to the metainfo that only adds a `<release>` (every upstream release commit makes one) brings nothing to FuTab's file, by the version rule below: just `git rm` the old name.
 - A file FuTab deleted on purpose (`scripts/new-repo.sh`, `scripts/split-history.sh`, the PayPal button and QR code, the placeholder icon): keep it deleted. If upstream changed it, tell me in one line.
-- A file upstream added: keep it. If its name or contents carry OxiGuitar names that the table renames, rename them. For example, upstream's new `FUNDING.yml` points at OxiGuitar's donations: ask me whether FuTab keeps it.
-- Version numbers (`Cargo.toml`, `Cargo.lock`, `debian/changelog`, the test plugins' `manifest.json`, metainfo `<release>`): FuTab has its own version (0.1.0 was its first release; OxiGuitar's are 0.19 and up). Keep FuTab's version, FuTab's `debian/changelog` entries and FuTab's metainfo `<release>` entries only (never add upstream's), and take only upstream's dependency changes in `Cargo.lock`. If `Cargo.lock` doesn't settle cleanly, take theirs and then run `cargo build` so Cargo writes FuTab's own entries back. If upstream's release is a good point for a FuTab release too, say so; don't bump anything yourself.
+- `README.md` sections FuTab removed: upstream's Status, its feature showcase (the screenshots, "Hear it", paragraphs such as OxiGuitar PR 301's "Drums") and its own privacy wording stay removed; drop upstream's additions there, and any new file only they use (`git rm` it, as `docs/readme/drums.png`). FuTab's README keeps its own structure; its install sections follow the install-docs rule above.
+- A file upstream added: keep it. If its name or contents carry OxiGuitar names that the table renames, rename them.
+- `.github/FUNDING.yml`: never take upstream's (it points at OxiGuitar's donations). If FuTab has its own, keep ours (`git checkout --ours .github/FUNDING.yml`). If FuTab has none, take it out of the merge (`git rm -f .github/FUNDING.yml`). A file only upstream added or changed merges without a conflict, so check this after every merge, conflicts or not (`git diff --cached --name-only HEAD -- .github/FUNDING.yml` must print nothing). This is settled in the merge, not by skipping the PR that brought it.
+- Version numbers (`Cargo.toml`, `Cargo.lock`, `spikes/*/Cargo.lock`, `debian/changelog`, the test plugins' `manifest.json`, metainfo `<release>`): FuTab has its own version (0.1.0 was its first release; OxiGuitar's are 0.19 and up). Upstream's release commits ("Release x.y.z", no PR) change only these and its changelog, and conflict in every merge that crosses one. Keep FuTab's version, FuTab's `debian/changelog` entries and FuTab's metainfo `<release>` entries only (never add upstream's), and take only upstream's dependency changes in the `Cargo.lock` files (a spike's lists the core's crates at the app's version too). If `Cargo.lock` doesn't settle cleanly, take theirs and then run `cargo build` so Cargo writes FuTab's own entries back; for a spike's, take theirs and run `cargo metadata --manifest-path spikes/<name>/Cargo.toml --format-version 1 > /dev/null`, which rewrites its lock without building. If upstream's release is a good point for a FuTab release too, say so; don't bump anything yourself.
 
 ## The name table
 
@@ -75,27 +89,50 @@ What FuTab renamed: always FuTab's side in a merge.
 | --- | --- |
 | `OxiGuitar` (the app's name, in text users read: UI strings, messages, the user manual `docs/manual/`, the plugin guide `docs/plugins/`, man pages, metainfo, README) | `FuTab` |
 | package and binary `oxiguitar`, `oxiguitar-x11`, `oxiguitar-cli` (`cargo run -p ...`, `target/.../oxiguitar*`, `/usr/bin/...`, `/app/bin/...`, `oxiguitar.exe`) | `futab`, `futab-x11`, `futab-cli`, `futab.exe` |
+| package `oxiguitar-app` (`-p`, `--exclude`, `cargo tree -p`, messages such as "build oxiguitar-app with…") | `futab` (the folder `crates/oxiguitar-app/` stays) |
 | app ID `io.github.mateusrdp.OxiGuitar` (and file names that use it) | `io.github.purpleicon.FuTab` |
-| repository `mateusrdp/oxiguitar` as **this** project's home: `repository`/`homepage`, bug reports, issues, discussions, screenshots | `PurpleIcon/futab` |
+| repository `mateusrdp/oxiguitar` as **this** project's home: `repository`/`homepage`, bug reports, issues, discussions, screenshots (web addresses: only those in "Web addresses" below; ask about any other) | `PurpleIcon/futab` |
 | settings, data and cache folders `oxiguitar` / `OxiGuitar` | `futab` / `FuTab` |
-| FuTab's own plugin folders: `lib/oxiguitar/plugins`, `~/.local/share/oxiguitar/plugins`, `Application Support/OxiGuitar/plugins` (searched first) | `lib/futab/plugins`, `~/.local/share/futab/plugins`, `Application Support/FuTab/plugins` |
+| FuTab's own plugin folders: `lib/oxiguitar/plugins`, `~/.local/share/oxiguitar/plugins`, `Application Support/OxiGuitar/plugins` (searched first), and the shared folders beside them (`lib/oxiguitar/<name>`, `~/.local/share/oxiguitar/<name>`, such as `soundfonts`, `nam` or a plugin's own) | `lib/futab/plugins`, `~/.local/share/futab/plugins`, `Application Support/FuTab/plugins`; `lib/futab/<name>`, `~/.local/share/futab/<name>`. Where text lists the system folders, add OxiGuitar's after FuTab's (`/usr/lib/futab/<name>`, then `/usr/lib/oxiguitar/<name>`): FuTab searches both |
 | release files `OxiGuitar-…AppImage`, `…flatpak`, `…windows-….zip`, `…macos-universal.dmg`; `dist/OxiGuitar-…` | `FuTab-…` |
 | launcher `oxiguitar-start`, man pages `oxiguitar.1`, `oxiguitar-cli.1` | `futab-start`, `futab.1`, `futab-cli.1` |
 | icon `oxiguitar-*.png`, `oxiguitar-placeholder.svg` | `futab-*.png`, `futab.svg` |
 | the core's advice dialog title / plugin name "OxiGuitar" (`Asked::core`) | "FuTab" |
 | debian package `oxiguitar`, maintainer `OxiGuitar <maintainer@oxiguitar.invalid>` | `futab`, `FuTab <maintainer@futab.invalid>` |
 
+**Versions in text.** FuTab's version numbers are its own, so "OxiGuitar 0.18" never becomes "FuTab 0.18". What a requirement needs ("Needs OxiGuitar 0.18 or later") becomes the first FuTab release that holds that OxiGuitar release, from the table below. A note about OxiGuitar's past ("Called SoundFont in OxiGuitar 0.10 and earlier") stays OxiGuitar's. If a requirement is newer than every FuTab release, ask me. Add a row with each FuTab release.
+
+| OxiGuitar | First FuTab release that holds it |
+| --- | --- |
+| up to 0.19.1, and up to OxiGuitar PR 290 (mateusrdp/oxiguitar@4ae4593) | 0.1.0 |
+| 0.19.2 up to 0.21.1 (mateusrdp/oxiguitar@e72d200) | 0.2.0 |
+
 What stays OxiGuitar's: never rename these, in a merge or anywhere else.
 
-- **Credit and copyright:** SPDX headers (`Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors`), `authors` in manifests, CREDITS.md, the About box's credit to OxiGuitar, "a fork of OxiGuitar".
+- **Credit and copyright:** SPDX headers (`Copyright (C) 2026 Mateus Rocha de Paula and the OxiGuitar contributors`), `authors` in manifests, OxiGuitar's copyright line and row in CREDITS.md (the file itself is FuTab's: see step 2), the About box's credit to OxiGuitar, "a fork of OxiGuitar".
 - **Code names:** crate folders (`crates/oxiguitar-*`), the library crates and their Rust names (`oxiguitar_plugin`, `oxiguitar_host`, ...), the `OXIGUITAR_*` environment variables (`OXIGUITAR_HOME`, ...).
 - **Plugins** (OxiGuitar's, used as they are): plugin repo and package names (`oxiguitar-guitarpro`, `oxiguitar-midi`, ...), plugin ids (`oxiguitar.midi`, ...), the core's advice id `oxiguitar` (`advice::CORE`), `oxiguitar-set.json`, `.oxp` files, and the plugin SDK's git source `https://github.com/mateusrdp/oxiguitar` in plugin `Cargo.toml`s.
-- **OxiGuitar's plugin folders as a fallback** (`/usr/lib/oxiguitar/plugins` and the others, searched after FuTab's), and `/usr/share/oxiguitar/soundfonts`.
+- **OxiGuitar's plugin folders as a fallback** (`/usr/lib/oxiguitar/plugins` and the others, searched after FuTab's), the shared folders beside them (`/usr/lib/oxiguitar/<name>`), and `/usr/share/oxiguitar/soundfonts`.
 - **File formats:** the `.oxg` sidecar and anything else written to a user's files. Renaming those would break files people already have.
-- **Code comments and design records:** comments in the code (`//`, `///`, `//!`, `#`), `docs/design/` and `docs/adr/` keep OxiGuitar's name, and upstream's changes to them are taken as they are. They record OxiGuitar's design and decisions; renaming them would only make every later merge conflict. FuTab's own design notes and decisions go in `docs/futab-design/` and `docs/futab-adr/`, never into these.
+- **Code comments and design records:** comments in the code (`//`, `///`, `//!`, `#`), `docs/design/`, `docs/adr/` and `docs/parity.md` (OxiGuitar's feature check against Guitar Pro, TuxGuitar and alphaTab, from OxiGuitar PR 298) keep OxiGuitar's name, and upstream's changes to them are taken as they are. They record OxiGuitar's design, decisions and checks; renaming them would only make every later merge conflict. FuTab's own design notes and decisions go in `docs/futab-design/` and `docs/futab-adr/`, never into these.
 - **Links to upstream as upstream:** the `upstream` remote, links to OxiGuitar's changelog, PRs and issues, the catch-up script. In anything that reaches GitHub (commit messages, PR text, the changelog), name upstream PRs as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`: see Referring to upstream in `.claude/rules/github.md`.
 
 When a name fits neither list, it's the clash you can't settle: list it with its file and line, and ask me.
+
+## Web addresses
+
+Never merge a link to OxiGuitar (`github.com/mateusrdp/...`, or any other site of OxiGuitar's) as it is, and never rename one to FuTab's on your own: each needs a decision. The links decided so far, in code, docs, scripts and workflows:
+
+| Link | Points at |
+| --- | --- |
+| Help → About's **Credits** link (`links::CREDITS` in `crates/oxiguitar-app/src/links.rs`, and its test) | `https://github.com/PurpleIcon/futab/blob/main/CREDITS.md` |
+| Bug reports and issues of the app (`ISSUES_URL` in `inventory.rs`, `ISSUES` in `crash.rs`, the packages' bug address) | `https://github.com/PurpleIcon/futab/issues` (`/issues/new` where upstream opens a new one) |
+| The project's home (`repository`, `homepage`, the packages' and release notes' links to FuTab) | `https://github.com/PurpleIcon/futab` |
+| About's "a fork of OxiGuitar" line | `https://github.com/mateusrdp/oxiguitar` (stays) |
+| Where the plugins are published (`PLUGINS_URL` in `inventory.rs`), the release notes' links to OxiGuitar's plugins | OxiGuitar's (stays) |
+| The plugin SDK's git source (plugin `Cargo.toml`s, `scripts/check-plugin-template.sh`, the plugin guide), the `upstream` remote and `scripts/upstream/catchup.py` | OxiGuitar's (stays) |
+
+For any other link to OxiGuitar that a merge brings in, new or changed: stop and ask me, with its file, line and what it's for, and what you'd point it at. Then add my answer to this table. The step-3 check below finds them (`mateusrdp`).
 
 ## 3. Check that no old name came back
 
@@ -111,7 +148,19 @@ Go through every hit against the two lists: rename what the table renames, leave
 git diff --cached --name-only --diff-filter=A HEAD | grep -i oxiguitar
 ```
 
-These are new files with OxiGuitar in their name; rename them by the table. Then do the build and lint checks (not the tests unless I ask):
+These are new files with OxiGuitar in their name; rename them by the table. Then:
+
+```bash
+git diff --cached HEAD -U0 -- . ':!docs/design' ':!docs/adr' ':!docs/parity.md' | grep -n '^+.*ROADMAP' | grep -v '^[0-9]*:+++'
+```
+
+These are mentions of upstream's roadmap: write each as "OxiGuitar's roadmap" (step 2, `ROADMAP.md`), unless it's a code comment. Then:
+
+```bash
+git diff --cached HEAD -U0 -- . ':!docs/design' ':!docs/adr' ':!docs/parity.md' ':!CHANGELOG.md' | grep -nE '^\+.*(-p oxiguitar(-app|-cli)?\b|--exclude oxiguitar-app|\boxiguitar-(app|cli|x11)\b[^/]|/bin/oxiguitar|oxiguitar\.exe|target/[a-z]+/oxiguitar)' | grep -v '^[0-9]*:+++'
+```
+
+These are package and binary names, often in lines that merged cleanly (OxiGuitar PR 305's new Clippy steps in `ci.yml` used `-p oxiguitar-app`, which would have failed FuTab's CI). The first check above lists them too, but among the crate names that stay; this one lists only these. Rename each by the table (`oxiguitar-app` → `futab`, `oxiguitar-cli` → `futab-cli`, `oxiguitar-x11` → `futab-x11`), except crate folder paths (`crates/oxiguitar-app/…`) and code comments. Then do the build and lint checks (not the tests unless I ask):
 
 ```bash
 cargo build
@@ -145,7 +194,7 @@ What skipping means (say this to me when I ask to skip, for that PR in particula
 
 - **Upstream counts it as merged.** The catch-up report won't list it again, and git won't offer it again. Getting it later takes a deliberate `git revert` of the revert, not another merge.
 - **Later upstream PRs may build on it** (for example #289 builds on #270's Harmonize). Before skipping, check whether later missing PRs touch the same files or code (`git diff --stat <sha>^ <sha>`, compared with what later commits change). If they do, they'll conflict or not build once it's skipped. Say which ones, and skip them all or none.
-- **The cost grows with every merge.** Each later upstream change to the code the revert removed conflicts again in every future merge. Skipping suits self-contained changes FuTab doesn't want (`FUNDING.yml`, OxiGuitar-only links or branding); for a feature FuTab doesn't want, hiding it behind a setting or a plugin is often cheaper over time than reverting it.
+- **The cost grows with every merge.** Each later upstream change to the code the revert removed conflicts again in every future merge. Skipping suits self-contained changes FuTab doesn't want (OxiGuitar-only links or branding; `FUNDING.yml` has its own rule in step 2); for a feature FuTab doesn't want, hiding it behind a setting or a plugin is often cheaper over time than reverting it.
 - **The changelog leaves it out**, and the PR description says why.
 
 ## 4. Changelog
@@ -229,16 +278,7 @@ Check it against what was merged:
 
 Then tell me in one line what upstream still has that FuTab doesn't (count, and the next PR or two). If a merged PR is still listed, something broke the ancestry (a cherry-pick, a rebase, or a merge of the wrong commit): stop and tell me.
 
-### When is `oxiguitar-catchup.md` up to date?
-
-Never by itself. The file is only rewritten when the script runs, and each run compares `upstream/develop` with the branch that is checked out at that moment (`HEAD`). So:
-
-- **While the merge is in progress (not committed yet):** the file still lists the PRs being merged, because `HEAD` hasn't moved. That's expected, not a fault.
-- **After the merge commit on the merge branch:** running the script (this step) drops the merged and skipped PRs; the rest is what FuTab hasn't taken yet.
-- **On GitHub:** the Upstream workflow (`.github/workflows/upstream.yml`) checks `develop`. It shows the new state once the merge PR has landed on `develop`, at its next Monday run or straight away with "Run workflow" on the Actions tab.
-- **The one thing that makes it wrong:** squash-merging (or rebasing) the merge PR. That throws away upstream's ancestry, so every merged PR shows up as missing again, and the next merge conflicts on all of them. Hence "Create a merge commit" for these PRs, always. If it happens anyway, "If a merge PR was squashed" above puts it right.
-
-The file is gitignored, so it never shows up in commits or PRs; each person or run makes their own.
+When the report says what, and why it can lag behind, is in the `upstream-report` skill (`.claude/skills/upstream-report/SKILL.md`).
 
 ## Keeping this skill current
 

@@ -239,7 +239,10 @@ impl Thread {
     /// what changed.
     fn score(&mut self, score: Arc<Score>, revision: u64, fresh: bool, live: bool) {
         self.score = Some((score.clone(), revision));
-        let timeline = Arc::new(Timeline::new(&score));
+        let mut timeline = Timeline::new(&score);
+        // As the plugins that play notes their own way play them (#293).
+        plugin_source::perform(&self.plugins, &score, &mut timeline);
+        let timeline = Arc::new(timeline);
         let plan = plugin_source::plan(&self.plugins, &score);
         let mut sources = None;
         let mut silent = Vec::new();
@@ -409,7 +412,7 @@ impl Thread {
 /// Why nothing plays a score: no instrument for any of its tracks.
 fn nothing_plays(plugins: &Plugins) -> String {
     if plugins.instruments().is_empty() {
-        "No instrument plugin is installed, so nothing can play. The basic plugins include the MIDI plugin.".to_owned()
+        "No instrument plugin is installed, so nothing can play.".to_owned()
     } else {
         "No installed instrument plays this score's tracks.".to_owned()
     }

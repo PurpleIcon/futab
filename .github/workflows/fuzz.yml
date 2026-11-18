@@ -47,6 +47,8 @@ env:
 jobs:
   first:
     name: Fuzz ${{ matrix.target }}${{ github.event_name == 'workflow_dispatch' && ' (1 of 2)' || '' }}
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 355
     strategy:

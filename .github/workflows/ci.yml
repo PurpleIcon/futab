@@ -1,6 +1,9 @@
 # Formatting, lint, tests, licence check, sign-off check and the no-network test.
 # The final job, ci-success, passes only if every other job passed; branch rules
 # require it before anything merges into develop or main.
+# A pull request labelled lean-ci runs only formatting, lint (which builds the
+# code) and the sign-off check; every other job is skipped, and runs again on
+# the push to develop after the merge (CONTRIBUTING.md, "Lean CI").
 name: CI
 
 on:
@@ -51,15 +54,19 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev libxkbcommon-dev libwayland-dev libasound2-dev libpipewire-0.3-dev libclang-dev
         timeout-minutes: 15
       # Each problem also becomes an annotation on the pull request.
+      # The app takes one display feature at a time (ADR 0011): every other
+      # crate with all its features, then the app's default (Wayland) build.
       - name: Clippy
         run: |
           set -o pipefail
-          cargo clippy --workspace --all-targets --all-features --locked \
-            --message-format=short -- -D warnings 2>&1 \
+          { cargo clippy --workspace --exclude futab --all-targets --all-features --locked \
+              --message-format=short -- -D warnings \
+            && cargo clippy -p futab --all-targets --locked \
+              --message-format=short -- -D warnings; } 2>&1 \
             | sed -E 's/^([^ :]+):([0-9]+):([0-9]+): (error|warning)(\[[^]]*\])?: (.*)$/::error file=\1,line=\2,col=\3::\6\n&/'
       # The X11 build of the app (the Wayland one is the default above), and
-      # the two builds keeping apart: no X11 crate in the Wayland build, no
-      # Wayland crate in the X11 one (docs/design/plugins.md).
+      # the two builds keeping apart: each turns on only its own windowing
+      # backend (docs/design/plugins.md, ADR 0011).
       - name: Clippy, the X11 build
         run: |
           set -o pipefail
@@ -80,6 +87,8 @@ jobs:
   # release's clippy will ask for, before Debian unstable ships it.
   lint-next:
     name: Lint on latest stable (advisory)
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -95,8 +104,10 @@ jobs:
           CARGO_TERM_COLOR: never
         run: |
           rustc --version
-          if ! cargo clippy --workspace --all-targets --all-features --locked \
-                --message-format=short -- -D warnings > clippy.log 2>&1; then
+          if ! { cargo clippy --workspace --exclude futab --all-targets --all-features --locked \
+                  --message-format=short -- -D warnings \
+                && cargo clippy -p futab --all-targets --locked \
+                  --message-format=short -- -D warnings; } > clippy.log 2>&1; then
             sed -E 's/^([^ :]+):([0-9]+):([0-9]+): (error|warning): (.*)$/::warning file=\1,line=\2,col=\3::\5/;t;d' clippy.log
             # Anything without a file position (a crash, a lockfile problem):
             # show the end of the output as one annotation.
@@ -107,6 +118,8 @@ jobs:
 
   test:
     name: Test (${{ matrix.name }})
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -117,8 +130,8 @@ jobs:
           - { name: Linux ARM64, os: ubuntu-24.04-arm, toolchain: stable }
           - { name: Windows x86_64, os: windows-2025, toolchain: stable }
           - { name: Windows ARM64, os: windows-11-arm, toolchain: stable }
-          - { name: macOS, os: macos-15, toolchain: stable }
-    steps:
+    # Shared with test-macos below (a YAML anchor).
+    steps: &test-steps
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -166,14 +179,31 @@ jobs:
           path: target/tmp/visual-diff/
           if-no-files-found: ignore
 
+  # The tests on macOS, only when CI is started by hand (Actions → CI → Run
+  # workflow): GitHub's macOS runners are too short of capacity to wait for
+  # on every pull request (Nov 2026; release.yml builds the .dmg the same
+  # way). Its steps are the test job's.
+  test-macos:
+    name: Test (${{ matrix.name }})
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - { name: macOS, os: macos-15, toolchain: stable }
+    steps: *test-steps
+
   # M2's last gate: the plugin developer guide builds a working plugin from
   # the template (docs/plugins/). A copy of docs/plugins/template/ outside
   # the repository, built against this checkout's SDK: fmt, clippy, its
   # tests and the contract suite (cargo test and oxiguitar-plugin-test), then
   # futab-cli opens the template's sample through the plugin file. On
-  # each of the three systems, as the guide's "Building for every system".
+  # each of the three systems, as the guide's "Building for every system";
+  # macOS only when CI is started by hand (template-macos below).
   template:
     name: Plugin template (${{ matrix.name }})
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -181,8 +211,8 @@ jobs:
         include:
           - { name: Linux, os: ubuntu-24.04 }
           - { name: Windows, os: windows-2025 }
-          - { name: macOS, os: macos-15 }
-    steps:
+    # Shared with template-macos below (a YAML anchor).
+    steps: &template-steps
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -218,6 +248,18 @@ jobs:
             ${{ runner.temp }}/template/example-plugin/samples/open-strings.extab
           retention-days: 14
 
+  # The plugin template on macOS, only when CI is started by hand, as
+  # test-macos. Its steps are the template job's.
+  template-macos:
+    name: Plugin template (${{ matrix.name }})
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - { name: macOS, os: macos-15 }
+    steps: *template-steps
+
   # M1's speed budget: a 300-bar, 8-track file opens in under a second, from
   # reading the file to the first tiles (crates/oxiguitar-app/src/speed.rs);
   # and M2's: 30 plugin manifests are read in under 10 ms at start
@@ -226,6 +268,8 @@ jobs:
   # turned off to build faster; that makes the check a little stricter.
   speed:
     name: Speed budget
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     env:
       CARGO_PROFILE_RELEASE_LTO: "false"
@@ -261,6 +305,8 @@ jobs:
 
   deny:
     name: Licences and advisories
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -271,6 +317,8 @@ jobs:
 
   no-network:
     name: No network (NET-5)
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -313,6 +361,8 @@ jobs:
 
   release-script:
     name: Release script
+    # Skipped on a pull request labelled lean-ci (CONTRIBUTING.md, "Lean CI").
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'lean-ci') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
@@ -333,7 +383,7 @@ jobs:
   ci-success:
     name: ci-success
     if: always()
-    needs: [fmt, lint, test, template, speed, deny, no-network, release-script, dco]
+    needs: [fmt, lint, test, test-macos, template, template-macos, speed, deny, no-network, release-script, dco]
     runs-on: ubuntu-24.04
     steps:
       - name: Every job passed
@@ -341,7 +391,9 @@ jobs:
           RESULTS: ${{ toJSON(needs.*.result) }}
         run: |
           echo "$RESULTS"
-          # 'skipped' is fine: the DCO job runs on pull requests only.
-          if echo "$RESULTS" | grep -Eq '"(failure|cancelled)"'; then
-            exit 1
-          fi
+          # Only 'success' and 'skipped' pass: the DCO job runs on pull
+          # requests only, the macOS jobs only when started by hand, and a
+          # lean-ci pull request skips the heavy jobs. Anything else fails,
+          # including a job that never got a runner ('cancelled', or
+          # 'abandoned' for a job with several runs).
+          echo "$RESULTS" | jq -e 'all(.[]; . == "success" or . == "skipped")' > /dev/null

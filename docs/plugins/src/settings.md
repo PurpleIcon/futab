@@ -22,19 +22,51 @@ It reads and writes only its own object, through the host:
 - `settings()` returns the object (empty when there is none). It is a `serde_json::Map`, so add `serde_json = "1"` to your dependencies.
 - `set_settings(map)` replaces the whole object and saves settings.json at once. Read, change, write: keys you leave out are gone.
 - The app and every plugin write through one shared copy of settings.json, so none overwrites another's keys. A settings.json that couldn't be read when FuTab started is never written, so settings then last for the session only. `set_settings` returns an error when the file can't be written (a full disk, a folder the user can't write to): handle it (the template tells the footer and carries on).
-- **Show them in a settings window** (interface 1.3): with `"settings_window": true` in the manifest and `Plugin::settings_window` returning a `Tab`, the plugin manager (Tools → Plugins) gives the plugin a Settings… button, which opens a window of the plugin's widgets: the same widgets as a tab's, without a canvas. Its `on` reads the settings, changes them and writes them back. Before 1.3, put them in a tab of your own ([Tabs](tabs.md)).
+- **Show them in a dialog of your own** (below).
 - Users can also edit settings.json by hand while FuTab is closed, so read it defensively: a value of the wrong type falls back to your default, as the template's `and_then(|v| v.as_bool())` does.
 
 Settings are for small values, and they are global. What belongs to one track of one score goes in a [section of the Track tab](track-sections.md) instead.
 
+## A settings dialog
+
+FuTab draws nothing of a plugin's settings: the plugin shows them itself, in a [dialog](tabs.md#dialogs) of its own, opened by a [tool](tools.md) that doesn't edit the score (interface 1.9):
+
+```json
+"tabs": [{ "id": "settings", "title": "Sound Sets", "area": "dialog" }],
+"tools": [{ "id": "settings", "name": "MIDI Sound Sets…",
+            "description": "Picks the sound set for each kind of instrument.",
+            "edits": false }]
+```
+
+- The tool's `run` calls `host.open_dialog("settings")`. With `"edits": false` its menu entry works with no score open and while the song plays. Without `menu`, it is in the **Plugins** menu; name it after your plugin so users find it there.
+- The dialog shows what is saved, and its `on` changes a **draft** the plugin keeps, not settings.json. In `Tab::closed(ok)`, OK (`true`) writes the draft with `set_settings`; Cancel (`false`) forgets it. Clear the draft when the tool opens the dialog, so each opening starts from what is saved. The test plugin's `SettingsDialog` does exactly this.
+- When `set_settings` changes what a plugin that plays sound had saved, FuTab stops the song and prepares its instruments and effects again, so the next Play uses the new settings. Writing only on OK means that happens once, when the user has decided.
+
+OxiGuitar 0.9 to 0.20 drew a settings window for a manifest with `"settings_window": true`, opened from the plugin manager. Interface 1.9 retired it (Mateus, 17 Nov 2026): the core owns nothing of a plugin. The key is now unknown, and the SDK's checks say so; FuTab ignores it in older plugins, which then show no settings until they move to a dialog.
+
 ## Folders (interface 1.3)
 
-`host.folders()` hands the plugin its folders, as paths:
+`host.folders()` hands the plugin its own two folders, as paths:
 
 | Folder | Where | For |
 | --- | --- | --- |
 | `data` | `$XDG_DATA_HOME/futab/data/<plugin id>/` on Linux, `data/<plugin id>/` in the user folder elsewhere | What the plugin keeps until the user deletes it |
 | `cache` | `$XDG_CACHE_HOME/futab/<plugin id>/` on Linux, `~/Library/Caches/FuTab/<plugin id>/` on macOS, `%LOCALAPPDATA%\FuTab\cache\<plugin id>\` on Windows | What it can make again (a sound set decoded once); the system or the user may empty it at any time |
-| `shared` | Beside `plugins` in the user folder: `soundfonts`, `nam` | Files the user puts there for plugins to read, one entry per folder the manifest lists under `"folders"` |
 
-The host makes the plugin's own two folders the first time it asks, and the shared folders a manifest lists when FuTab starts, so the user finds them before any plugin runs. Nothing is ever downloaded into them: FuTab and its plugins download nothing.
+The host makes the plugin's own two folders the first time it asks, and the shared folders a manifest lists (below) when FuTab starts, so the user finds them before any plugin runs. Nothing is ever downloaded into them: FuTab and its plugins download nothing.
+
+## Shared folders
+
+A plugin names its shared folders, which the user fills (sound sets, amp models): any name in the manifest's `folders`, and FuTab knows none of them. Asking where one is by name needs interface 1.8; until interface 1.10, `folders()` also answered two names FuTab used to know, `soundfonts` and `nam`, which it no longer does (ADR 0012).
+
+```json
+"folders": ["impulses"]
+```
+
+Such a folder sits beside `plugins`, in each of FuTab's folders:
+
+- **the user's** (`~/.local/share/futab/impulses` on Linux, the user folder elsewhere, the Flatpak's own data folder in the Flatpak): FuTab creates it at start, the user puts files there, and the plugin may write there;
+- **beside a system plugin folder** (`/usr/lib/futab/impulses`, `PREFIX/lib/futab/impulses`, then OxiGuitar's `/usr/lib/oxiguitar/impulses` and `PREFIX/lib/oxiguitar/impulses`), where a package can ship files;
+- **beside the program** in a portable copy (`impulses\` next to `futab.exe`).
+
+`host.folder("impulses")` answers with `FolderPlaces`: `user`, and `others`, the system's and the program's that exist, in the order plugins are looked for; `all()` walks them, the user's first. Read from every place; write only to the user's. A name is 1 to 24 lowercase letters, digits and single hyphens, and none of `plugins`, `data` and `cache`. Two plugins that list the same name share the folder, as the MIDI plugin and a sampler might share `soundfonts`. `host.folder` refuses a name the manifest doesn't list.

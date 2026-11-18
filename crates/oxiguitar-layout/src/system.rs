@@ -88,8 +88,14 @@ pub(crate) fn views(
         let choice = notation.get(&t).copied();
         let grand = track.instrument.is_keyboard() && track.staves.len() == 1;
         for (s, staff) in track.staves.iter().enumerate() {
-            let strings = staff.string_count();
-            let can_tab = strings > 0 && !percussion;
+            // A drum staff's tablature has the kit map's lines, each note
+            // its General MIDI key (docs/design/drums.md).
+            let strings = if percussion {
+                usize::from(oxiguitar_model::drums::TAB_LINES)
+            } else {
+                staff.string_count()
+            };
+            let can_tab = strings > 0;
             let (show_std, show_tab) = match choice {
                 Some(n) => {
                     let tab = n.tablature && can_tab;
@@ -130,7 +136,13 @@ pub(crate) struct Plans {
     pub(crate) grids: Vec<BarGrid>,
 }
 
-pub(crate) fn plan_all(score: &Score, views: &[View], p: &Painter<'_>, dynamics: bool) -> Plans {
+pub(crate) fn plan_all(
+    score: &Score,
+    views: &[View],
+    p: &Painter<'_>,
+    dynamics: bool,
+    drawings: &crate::drawing::Drawings,
+) -> Plans {
     let empty = Bar::default();
     // Grand staves, split once per track and staff.
     let mut hands: HashMap<(usize, usize), (Staff, Staff, Staff)> = HashMap::new();
@@ -174,6 +186,7 @@ pub(crate) fn plan_all(score: &Score, views: &[View], p: &Painter<'_>, dynamics:
                 tab_gap: TAB_GAP * p.sp,
                 show_std: v.show_std,
                 show_tab: v.show_tab,
+                drawn: matches!(v.part, Part::Whole).then_some(((v.track, v.staff), drawings)),
             };
             let mut planned: Vec<BarPlan> = score
                 .master_bars

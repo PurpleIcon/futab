@@ -2,7 +2,7 @@
 
 An instrument turns the player's timed events into sound for the tracks given to it: a MIDI synthesiser, a modelled guitar amplifier, sampled drums. The core plays the score: it turns it into a timeline of notes with every effect, tempo, the metronome and count-in, runs the transport, and mixes the instruments' sound (volume, pan, mute, solo) before an audio-device service sends it to the system.
 
-**The instrument interface is interface 1.3** (FuTab 0.9 and later). The player ignores instruments declared by a plugin built for an older interface.
+**The instrument interface is interface 1.3** (OxiGuitar 0.9 and later). The player ignores instruments declared by a plugin built for an older interface.
 
 ## How an instrument works
 
@@ -24,7 +24,7 @@ An effect works on one track's sound after its instrument, in the order the trac
 
 ### Following settings while the song plays
 
-Since interface 1.5 (FuTab 0.14), an effect can follow its track's settings as the user changes them in its [track section](track-sections.md) while the song plays: an equalizer's slider, an amp's level. Without it, the song keeps the settings it started with until it next starts. It takes two methods, one on each side of the audio thread:
+Since interface 1.5 (OxiGuitar 0.14), an effect can follow its track's settings as the user changes them in its [track section](track-sections.md) while the song plays: an equalizer's slider, an amp's level. Without it, the song keeps the settings it started with until it next starts. It takes two methods, one on each side of the audio thread:
 
 - `Effect::update(prepare, previous)`, off the audio thread, gets what the processor was prepared with, but with the track's new settings in `prepare.track.settings`, and the settings it follows now in `previous`, to see what changed. Do the slow work here (read the JSON, compute coefficients, allocate) and hand back `Some(Update::new(value))`, whatever value the processor needs. `Ok(None)`, the default, says the processor can't follow these settings while it runs (a new model file to load, say): FuTab then prepares the effect again when the song next starts.
 - `Processor::apply(update)`, on the audio thread, between two calls of `process`, gets that update (`update.get::<T>()`). The audio thread's rules hold: take the values out, or swap your old ones into it, and allocate nothing; the update is freed off the audio thread. Move towards the new values over a few milliseconds instead of jumping, or the change clicks: ramp a gain, glide a filter's coefficients.
@@ -59,6 +59,21 @@ impl Processor for Scale {
 ```
 
 The update reaches the processor before its next `process` call; if the user moves a slider faster than the audio thread runs, only the newest update is taken. The SDK's glue keeps the two threads apart with no lock. The contract suite hands each effect an update and checks that taking it allocates nothing and makes no system call. Ask for interface 1.5 in the manifest (`"interface": "1.5"`).
+
+## Following the score
+
+An effect usually knows nothing of the music: it gets sound and changes it. One that the score drives (a wah pedal rocked by wah marks, a volume pedal, a pitch shifter set by a mark) asks to follow it (interface 1.8):
+
+```json
+"effects": [{ "id": "wah", "name": "Wah-wah", "follows_score": true, "order": 100 }]
+```
+
+- FuTab then prepares it with `Effect::prepare_following(prepare, beats)` instead of `prepare`. `beats` is every beat its track plays, in time order, each a `PlayedBeat`: `start` and `end` in the score's seconds, the beat's place (`staff`, `bar`, `voice`, `beat`) and its extensions (`ext`), the core's marks and your own data ([Tools](tools.md#your-own-data-and-marks-on-beats)). Repeats are unrolled: a beat played twice is there twice. Build what the audio thread needs from it here, off that thread.
+- Its processor implements `process_at(left, right, time, step)` instead of `process`: `time` is the score's time at the first frame, in the same seconds, and `step` the seconds each frame adds, which follows the speed. `step` is 0 while the score isn't playing (the preview of a typed note, the sound's tail after Stop): play as without the score then.
+
+The beats are the score's as playback started; the song isn't edited while it plays. The contract suite prepares a following effect with beats that carry the marks an effect may play (wah, pedal, fades, hairpins) and checks the audio thread's rules on `process_at`.
+
+`order` says where the effect goes in a track's chain when the user hasn't moved it: lower first. Pedals before the amp take 100, amp models 200, equalizers and what shapes the finished sound 300; without it an effect goes last. The user's own order for a track, set with the arrows of the Track tab's sections, wins.
 
 ## Tracks and classes
 

@@ -4,7 +4,7 @@ A few of FuTab's own reference songs, played by FuTab exactly as they sound in t
 
 ## Recorded guitars, basses and drums
 
-The electric guitars are Karoryfer's Black and Green Guitars (the green Gretsch, CC0), the basses Karoryfer's Black and Blue Basses (CC0) and the drums the MuldjordKit by Lars Muldjord and the DrumGizmo team, SFZ by kinwie (CC BY 4.0); the acoustic guitar, piano, strings and voice FluidR3_GM (MIT). All three are SFZ sets, played by the MIDI plugin's sampler (FuTab 1.0).
+The electric guitars are Karoryfer's Black and Green Guitars (the green Gretsch, CC0), the basses Karoryfer's Black and Blue Basses (CC0) and the drums the MuldjordKit by Lars Muldjord and the DrumGizmo team, SFZ by kinwie (CC BY 4.0); the acoustic guitar, piano, strings and voice FluidR3_GM (MIT). All three are SFZ sets, played by the MIDI plugin's sampler (OxiGuitar 1.0).
 
 **A band**: the same eight tracks as below, with recorded electric guitars, bass and drums.
 
@@ -24,7 +24,7 @@ The electric guitars are Karoryfer's Black and Green Guitars (the green Gretsch,
 
 ## General MIDI sets
 
-Played by FuTab 0.9: the guitars use FreePats' Clean electric guitar (CC0) and everything else uses FluidR3_GM (MIT).
+Played by OxiGuitar 0.9: the guitars use FreePats' Clean electric guitar (CC0) and everything else uses FluidR3_GM (MIT).
 
 **A band**: three guitars, bass, drums, piano, strings and a voice, each track at its file's volume and pan.
 

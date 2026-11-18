@@ -6,6 +6,47 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-18
+
+FuTab caught up with OxiGuitar 0.21.1: a Plugins menu and plugin interface 1.10, the mixer saved in the file, drum entry on the drum staff, and Save in the file's own format.
+
+### Added
+
+- **build-test-rpm skill** (#17): the agent skill builds a test `.rpm` from the working copy (release build, licence report, package) and says how to install it with dnf, to test FuTab as a packaged app.
+- **upstream-report skill** (#18): the agent skill updates `oxiguitar-catchup.md` with `scripts/upstream/catchup.py` and sums up what OxiGuitar has that FuTab hasn't merged yet, and which files a merge would conflict in. The merge-upstream skill uses it.
+- **Lean CI label** (#19): a pull request labelled `lean-ci` runs only formatting, lint and the sign-off check, and skips the tests, packages and other long checks, which still run after the merge into `develop`. CONTRIBUTING.md says when to use it.
+- **Lean PRs in the agent rules** (#20): before opening a pull request, the agent asks whether it's lean, and if so opens it with the `lean-ci` label.
+
+### Changed
+
+- **Credits** (#21): CREDITS.md reads as FuTab's: FuTab's own copyright line, and OxiGuitar listed first among the projects FuTab comes from, with its authors and licence.
+- **merge-upstream skill** (#22): conflicts show the common ancestor and are settled line by line; a deletion upstream wins over a FuTab rename; OxiGuitar's version numbers never become FuTab's (a table maps them to FuTab releases); the shared folders beside the plugin folders take FuTab's names; upstream's `FUNDING.yml` is never taken; release commits' version changes cover the spikes' lockfiles and the renamed metainfo too.
+- **Roadmap** (#23): ROADMAP.md is FuTab's own, a table of milestones: 0.1.0 (released) and M1, the rules for merging upstream (in progress). OxiGuitar's milestones are no longer listed; CREDITS.md now points to OxiGuitar's roadmap for them.
+- **merge-upstream skill, more rules** (#23): CREDITS.md keeps FuTab's opening and trademark sentence, and its rows name no versions; links to OxiGuitar are never merged or renamed without a decision; install instructions take only which plugin packages exist; ROADMAP.md is never merged from upstream.
+- **Merged OxiGuitar 0.21.1** (up to mateusrdp/oxiguitar@e72d200):
+  - Plugin interface 1.8: plugins add their own palette buttons, menu entries (a new Plugins menu, between Tools and Help), toolbar buttons, keys and dialogs; keep their own data and marks on beats, saved in the `.oxg` file beside the score; draw on the page; play the notes their own way; and have shared folders of their own name. Closed and Open Wah-Wah move to the Wah-wah plugin. Save always writes the file's own format, and can keep what the format can't hold in the `.oxg` file. FuTab writes a crash report naming the plugin that crashed it (OxiGuitar PR 292)
+  - Help → About links to the credits, CREDITS.md, in place of its own list of fonts; the footer shows what a plugin's tool did; plugins built for macOS are recognised from their file headers (OxiGuitar PR 295)
+  - The Wah-wah plugin (`oxiguitar-wah`) is suggested by FuTab's packages and in the install instructions (OxiGuitar PR 296)
+  - OxiGuitar's feature check against Guitar Pro 8, TuxGuitar and alphaTab (docs/parity.md); the amp models' manual page says which computers use the plugin's faster engine (OxiGuitar PR 298)
+  - The feature check places each gap it found in OxiGuitar's plan (OxiGuitar PR 299)
+  - The mixer is saved in the file: each track's volume, pan, mute and solo, as much as the format holds; moving them is one step for Undo (OxiGuitar PR 300)
+  - Drums are written on the drum staff, a key per kit piece as in Guitar Pro 8, or as their General MIDI numbers on drum tablature (OxiGuitar PR 301)
+  - The feature check covers Power Tab Editor too (OxiGuitar PR 304)
+  - Slint 1.19.0; the app never looks at its environment to choose what to do: each build is made for one display system (OxiGuitar PR 305)
+  - Plugin interface 1.9: a plugin shows its settings in a dialog of its own, opened from its menu entry (the MIDI plugin's Plugins → MIDI Sound Sets…); the plugin manager's Settings… button and the settings window it opened are gone (OxiGuitar PR 306)
+  - FuTab's own texts name no plugin or format: no Guitar Pro or MIDI in its messages, its empty window and futab-cli's help; a plugin's warning carries its own link (OxiGuitar PR 307)
+  - Plugin interface 1.10: FuTab knows no shared folder's name; a plugin asks for its own shared folders (sound sets, amp models) by name (OxiGuitar PR 308)
+
+### Fixed
+
+- **Flatpak** (#26): the Flatpak is no longer a preview. It opens and plays with OxiGuitar's plugins from OxiGuitar's Flatpak repository, now that FuTab has the plugin interface they need. The install page says how to add them, and where the Flatpak keeps its plugins, sound sets and amp models.
+- **Sound-set installer, in the manual** (#26): the manual says to run `install.sh` or `install.ps1` with FuTab's `soundfonts` folder (`--dir`, `-Dir`), since without it they fill OxiGuitar's folder, which FuTab doesn't search.
+- **Upstream history up to OxiGuitar 0.21.1** (#25): the merge of OxiGuitar up to 0.21.1 (#23) was squash-merged, which dropped upstream's commits from FuTab's history, so the catch-up report would have listed them as missing again and the next merge would have conflicted on them. A merge that changes no file links them back in.
+- **CI on macOS and the ci-success gate** (#24): pull requests no longer wait for GitHub's macOS machines, which were too scarce to get one: CI's macOS tests and plugin template run only when CI is started by hand, as the macOS package already did. `ci-success` now passes only when every job passed or was skipped; before, a job that never got a machine counted as passed.
+- **Installing, in the manual** (#23): the Installing, Linux and Windows pages no longer say FuTab has no packages or downloads: they point to FuTab's releases (.rpm, .deb, AppImage, Windows zip). The Linux page says to install FuTab first, then OxiGuitar's plugins, and that adding OxiGuitar's repository first brings the recommended plugins with FuTab.
+- **Version numbers in the manual and the plugin guide** (#22): versions from before the fork read as OxiGuitar's again (they had been renamed to FuTab 0.2 to 0.18, versions FuTab never had), and what a plugin needs reads FuTab 0.1.0 or later. The plugin template's copy step uses the folder `git clone` makes again.
+- **Desktop icon** (#16): FuTab's icon shows again when searching for the app on the desktop. The icon file opened with a long comment, so desktops didn't recognise it as an SVG image and showed a blank icon.
+
 ## [0.1.0] - 2026-11-16
 
 FuTab's first release, from OxiGuitar 0.19.1 with OxiGuitar's changes up to OxiGuitar PR 290.
