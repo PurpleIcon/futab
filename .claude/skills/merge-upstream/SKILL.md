@@ -216,7 +216,7 @@ Then stop. Commit only when I say so (`git commit -s`, the merge's own message i
 
 When I ask for the PR (push only when I say so):
 
-- **Title:** `Merge FROM upstream oxiguitar #N`, where `#N` is the last upstream PR the merge brings in (the target's PR, or the last PR before it when the target is a release or other commit without one). For example: `Merge FROM upstream oxiguitar #290`. The capital FROM keeps the direction plain: FuTab takes OxiGuitar's changes, nothing goes back to OxiGuitar. Never a title that could read as merging into upstream (the old `Merge upstream to oxiguitar #N` did). Nothing else in the title: no repository prefix, no list of PRs, no release number.
+- **Title:** `Merge FROM upstream OxiGuitar PR N`, where `N` is the last upstream PR the merge brings in (the target's PR, or the last PR before it when the target is a release or other commit without one). For example: `Merge FROM upstream OxiGuitar PR 290`. The capital FROM keeps the direction plain: FuTab takes OxiGuitar's changes, nothing goes back to OxiGuitar. Never a title that could read as merging into upstream (the old `Merge upstream to oxiguitar #N` did), and **never a `#` before the number**: FuTab has no PR of that number, so GitHub links OxiGuitar's, and the merge commit (whose message carries the title) posts on upstream's PR (Referring to upstream in `.claude/rules/github.md`). Nothing else in the title: no repository prefix, no list of PRs, no release number.
 - **Description:** first, the warning to merge with "Create a merge commit", never squash or rebase, and why. Then the upstream PRs merged (as `OxiGuitar PR N`, never `mateusrdp/oxiguitar#N`, with what each changes and its merge commit), the skipped ones with reasons, what upstream still has, every conflict and how it was settled, the names changed and kept, behaviour changes users will notice, the checks run, and test steps.
 - Branch, base and sign-off as in step 1 and `.claude/rules/github.md`.
 
@@ -260,7 +260,7 @@ You can tell: the PR's commit on `develop` has one parent, and the catch-up repo
    with a message saying which PR was squashed and that the merge changes no file, naming the target as `OxiGuitar PR N`.
 3. Check: `git diff origin/develop HEAD` is empty, and the catch-up report on the branch shows the target as the last common commit.
 4. Add a changelog entry under `### Fixed` ("Upstream history up to OxiGuitar PR N", why it was missing, and that the merge changes no file) as a commit of its own.
-5. With my go-ahead, push and open the PR titled `Restore history FROM upstream oxiguitar #N`, its description opening with the merge-commit warning, and merge it as above, with `--merge`.
+5. With my go-ahead, push and open the PR titled `Restore history FROM upstream OxiGuitar PR N` (no `#`), its description opening with the merge-commit warning, and merge it as above, with `--merge`.
 
 ## 6. Update the catch-up report
 

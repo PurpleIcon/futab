@@ -62,8 +62,10 @@ Read and Write file support
 
 Never write a linking reference to an OxiGuitar issue or PR (`mateusrdp/oxiguitar#N`, or a `github.com/mateusrdp/...` issue or PR URL) anywhere that reaches GitHub: commit messages (merge commits included, which carry the PR's title and description), PR titles and descriptions, issue and PR comments, and `CHANGELOG.md` (it becomes the release notes). GitHub then posts "added a commit to PurpleIcon/futab that referenced this pull request" on upstream's PR, for the maintainer to see, and a pushed commit's reference can't be taken back.
 
-- Write `OxiGuitar PR N` or `OxiGuitar issue N` instead, as plain text.
-- A bare `#N` is FuTab's own issue or PR, so it never stands for an upstream one.
+- Write `OxiGuitar PR N` or `OxiGuitar issue N` instead, as plain text, never with a `#`.
+- **A bare `#N` links to OxiGuitar when FuTab has no issue or PR `N`**: FuTab is a fork, and GitHub then reads the number as the parent's (18 Nov 2026: "oxiguitar #308" in a PR title linked OxiGuitar PR 308). So write `#N` only for a FuTab issue or PR that already exists, and never put an upstream number after a `#` anywhere: not in PR titles (a merge commit's message carries the PR's title), not as `oxiguitar #N`, not in branch-based or GitHub-generated text you choose.
+- **A PR that carries upstream commits is never squashed.** GitHub's squash message lists every commit's subject, and upstream's end in `(#N)`: #23's squash commit linked 16 OxiGuitar PRs and issues at once. It takes "Create a merge commit" (see Merging a PR); upstream's own commits then arrive as they are, which posts nothing.
+- **Before every push and every PR**, check what will reach GitHub for `#` numbers: `git log origin/develop..HEAD --format=%B | grep -nE '#[0-9]+'`, and the PR's title and description. Each hit must be a FuTab issue or PR that exists (`gh issue view N --repo PurpleIcon/futab` or `gh pr view N --repo PurpleIcon/futab` finds it); rewrite anything else as `OxiGuitar PR N` before pushing. A pushed reference can't be taken back.
 - An upstream commit may be named by its hash (`mateusrdp/oxiguitar@f66b344`): that doesn't post on upstream's PRs.
 - This is about FuTab only. A PR we open on OxiGuitar itself links its issue as upstream asks.
 
