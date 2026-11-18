@@ -10,6 +10,15 @@ Rules for commits, PRs and issues on FuTab (moved here from AGENTS.md).
 - Before creating a PR, ask me whether it's lean (CONTRIBUTING.md, "Lean CI"). If it is, create it with `gh pr create --label lean-ci`; if not, without the label
 - When a PR is created, watch its CI in the background until it's all green as you work through your tasks, and fix errors as they appear
 
+## Merging a PR
+
+Every commit that reaches `develop` must be signed off, or the sign-off check fails on the next release PR into `main`, when the commit can no longer be changed (#24's squash commit, Nov 2026). A squash commit keeps the sign-off only through its message: GitHub's default squash message lists the PR's commit messages, with their `Signed-off-by` and `Co-authored-by` lines (`scripts/check-dco.sh` skips a squash commit carrying Claude's `Co-authored-by`). A squash commit whose message is replaced, for example by the merge-commit text "Merge pull request #N from ...", has neither, and fails.
+
+- Merge method: **squash** for FuTab's own PRs; **create a merge commit** for merges from upstream (the merge-upstream skill) and for `develop` into `main` (releases).
+- When you merge (only when I ask): `gh pr merge N --squash` or `gh pr merge N --merge`, never with `--subject` or `--body`, so GitHub writes its default message. Never `--rebase`.
+- Straight after a squash merge, check its commit on `develop`: `git fetch origin develop`, then `scripts/check-dco.sh origin/develop^ origin/develop` must show `ok` or `skip`, never `FAIL`. If it fails, tell me at once.
+- When a PR is ready for me to merge on GitHub, tell me the method in one line: "Squash and merge, and keep the message GitHub fills in" (it lists the commits and their `Signed-off-by` lines), or "Create a merge commit". After switching method in GitHub's merge box, the message may still be the other method's: check it before confirming.
+
 ## Repositories
 
 - FuTab's repositories are in GitHub, in the @PurpleIcon organisation (eg: PurpleIcon/futab)

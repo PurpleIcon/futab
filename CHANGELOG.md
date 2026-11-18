@@ -6,6 +6,10 @@ FuTab is a fork of [OxiGuitar](https://github.com/mateusrdp/oxiguitar), taken fr
 
 ## [Unreleased]
 
+### Changed
+
+- **Merging pull requests, in the agent rules** (#28): the rules say which merge method each pull request takes, that a squash merge keeps GitHub's default message (it carries the commits' sign-off), and that the agent checks the sign-off of a squash commit straight after merging it.
+
 ### Fixed
 
 - **CI's macOS job names** (#28): on pull requests, the skipped macOS jobs are listed as Test (macOS) and Plugin template (macOS), no longer as `Test (${{ matrix.name }})` and `Plugin template (${{ matrix.name }})`.
